@@ -1,10 +1,17 @@
-import { useState } from 'react';
-
+import { TextField } from '@mui/material';
+import { useState, useMemo } from 'react';
+import { ProductDisplayItem } from './ProductDisplayItem';
+import trie from 'trie-prefix-tree';
 
 
 const DBFReaderComponent = () => {
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
+    const [productDisplayList, setProductDisplayList] = useState([]);
+    const [searchBarValue, setSearchBarValue] = useState(null);
+    const [searchResult, setSearchResult] = useState([]);
+    const [alphabetTrie, setAlphabetTree] = useState(trie([]));
+
 
     const handleFileChange = async (event) => {
         console.log(`event is: `);
@@ -47,7 +54,7 @@ const DBFReaderComponent = () => {
                     const fieldType = String.fromCharCode(view.getUint8(i + 11));
                     const fieldLength = view.getUint8(i + 16); //
                     if (fieldName === '') break; // End of fields
-                    fields.push({ name: fieldName, type: fieldType, length: fieldLength, offset:currentOffset });
+                    fields.push({ name: fieldName, type: fieldType, length: fieldLength, offset: currentOffset });
                     currentOffset += fieldLength;
                 }
 
@@ -56,8 +63,8 @@ const DBFReaderComponent = () => {
 
                 // Read records
                 const records = [];
-                 console.log(`headerSize ${headerSize}, buffer.byteLength ${buffer.byteLength} and recordLength ${recordLength}`);
-                 let count = 0;
+                console.log(`headerSize ${headerSize}, buffer.byteLength ${buffer.byteLength} and recordLength ${recordLength}`);
+                let count = 0;
                 for (let i = headerSize; i < buffer.byteLength; i += recordLength) {
                     // console.log(`in for loop for records, i: ${i})`);
                     const record = {};
@@ -72,12 +79,15 @@ const DBFReaderComponent = () => {
                     // console.log(record);
                     records.push(record);
                     count++;
-                    if(count > 25){
+                    if (count > 25) {
                         break;
                     }
                 }
 
                 setData(records);
+                console.log(records);
+
+
             } catch (err) {
 
                 setError('Error reading DBF file: ' + err.message);
@@ -87,13 +97,13 @@ const DBFReaderComponent = () => {
         reader.onerror = (err) => {
             setError('File reading failed: ' + err.message);
         };
-      
+
         reader.readAsArrayBuffer(file); // Read the file as an ArrayBuffer
     };
 
     const readFieldValue = (view, offset, field) => {
-        
-        const fieldOffset = offset +field.offset; // Calculate field's offset in the record
+
+        const fieldOffset = offset + field.offset; // Calculate field's offset in the record
         // console.log(`in readFieldValue, view ${view} offset ${offset} and field ${field} fieldOffset ${fieldOffset}`);
         // console.log(offset);
         // console.log(field);
@@ -105,52 +115,164 @@ const DBFReaderComponent = () => {
 
         return String.fromCharCode.apply(null, new Uint8Array(view.buffer, fieldOffset, field.length)).trim();
 
-        // if (field.type === 'C') { // Character
-        //     // const length = field.length; // Field length
-           
-        //     return String.fromCharCode.apply(null, new Uint8Array(view.buffer, fieldOffset, field.length)).trim();
-        // } else if (field.type === 'N') { // Numeric
-        //     // console.log(`type N, length ${length}`);
-        //     const number = view.getFloat64(fieldOffset, true)
-        //     return number; // Assuming float64 for numeric values
-            
-        // } else if (field.type === 'D') { // Date
-        //     // console.log(`type D, length ${length}`);
-        //     const year = view.getUint8(fieldOffset + 1);
-        //     const month = view.getUint8(fieldOffset + 2);
-        //     const day = view.getUint8(fieldOffset + 3);
-        //     return `${year}-${month}-${day}`;
-        // }
-        // // Add other field types as necessary
-        // return null;
+
     };
 
+    // Create Hashmaps: 
+    // Create the hash maps only once (or when `products` changes)
+    const { productsByCodeNum, productsByBrand, productsByDescription } = useMemo(() => {
+        const byCodeNum = new Map();
+        const byBrand = new Map();
+        const byDescription = new Map();
+
+        
+
+        data.forEach(product => {
+
+            byCodeNum.set(product.CODE_NUM, [product]);
+
+            if (!byBrand.has(product.BRAND)) {
+                byBrand.set(product.BRAND, []);
+                setAlphabetTree(alphabetTrie.addWord(product.BRAND));
+                
+            }
+            // Add this product to this brand array. 
+            byBrand.get(product.BRAND).push(product);
+
+            if (!byDescription.has(product.DESCRIP)) {
+                byDescription.set(product.DESCRIP, []);
+            }
+            // add this product to the description array
+            byDescription.get(product.DESCRIP).push(product);
+        });
+
+        
+       
+        return { productsByCodeNum: byCodeNum, productsByBrand: byBrand, productsByDescription: byDescription };
+    }, [data]);
+
+    // Now you can use these maps for lookups within the component
+    const getProductByCode = (code) => productsByCodeNum.get(code);
+    const getProductsByBrand = (brand) => productsByBrand.get(brand) || [];
+    const getProductsByDescription = (description) => productsByDescription.get(description) || [];
+
+    const searchForProductByCodeHandler = () => {
+        setSearchResult(getProductByCode(searchBarValue));
+    };
+
+    const searchForProductByBrandHandler = (term) => {
+        console.log("Searching for products with the input: " + term)
+        if (term.trim() === ""){
+            return;
+        }
+        console.log("Trie results are:")
+        const trieResultArray = alphabetTrie.getPrefix(term);
+        console.log("Trie array is:");
+        console.log(trieResultArray);
+
+        let newSearchResultArray = [];
+        for (let i = 0; i < trieResultArray.length; i++){
+            const thisTreeString = trieResultArray[i].toUpperCase();
+            console.log("thisTreeString: " + thisTreeString);
+            const allProductsForThisBrand = getProductsByBrand(thisTreeString);
+            console.log("allProductsForThisBrand: ");
+            console.log(allProductsForThisBrand);
+            newSearchResultArray.push(...allProductsForThisBrand);
+        }
+        console.log("newSearchResultArray is: ");
+        console.log(newSearchResultArray);
+        setSearchResult(newSearchResultArray);
+      
+    };
+
+
+    const searchForProductByDescripHandler = () => {
+        console.log("Searching for products by DESCRIP" + searchBarValue)
+        setSearchResult(getProductsByDescription(searchBarValue));
+    };
+
+
+    const addProductToDisplayHandler = (e) => {
+        console.log("Setting the display list, target CODE_NUM is:");
+        console.log(e.target.id);
+
+        // Put this search result into the product display if it doesn't already exist in the product display
+        if (!productDisplayList.find(element => element.CODE_NUM == searchResult[e.target.id].CODE_NUM)) {
+            setProductDisplayList([...productDisplayList, searchResult[e.target.id]]);
+        } else {
+            console.log("Not adding this product from the search list to the display list since we already have it in there.")
+        }
+
+    };
+
+    const changeSearchHandler = (e) => {
+        const upperCaseVal = e.target.value.toUpperCase();
+        searchForProductByBrandHandler(upperCaseVal);
+        setSearchBarValue(upperCaseVal);
+    }
+
+    console.log("Search Result is: ");
+    console.log(searchResult);
+    // console.log("Product Display List Array is: ");
+    // console.log(productDisplayList); 
+    // console.log("Alphabet trie for the brand name: ");
+    // console.log(alphabetTrie.dump());
     return (
         <div>
             <h1>DBF File Reader</h1>
             <input type="file" accept=".dbf" onChange={handleFileChange} />
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {data.length > 0 && (
-                <table>
-                    <thead>
-                        <tr>
-                            {data[0] && Object.keys(data[0]).map((key) => (
-                                <th key={key}>{key}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.map((row, index) => (
-                            <tr key={index}>
-                                {Object.values(row).map((value, idx) => (
-                                    <td key={idx}>{value}</td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                <p>Data Loaded!</p>
             )}
-        </div>
+            <TextField
+                id="select-product"
+                variant="outlined"
+                fullWidth
+                lable="Search"
+                onChange={changeSearchHandler} />
+            {/* <button id="search-button" onClick={searchForProductByCodeHandler}>Search By COD NUM</button>
+            <button id="search-button" onClick={searchForProductByBrandHandler}>Search By BRAND</button>
+            <button id="search-button" onClick={searchForProductByDescripHandler}>Search By DESCRIP</button> */}
+            <div className="content-window">
+                {searchResult != null &&
+                    <div className="search-result-window">
+                        <p> Search Results</p>
+                        <ul>
+                            {searchResult.map((product, searchIndex) => {
+                                return (<li key={product.CODE_NUM}>
+                                    <button id={searchIndex} onClick={addProductToDisplayHandler}>{product.BRAND} {product.DESCRIP} {product.SIZE} {"Click To Add"}</button>
+                                </li>)
+                            })}
+                        </ul>
+
+                    </div>
+                }
+                {searchResult == null &&
+                    <div className="search-result-window">{"Didn't find that."}</div>
+                }
+
+                <div className="product-display-window">
+                    <p> Currently Selected Products</p>
+                    {productDisplayList.map((product) => {
+                        return (<>
+                            
+                                <ul>
+                                    <li key={product.CODE_NUM}>
+                                        <ProductDisplayItem
+                                            productData={product} />
+                                    </li>
+                                </ul>
+                            
+                        </>)
+                    })
+                    }
+                </div>
+            </div>
+
+
+
+        </div >
     );
 };
 
