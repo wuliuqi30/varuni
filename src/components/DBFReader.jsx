@@ -4,6 +4,7 @@ import trie from 'trie-prefix-tree';
 import { SearchDisplay } from './SearchDisplay';
 import { CurrentSelection } from './CurrentSelection';
 import { ProductDetails } from './ProductDetails';
+import { AssortmentAnalyzer } from './AssortmentAnalyzer';
 
 
 const DBFReaderComponent = () => {
@@ -67,8 +68,8 @@ const DBFReaderComponent = () => {
                     currentOffset += fieldLength;
                 }
 
-                //console.log("fields: ");
-                //console.log(fields);
+                console.log("fields: ");
+                console.log(fields);
 
                 // Read records
                 const records = [];
@@ -91,7 +92,7 @@ const DBFReaderComponent = () => {
                     //console.log(`record (${i}): is: `);
                     //console.log(record);
                     records.push(record);
-                    if (count > 6000) {
+                    if (count > 200) {
                         break;
                     }
                     count++;
@@ -99,8 +100,8 @@ const DBFReaderComponent = () => {
                 }
 
                 setData(records);
-                //console.log("records: ");
-                //console.log(records);
+                console.log("records: ");
+                console.log(records);
 
 
             } catch (err) {
@@ -254,7 +255,7 @@ const DBFReaderComponent = () => {
             const clone = structuredClone(prevData);
 
             const checkState = clone[product.INDEX].CHECKED;
-           // console.log(`Old checkState is ${checkState}`);
+            // console.log(`Old checkState is ${checkState}`);
             //console.log(`Setting new checkState  to ${!checkState}`);
             clone[product.INDEX].CHECKED = !checkState;
             //console.log(`returning clone`);
@@ -300,7 +301,7 @@ const DBFReaderComponent = () => {
 
 
     const showProductDetailsHandler = (e) => {
-       // console.log("showProductDetailsHandler");
+        // console.log("showProductDetailsHandler");
         //console.log("event is");
         //console.log(e);
         const searchIndexLocatorString = e.target.id;
@@ -355,15 +356,17 @@ const DBFReaderComponent = () => {
                         <div className="search-result-window">{"Didn't find that."}</div>
                     }
 
-                    <CurrentSelection
+                    
+
+                </div>
+                <CurrentSelection
                         data={data}
                         selectedProductsList={selectedProductsList}
                         onRemove={handleRemoveFromSelection} />
-
-                </div>
                 <ProductDetails
-                productData = {viewDetailsProduct}
+                    productData={viewDetailsProduct}
                 />
+                <AssortmentAnalyzer />
 
 
 

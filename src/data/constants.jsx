@@ -1,9 +1,15 @@
 
+import { format } from "date-fns";
+
 const now = new Date();
 
-const monthData = [];
+const barChartOptions = [];
 
-const dbfMonths = ["FIRST",
+const dbfMonths = [
+    "PRIORY",
+    "YTD",
+    "MTD",
+    "FIRST",
     "SECON",
     "THIRD",
     "FOURT",
@@ -14,11 +20,45 @@ const dbfMonths = ["FIRST",
     "NINTH",
     "TENTH",
     "ELEVE",
-    "TWELV"]
+    "TWELV"
+];
 
-for (let i = 0; i < 12; i++) {
+const xlabels = [
+    "Last Yr",
+    "YTD",
+    "MTD",
+]
 
-    monthData[i] = { dbfName: dbfMonths[i], date: new Date(now.getFullYear(), now.getMonth() - i - 1) };
-} 
+const colors = [
+    "#0c0a09",
+    "#1d4ed8",
+    "#dc2626",
+    "#db2777",
+     "#4ade80",
+     "#67e8f9",
+     "#fde047",
+     "#78716c",
+     "#1e3a8a",
+     "#9f1239",
+     "#701a75",
+     "#166534",
+     "#0e7490",
+     "#854d0e",
+     "#e7e5e4"
 
-export default monthData;
+]
+
+for (let i = 0; i < dbfMonths.length; i++) {
+    let thisLabel;
+    if (i < 3){
+        thisLabel = xlabels[i];
+    } else {
+        thisLabel = format(new Date(now.getFullYear(), now.getMonth() - i - 1 + 3),'MMM');
+    }
+    barChartOptions[i] = { 
+        dbfName: dbfMonths[i],        
+        xlabel: thisLabel,
+        color: colors[i] };
+}
+
+export default barChartOptions;
