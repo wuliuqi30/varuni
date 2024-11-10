@@ -1,7 +1,7 @@
 export function ProductDisplayItem({ productData }) {
     //console.log("In product display item-------------");
 
-    console.log(productData);
+    //console.log(productData);
     return (
         <>
 
@@ -24,6 +24,20 @@ export function ProductDisplayItem({ productData }) {
                 <p >{productData["MTD"]}</p>
                 <p >{productData["YTD"]}</p>
             </button>
+
+        </>
+    )
+
+}
+
+export function SimpleProduct({productData}){
+    return (
+        <>
+
+            <div className="simple-product">                
+            {productData["SIZE"]} {productData["DESCRIP"]}  
+                
+            </div>
 
         </>
     )

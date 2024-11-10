@@ -19,10 +19,23 @@ p {
   margin: 0px;
 }
 
+
+/* -------------------------------------------------------*/
+
 .main-display{
   display: grid;
   grid-template-columns: var(--main-left-width) var(--main-right-width);
   grid-template-rows: var(--main-top-width) var(--main-bottom-width);
+}
+
+.simple-product{
+  border: 2px solid black;
+  border-radius: 10px;
+  color: red;
+  padding: 3px;
+  width: 250px;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .search-bar .MuiInputBase-root {
@@ -39,9 +52,62 @@ p {
   padding: var(--window-padding);
 }
 
+.assortment-analyzer-main-window{
+  
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    border: 2px solid orange;
+  
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: flex-start;
+    padding: var(--window-padding);
+    overflow-y: auto;
+}
+
+.assortment-analyzer-options-window{
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+
+.assortment-analyzer-options-item .MuiInputBase-root {
+  width: 150px;
+}
+
+
+.assortment-analyzer-list{
+  display:flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.assortment-analyzer-list li{
+  display:flex;
+  
+  gap: 5px;
+  justify-content: flex-start;
+}
+
+
 .product-details-window{
   grid-column: 2 / 3;
-  grid-row: 1 / 2;
+  grid-row: 2 / 3;
+  border: 2px solid blue;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: space-between;
+  padding: var(--window-padding);
+
+  overflow-y: auto;
+  
+}
+
+.product-details-item{
   border: 2px solid blue;
 
   display: flex;
@@ -75,6 +141,9 @@ p {
   overflow-y: auto;
   overflow-x: auto;
   border: 2px solid red;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 
 }
 
@@ -92,10 +161,22 @@ p {
   white-space: nowrap;
   border: none;
   background-color: white;
+  margin-right: auto;
 }
+
+.page-turn-div{
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-right: 10px;
+}
+
+
 
 .current-selection-window {
   width: 600px;
+  grid-column: 1 / 2;
   flex: 0 0 auto;
   border: 2px solid blue;
 }

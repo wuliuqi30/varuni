@@ -3,24 +3,42 @@ import { useState, useMemo } from 'react';
 import trie from 'trie-prefix-tree';
 import { SearchDisplay } from './SearchDisplay';
 import { CurrentSelection } from './CurrentSelection';
-import { ProductDetails } from './ProductDetails';
-import { AssortmentAnalyzer } from './AssortmentAnalyzer';
+import { ProductDetailsPanel } from './ProductDetailsPanel';
+import { AssortmentAnalyzerWindow } from './AssortmentAnalyzerWindow';
+
 
 
 const DBFReaderComponent = () => {
+
+    const suppressOutput = true;
+    if (!suppressOutput) {
+        console.log("Entering DBF Reader Component");
+    }
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
+
+
+    // Search: 
+    const [searchBarValue, setSearchBarValue] = useState(null);
+    const [searchResult, setSearchResult] = useState([]);
+    const [alphabetTrie, setAlphabetTree] = useState(trie([]));
+    const [searchPageNumber, setSearchPageNumber] = useState(1); // 1 indexed.
+    const itemsPerPage = 10;
 
     // Stores the product.INDEX
     const [selectedProductsList, setSelectedProductsList] = useState([]);
 
-    const [searchBarValue, setSearchBarValue] = useState(null);
+    // Assorted Products Analyzer Tool
+    const [assortmentAnalyzerProductList, setAssortmentAnalyzerProductList] = useState([]);
 
-    const [searchResult, setSearchResult] = useState([]);
-    const [alphabetTrie, setAlphabetTree] = useState(trie([]));
+    // Details Panel
+    const [viewDetailsProductList, setViewDetailsProductList] = useState([]);
 
-    const [viewDetailsProduct, setViewDetailsProduct] = useState(null);
 
+
+
+
+    // Load And Read DBF File 
     const handleFileChange = async (event) => {
         console.log(`event is: `);
         console.log(event);
@@ -31,6 +49,10 @@ const DBFReaderComponent = () => {
 
         const reader = new FileReader();
         console.log("instantiated a file reader");
+
+
+
+
 
         reader.onload = (e) => {
             try {
@@ -92,28 +114,28 @@ const DBFReaderComponent = () => {
                     //console.log(`record (${i}): is: `);
                     //console.log(record);
                     records.push(record);
-                    if (count > 200) {
+                    if (count > 400) {
                         break;
                     }
                     count++;
 
                 }
-
+                records.pop();
                 setData(records);
                 console.log("records: ");
                 console.log(records);
-
+                console.log("finished console logging records");
 
             } catch (err) {
-
+                console.log("Catching an erro");
                 setError('Error reading DBF file: ' + err.message);
             }
         };
-
+        console.log("declare  reader.onerror");
         reader.onerror = (err) => {
             setError('File reading failed: ' + err.message);
         };
-
+        console.log("About to call reader.readAsArrayBuffer(file);");
         reader.readAsArrayBuffer(file); // Read the file as an ArrayBuffer
     };
 
@@ -187,16 +209,16 @@ const DBFReaderComponent = () => {
 
 
         return { productsByCodeNum: byCodeNum, productsByBrand: byBrand, productsByDescription: byDescription };
-    }, [data]);
+    }, [alphabetTrie, data]);
 
     // Now you can use these maps for lookups within the component
     const getProductIndicesByCode = (code) => productsByCodeNum.get(code);
     const getProductIndicesByBrand = (brand) => productsByBrand.get(brand) || [];
-    const getProductIndicesByDescription = (description) => productsByDescription.get(description) || [];
+    // const getProductIndicesByDescription = (description) => productsByDescription.get(description) || [];
 
-    const searchForProductByCodeHandler = () => {
-        setSearchResult(getProductIndicesByCode(searchBarValue));
-    };
+    // const searchForProductByCodeHandler = () => {
+    //     setSearchResult(getProductIndicesByCode(searchBarValue));
+    // };
 
     const searchForProductByBrandHandler = (term) => {
         //console.log("Searching for products with the input: " + term)
@@ -224,10 +246,10 @@ const DBFReaderComponent = () => {
     };
 
 
-    const searchForProductByDescripHandler = () => {
-        //console.log("Searching for products by DESCRIP" + searchBarValue)
-        setSearchResult(getProductIndicesByDescription(searchBarValue));
-    };
+    // const searchForProductByDescripHandler = () => {
+    //     //console.log("Searching for products by DESCRIP" + searchBarValue)
+    //     setSearchResult(getProductIndicesByDescription(searchBarValue));
+    // };
 
     const handleCheckBoxClick = (e) => {
         e.stopPropagation();
@@ -243,7 +265,7 @@ const DBFReaderComponent = () => {
         //console.log(`parentCodeNum is ${parentCodeNum}`);
 
         const product = data[getProductIndicesByCode(parentCodeNum)];
-        const filteredList = selectedProductsList.filter(index => index != product.INDEX);
+        //const filteredList = selectedProductsList.filter(index => index != product.INDEX);
         //console.log("selectedProductsList is: ");
         ///console.log(selectedProductsList);
         //console.log("fitlered list should be: ");
@@ -252,14 +274,13 @@ const DBFReaderComponent = () => {
         setSelectedProductsList(product.CHECKED ? selectedProductsList.filter(index => index != product.INDEX) : [...selectedProductsList, product.INDEX]);
 
         setData((prevData) => {
-            const clone = structuredClone(prevData);
+            const updatedData = [...prevData];
 
-            const checkState = clone[product.INDEX].CHECKED;
             // console.log(`Old checkState is ${checkState}`);
             //console.log(`Setting new checkState  to ${!checkState}`);
-            clone[product.INDEX].CHECKED = !checkState;
+            updatedData[product.INDEX] = { ...updatedData[product.INDEX], CHECKED: !updatedData[product.INDEX].CHECKED };
             //console.log(`returning clone`);
-            return clone;
+            return updatedData;
         })
     }
 
@@ -308,7 +329,12 @@ const DBFReaderComponent = () => {
         const idstring = "search-result-button-";
         const thisCodeNum = searchIndexLocatorString.substring(idstring.length);
         //console.log(`thisCodeNum is ${thisCodeNum}`);
-        setViewDetailsProduct(data[getProductIndicesByCode(thisCodeNum)]);
+
+        const productIndexClicked = getProductIndicesByCode(thisCodeNum);
+
+        if (!viewDetailsProductList.includes(productIndexClicked)) {
+            setViewDetailsProductList((prevArray) => [...prevArray, productIndexClicked]);
+        }
 
     };
 
@@ -319,14 +345,41 @@ const DBFReaderComponent = () => {
         setSearchBarValue(upperCaseVal);
     }
 
-    //console.log("Search Result is: ");
-    //console.log(searchResult);
-    //console.log("Product Selection List Array is: ");
-    //console.log(selectedProductsList);
-    // console.log("Alphabet trie for the brand name: ");
-    // console.log(alphabetTrie.dump());
+
+    // Import Selection to Assorted Analyzer Selection
+
+    const importSelectionToAssortmentAnalyzer = () => {
+
+        // if nothing selected, do nothing
+        if (selectedProductsList.length < 1) {
+            return;
+        }
+
+        // import any products that are NOT already in the assortment analysze list from the selection list into the assortment analyzer list
+
+
+        let itemsToAdd = [];
+        selectedProductsList.forEach(item => {
+            if (!assortmentAnalyzerProductList.includes(item)) {
+                itemsToAdd.push(item);
+            }
+        })
+
+        setAssortmentAnalyzerProductList((prevArray) => [...prevArray, ...itemsToAdd]);
+    }
+
+    if (!suppressOutput) {
+        console.log("data is: ");
+        console.log(data);
+        //console.log("Product Selection List Array is: ");
+        //console.log(selectedProductsList);
+        console.log("viewDetailsProductList ");
+        console.log(viewDetailsProductList);
+    }
     return (
-        <><input type="file" accept=".dbf" onChange={handleFileChange} />
+        <>
+
+            <input type="file" accept=".dbf" onChange={handleFileChange} />
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {data.length > 0 && (
                 <p>Data Loaded!</p>
@@ -336,42 +389,52 @@ const DBFReaderComponent = () => {
                 id="select-product"
                 variant="outlined"
                 fullWidth
-                lable="Search"
+                label="Search"
                 onChange={changeSearchHandler} />
             <div className='main-display'>
 
 
-                {/* <button id="search-button" onClick={searchForProductByCodeHandler}>Search By COD NUM</button>
-            <button id="search-button" onClick={searchForProductByBrandHandler}>Search By BRAND</button>
-            <button id="search-button" onClick={searchForProductByDescripHandler}>Search By DESCRIP</button> */}
+
                 <div className="search-select-window">
                     {searchResult != null &&
                         <SearchDisplay
                             data={data}
                             searchDisplayItemsArray={searchResult}
                             handleCheckBoxClick={handleCheckBoxClick}
-                            showDetailsHandler={showProductDetailsHandler} />
+                            showDetailsHandler={showProductDetailsHandler}
+                            itemsPerPage={itemsPerPage}
+                            searchPageNumber={searchPageNumber}
+                            setSearchPageNumber={setSearchPageNumber} />
                     }
                     {searchResult == null &&
                         <div className="search-result-window">{"Didn't find that."}</div>
                     }
 
-                    
+
 
                 </div>
                 <CurrentSelection
-                        data={data}
-                        selectedProductsList={selectedProductsList}
-                        onRemove={handleRemoveFromSelection} />
-                <ProductDetails
-                    productData={viewDetailsProduct}
+                    data={data}
+                    selectedProductsList={selectedProductsList}
+                    onRemove={handleRemoveFromSelection} />
+                <AssortmentAnalyzerWindow
+                    data={data}
+                    productIndicesToAnalyze={assortmentAnalyzerProductList}
+                    importSelectionToAssortmentAnalyzerHandler={importSelectionToAssortmentAnalyzer}
+
                 />
-                <AssortmentAnalyzer />
+
+                <ProductDetailsPanel
+                    data={data}
+                    productDetailsIndexList={viewDetailsProductList}
+                />
 
 
 
             </div >
+
         </>
+
     );
 };
 

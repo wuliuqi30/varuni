@@ -3,6 +3,8 @@ import { format } from "date-fns";
 
 const now = new Date();
 
+
+
 const barChartOptions = [];
 
 const dbfMonths = [
@@ -22,6 +24,7 @@ const dbfMonths = [
     "ELEVE",
     "TWELV"
 ];
+
 
 const xlabels = [
     "Last Yr",
@@ -50,15 +53,23 @@ const colors = [
 
 for (let i = 0; i < dbfMonths.length; i++) {
     let thisLabel;
+    const monthIndex = now.getMonth() - i - 1 + 3;
     if (i < 3){
         thisLabel = xlabels[i];
     } else {
-        thisLabel = format(new Date(now.getFullYear(), now.getMonth() - i - 1 + 3),'MMM');
+        thisLabel = format(new Date(now.getFullYear(), monthIndex),'MMM');
     }
     barChartOptions[i] = { 
         dbfName: dbfMonths[i],        
         xlabel: thisLabel,
-        color: colors[i] };
+        color: colors[i],
+        monthIndex: monthIndex };
 }
 
-export default barChartOptions;
+const monthsFromNowToDBFFileMonthName = [];
+
+for (let i = 0; i < 12; i++){
+    monthsFromNowToDBFFileMonthName[i] = dbfMonths[14-i];
+}
+
+export {barChartOptions, monthsFromNowToDBFFileMonthName};
