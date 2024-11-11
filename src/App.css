@@ -1,17 +1,19 @@
 #root {
-  max-width: 1280px;
+ 
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  margin: 0;
-  --main-top-width: 600px;
+  margin: auto;
+  
+  padding: 2rem;
+
+
+  --main-top-width: 650px;
   --main-bottom-width: 500px;
   --main-left-width: 800px;
   --main-right-width: 900px;
   --window-padding: 15px;
-  
-  font-size: 18px;
-  
+  --common-border-radius: 10px;
 
   
 }
@@ -32,12 +34,30 @@ p {
 
 
 /* -------------------------------------------------------*/
+
+.liquor-app{
+  
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  align-items: center;
+
+  flex-direction: column;
+}
+
+
 .main-header {
   display: flex;
   gap: 20px;
   justify-content: flex-start;
   align-items: center;
   margin: 20px;
+  align-self:flex-start;
+}
+
+.page-selection-bar{
+  display: flex;
+  gap: 20px;
 }
 
 .main-display {
@@ -150,17 +170,31 @@ align-items: center;
 
 .assortment-analyzer-main-window {
 
-  grid-column: 2 / 3;
-  grid-row: 2 / 3;
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
   border: 2px solid orange;
 
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 10px;
   justify-content: flex-start;
+  align-items: center;
   padding: var(--window-padding);
   overflow-y: auto;
 }
+
+.assortment-analyzer-button-bar{
+  display: flex;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.calculation-info-message{
+  
+  border-radius: var(--common-border-radius);
+}
+
+
 
 .assortment-analyzer-options-window {
   display: flex;
@@ -202,13 +236,13 @@ align-items: center;
 
 .product-details-window {
   grid-column: 2 / 3;
-  grid-row: 1 / 2;
+  grid-row: 1 / 3;
   border: 2px solid blue;
 
   display: flex;
   flex-direction: column;
   gap: 10px;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: var(--window-padding);
 
   overflow-y: auto;
@@ -218,7 +252,7 @@ align-items: center;
 
 
 .product-details-item {
-  border: 4px solid blue;
+  border: 1px solid blue;
   border-radius: 20px;
   
   display: flex;

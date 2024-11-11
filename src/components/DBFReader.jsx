@@ -5,7 +5,7 @@ import { SearchDisplay } from './SearchDisplay';
 import { CurrentSelection } from './CurrentSelection';
 import { ProductDetailsPanel } from './ProductDetailsPanel';
 import { AssortmentAnalyzerWindow } from './AssortmentAnalyzerWindow';
-
+import { webpageSelectionEnums } from '../data/constants';
 
 
 const DBFReaderComponent = () => {
@@ -14,8 +14,13 @@ const DBFReaderComponent = () => {
     if (!suppressOutput) {
         console.log("Entering DBF Reader Component");
     }
+
+    // Data: 
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
+
+    // Page View: 
+    const [webpageSelection, setWebpageSelection] = useState(webpageSelectionEnums.main);
 
 
     // Search: 
@@ -30,6 +35,8 @@ const DBFReaderComponent = () => {
 
     // Assorted Products Analyzer Tool
     const [assortmentAnalyzerProductList, setAssortmentAnalyzerProductList] = useState([]);
+    
+
 
     // Details Panel
     const [viewDetailsProductList, setViewDetailsProductList] = useState([]);
@@ -182,7 +189,7 @@ const DBFReaderComponent = () => {
 
             }
             // Add this product to this brand array. 
-            byBrand.get(product.BRAND).push(product.INDEX);
+            byBrand.get(product.BRAND).push(product);
 
             if (!byDescription.has(product.DESCRIP)) {
                 byDescription.set(product.DESCRIP, []);
@@ -191,9 +198,20 @@ const DBFReaderComponent = () => {
             byDescription.get(product.DESCRIP).push(product.INDEX);
         });
 
+        // Sort products within each brand by DESCRIP
+        byBrand.forEach((products) => {
+            products.sort((a, b) => a.DESCRIP.localeCompare(b.DESCRIP));
+        });
 
+        // Map the sorted products to indices for byBrand
+        const productsByBrand = new Map(
+            Array.from(byBrand.entries()).map(([brand, products]) => [
+                brand,
+                products.map(product => product.INDEX),
+            ])
+        );
 
-        return { productsByCodeNum: byCodeNum, productsByBrand: byBrand, productsByDescription: byDescription };
+        return { productsByCodeNum: byCodeNum, productsByBrand, productsByDescription: byDescription };
     }, [alphabetTrie, data]);
 
     // Now you can use these maps for lookups within the component
@@ -202,22 +220,20 @@ const DBFReaderComponent = () => {
 
 
     const searchForProductByBrandHandler = (term) => {
-        //console.log("Searching for products with the input: " + term)
+
         if (term.trim() === "") {
             return;
         }
-        //console.log("Trie results are:")
+
         const trieResultArray = alphabetTrie.getPrefix(term);
-        //console.log("Trie array is:");
-        //console.log(trieResultArray);
+
 
         let newSearchResultArray = [];
         for (let i = 0; i < trieResultArray.length; i++) {
             const thisTreeString = trieResultArray[i].toUpperCase();
-            //console.log("thisTreeString: " + thisTreeString);
+
             const allProductsForThisBrand = getProductIndicesByBrand(thisTreeString);
-            //console.log("allProductsForThisBrand: ");
-            //console.log(allProductsForThisBrand);
+
             newSearchResultArray.push(...allProductsForThisBrand);
         }
         //console.log("newSearchResultArray is: ");
@@ -277,13 +293,27 @@ const DBFReaderComponent = () => {
 
 
     const clickCurrentSelectionItemHandler = (e) => {
-        
+
         if (selectedProductsList === null) {
             return;
         }
         const parent = e.target.closest('li');
 
         const idstring = "selection-";
+        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
+
+
+        if (!viewDetailsProductList.includes(productIndex)) {
+            setViewDetailsProductList((prevArray) => [productIndex, ...prevArray]);
+        }
+
+    }
+
+    const handleAssortmentWindowShowProduct = (e) => {
+
+        const parent = e.target.closest('li');
+
+        const idstring = "assortment-item-";
         const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
 
 
@@ -359,6 +389,15 @@ const DBFReaderComponent = () => {
 
     }
 
+    const selectMainDisplayHandler = () => {
+        setWebpageSelection(webpageSelectionEnums.main);
+    }
+
+    const selectAssortmentDisplayHandler = () => {
+        setWebpageSelection(webpageSelectionEnums.assortmentTool);
+    }
+
+
     if (!suppressOutput) {
         console.log(`data is a length ${data.length} array`);
 
@@ -389,18 +428,22 @@ const DBFReaderComponent = () => {
                 {data.length > 0 && (
                     <p>Data Loaded!</p>
                 )}
+                <div className="page-selection-bar">
+                    <button onClick={selectMainDisplayHandler}>Search Window</button>
+                    <button onClick={selectAssortmentDisplayHandler}>Assortment Tool</button>
+                </div>
             </div>
 
-           
+
             <div className='main-display'>
 
 
 
-                <div className="search-select-window">
+                {webpageSelection === webpageSelectionEnums.main && <div className="search-select-window">
                     {searchResult != null &&
                         <SearchDisplay
                             data={data}
-                            changeSearchHandler = {changeSearchHandler}
+                            changeSearchHandler={changeSearchHandler}
                             searchDisplayItemsArray={searchResult}
                             selectedItemsIndicesArray={selectedProductsList}
                             handleCheckBoxClick={handleCheckBoxClick}
@@ -413,27 +456,28 @@ const DBFReaderComponent = () => {
                     {searchResult == null &&
                         <div className="search-result-window">{"Didn't find that."}</div>
                     }
+                </div>}
+                {(webpageSelection === webpageSelectionEnums.main || webpageSelection === webpageSelectionEnums.assortmentTool) &&
+                    <CurrentSelection
+                        data={data}
+                        selectedProductsList={selectedProductsList}
+                        onRemove={handleRemoveFromSelection}
+                        clickCurrentSelectionItemHandler={clickCurrentSelectionItemHandler} />}
+                {webpageSelection === webpageSelectionEnums.assortmentTool &&
+                    <AssortmentAnalyzerWindow
+                        data={data}
+                        productIndicesToAnalyze={assortmentAnalyzerProductList}
+                        importSelectionToAssortmentAnalyzerHandler={importSelectionToAssortmentAnalyzer}
+                        handleRemoveAssortmentItem={handleRemoveAssortmentItem}
+                        showDetailsHandler={handleAssortmentWindowShowProduct}
+                    />}
 
-
-
-                </div>
-                <CurrentSelection
-                    data={data}
-                    selectedProductsList={selectedProductsList}
-                    onRemove={handleRemoveFromSelection}
-                    clickCurrentSelectionItemHandler={clickCurrentSelectionItemHandler} />
-                <AssortmentAnalyzerWindow
-                    data={data}
-                    productIndicesToAnalyze={assortmentAnalyzerProductList}
-                    importSelectionToAssortmentAnalyzerHandler={importSelectionToAssortmentAnalyzer}
-                    handleRemoveAssortmentItem={handleRemoveAssortmentItem}
-                />
-
-                <ProductDetailsPanel
-                    data={data}
-                    productDetailsIndexList={viewDetailsProductList}
-                    removeProductDetailsHandler={removeProductDetailsHandler}
-                />
+                {(webpageSelection === webpageSelectionEnums.main || webpageSelection === webpageSelectionEnums.assortmentTool) &&
+                    <ProductDetailsPanel
+                        data={data}
+                        productDetailsIndexList={viewDetailsProductList}
+                        removeProductDetailsHandler={removeProductDetailsHandler}
+                    />}
 
 
 

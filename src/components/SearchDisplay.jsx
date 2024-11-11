@@ -33,7 +33,13 @@ export function SearchDisplay({
                     id="select-product"
                     label="Search"
                     onChange={changeSearchHandler} />
+                <div className="page-turn-div">
 
+                    <button onClick={prevPageHandler}> {'<'} </button>
+                    <button onClick={nextPageHandler}> {'>'} </button>
+                    <p>{`Page ${searchPageNumber}/${lastPage}`}</p>
+
+                </div>
                 <button className="search-results-clear-all-button" onClick={handleUncheckAllClick}> Uncheck All</button>
             </div>
             <ul>

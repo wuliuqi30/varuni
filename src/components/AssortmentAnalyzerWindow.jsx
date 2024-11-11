@@ -10,11 +10,12 @@ import { styled } from '@mui/system';
 const StyledNumberInput = styled(NumberInput)
 
 
-export function AssortmentAnalyzerWindow({ 
-    data, 
-    productIndicesToAnalyze, 
+export function AssortmentAnalyzerWindow({
+    data,
+    productIndicesToAnalyze,
     importSelectionToAssortmentAnalyzerHandler,
-    handleRemoveAssortmentItem }) {
+    handleRemoveAssortmentItem,
+    showDetailsHandler }) {
     const suppressOutput = true;
     const exampleCalcs = false;
 
@@ -32,12 +33,19 @@ export function AssortmentAnalyzerWindow({
     const [analysisMethod, setAnalysisMethod] = useState('previous-year'); // previous-year, year-to-date, last-three-months
 
     const [productThingReorderAmounts, setProductThingReorderAmounts] = useState([]);
+    const [calculationInfoMessage, setCalculationInfoMessage] = useState("");
 
 
     const productDataArray = [];
+
+
     for (let i = 0; i < productIndicesToAnalyze.length; i++) {
         productDataArray[i] = data[productIndicesToAnalyze[i]];
+
     }
+
+
+
 
     const extrapolateMonthlySales = (product, m) => {
         // returns a value predicting the number of sales per month at month m, where m is number of months away from now
@@ -49,7 +57,7 @@ export function AssortmentAnalyzerWindow({
                     // Remainder of this month: 
                     return Math.max(0, product[monthsFromNowToDBFFileMonthName[0]] - product['MTD']);
                 } else {
-                    return product[monthsFromNowToDBFFileMonthName[(m - 1) % 12 + 1]];
+                    return product[monthsFromNowToDBFFileMonthName[m % 12]];
                 }
 
         }
@@ -57,26 +65,57 @@ export function AssortmentAnalyzerWindow({
 
     }
 
+    const getLastTwelveMonthSales = (product) => {
+        let sum = 0;
+        for (let i = 1; i <= 12; i++) {
+            sum += extrapolateMonthlySales(product, i);
+        }
+        return sum;
+    }
+
     const calculateReorderPoint = (product, numThingsOrdered) => {
+
         // based on the product case amounts ordered which is a state
+
+
         if (!suppressOutput) {
             //console.log("Entered calculateReorderPoint");
             //console.log(`numThingsOrdered = ${numThingsOrdered}, product is: `);
             //console.log(product);
         }
+
+
+
+
         let thingsUnsold = product.QTY_ON_HND;
-        thingsUnsold += targetType === 'Cases' ? product.QTY_CASE * numThingsOrdered : numThingsOrdered;
-
         let reorderMonth = -1;
-        while (thingsUnsold >= 0) {
-            reorderMonth++;
-            thingsUnsold -= extrapolateMonthlySales(product, reorderMonth);
 
+        if (getLastTwelveMonthSales(product) === 0) {
+            return 'No Sales Projected';
+        } else if (thingsUnsold === 0) {
+            reorderMonth = 0;
+        } else {
+            // Set to zero if no data
+            if (numThingsOrdered === undefined || numThingsOrdered === null) {
+                numThingsOrdered = 0;
+            }
+
+
+            thingsUnsold += targetType === 'Cases' ? product.QTY_CASE * numThingsOrdered : numThingsOrdered;
+
+
+            while (thingsUnsold >= 0) {
+                reorderMonth++;
+                thingsUnsold -= extrapolateMonthlySales(product, reorderMonth);
+
+            }
+            reorderMonth = Math.max(reorderMonth, 0);
         }
-        reorderMonth = Math.max(reorderMonth, 0);
+
+
         // we sell out DURING month= reorderMonth. We can reorder then at the beginning of the month of the return date
         const reorderDate = new Date(todayDate.getFullYear(), todayDate.getMonth() + reorderMonth);
-        const reorderTimeWeeks = differenceInWeeks(reorderDate, todayDate);
+        const reorderTimeWeeks = Math.max(differenceInWeeks(reorderDate, todayDate), 0);
         return [reorderDate, reorderTimeWeeks];
     }
 
@@ -110,6 +149,8 @@ export function AssortmentAnalyzerWindow({
             console.log("Not a number!");
         }
     }
+
+
 
     if (exampleCalcs) {
         // calcualtions:     
@@ -157,11 +198,33 @@ export function AssortmentAnalyzerWindow({
         return -1 * (r * t + qInitial);
     }
 
+    const orderCalculationInvalid = () => {
+
+        // If any product will have no project sales, return a message:
+        for (let i = 0; i < productDataArray.length; i++) {
+            if (getLastTwelveMonthSales(productDataArray[i]) <= 0){
+                return `One of the products has no project sales: please remove ${productDataArray[i].DESCRIP}  ${productDataArray[i].SIZE}.`;
+            }
+        }
+        return null;
+    }
+
+
     const getOrderQuantities = () => {
-        if (!targetNumberOfItems){
-            console.log("No Cases Target! Returning...");
+        if (!targetNumberOfItems) {
+            console.log("No Target! Returning...");
             return;
         }
+
+        const calculationInvalidAlert = orderCalculationInvalid();
+        if (calculationInvalidAlert !== null) {
+
+            setCalculationInfoMessage(calculationInvalidAlert);
+            return;
+        } else {
+            setCalculationInfoMessage("");
+        }
+
         // // returns an array of number of things to be ordered
         const orderProductsArray = [];
         // Iterative Algorithm:
@@ -210,7 +273,7 @@ export function AssortmentAnalyzerWindow({
         console.log("Order Products: ");
         console.log(orderProductsArray);
 
-        while ( timeArrayInWeeks[mxIndex] - timeArrayInWeeks[mnIndex] > timeMaxMinEndConditionWeeks) {
+        while (timeArrayInWeeks[mxIndex] - timeArrayInWeeks[mnIndex] > timeMaxMinEndConditionWeeks) {
             // Subtract diff from the index of the productorder array that is the max, and add it to the minimum
 
             orderProductsArray[mxIndex] -= diff;
@@ -226,7 +289,7 @@ export function AssortmentAnalyzerWindow({
             mxIndex = getPseudoMaxIndex(timeArrayInWeeks, orderProductsArray, diff);
             mnIndex = getMinIndex(timeArrayInWeeks);
             console.log(`Recalculated pseudo min/max: max: ${mxIndex} and min: ${mnIndex}`);
-           
+
         }
         console.log("Setting Order Amount States::");
         setProductThingReorderAmounts(orderProductsArray);
@@ -255,12 +318,25 @@ export function AssortmentAnalyzerWindow({
     const getTimeArrayFromOrderNumbers = (productDataList, orderProductsArray) => {
         const timeArrayDays = [];
         for (let p = 0; p < productDataList.length; p++) {
-            timeArrayDays[p] = calculateReorderPoint(productDataList[p], orderProductsArray[p])[1];
+            const reorderPt = calculateReorderPoint(productDataList[p], orderProductsArray[p])[1];
+            timeArrayDays[p] = typeof reorderPt !== 'string' ? reorderPt : 0;
         }
         return timeArrayDays;
     }
 
- 
+    const runoutTimeLabelArray = [];
+
+    for (let i = 0; i < productIndicesToAnalyze.length; i++) {
+        const reorderPoint = calculateReorderPoint(productDataArray[i], productThingReorderAmounts[i]);
+        let runoutLabel;
+        if (typeof reorderPoint === 'string') {
+            runoutLabel = reorderPoint;
+        } else {
+            runoutLabel = `...runs out during ${format(reorderPoint[0], 'M/yyyy')}`;
+        }
+
+        runoutTimeLabelArray[i] = runoutLabel;
+    }
 
 
     if (!suppressOutput) {
@@ -274,7 +350,18 @@ export function AssortmentAnalyzerWindow({
     }
     return (
         <div className='assortment-analyzer-main-window'>
-            <h2>Analyzer</h2>
+            <h2>Assorted Ordering Tool</h2>
+            <div className="assortment-analyzer-button-bar">
+                <button
+                    className="assortment-analyzer-button"
+                    onClick={importSelectionToAssortmentAnalyzerHandler}
+                >Import Selection!
+                </button>
+
+            </div>
+
+
+
             <div className='assortment-analyzer-options-window'>
 
                 <FormControl>
@@ -304,8 +391,13 @@ export function AssortmentAnalyzerWindow({
                     onChange={changeLastTillDateHandler}
                 />
             </div>
-            <button onClick={importSelectionToAssortmentAnalyzerHandler}>Import Selection To Assortment Analyzer</button>
-            <button onClick={getOrderQuantities}> Calculate Order Quantities</button>
+            <div className="calculate-bar">
+                <button
+                    className="assortment-analyzer-calculate-button"
+                    onClick={getOrderQuantities}
+                > Calculate!</button>
+                <div className ="calculation-info-message">{calculationInfoMessage}</div>
+            </div>
             {/* {analysisState &&
                 <button onClick={handleEndAnalysisClick}>Close Assortment Analysis</button>} */}
 
@@ -317,23 +409,24 @@ export function AssortmentAnalyzerWindow({
                             <li
                                 key={product.CODE_NUM}
                                 id={`assortment-item-${product.INDEX}`}
-                                >
+                            >
                                 <SimpleProduct
-                                    productData={product} />
+                                    productData={product}
+                                    clickHandler={showDetailsHandler} />
                                 <input
-                                type="text"
+                                    type="text"
                                     name={`${index}`}
                                     label={`Ordering how many ${targetType}?`}
                                     onChange={changeOrderAmountHandler}
                                     value={productThingReorderAmounts[index] == null ? 0 : productThingReorderAmounts[index]}
                                 />
-                                <div>{`...runs out during ${format(calculateReorderPoint(product, productThingReorderAmounts[index])[0], 'M/yyyy')}`}</div>
+                                <div>{runoutTimeLabelArray[index]}</div>
                                 <button onClick={handleRemoveAssortmentItem}>Delete</button>
                             </li>
                         )
                     })}
                 </ul>
-                
+
             </div>
             {/* {!analysisState &&
                 <div> Nothing Being Analyzed </div>} */}

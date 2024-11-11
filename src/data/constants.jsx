@@ -72,4 +72,10 @@ for (let i = 0; i < 12; i++){
     monthsFromNowToDBFFileMonthName[i] = dbfMonths[14-i];
 }
 
-export {barChartOptions, monthsFromNowToDBFFileMonthName};
+const webpageSelectionEnums = {
+    main: "main",
+    assortmentTool: "assortmentTool",
+    orderingTool: "orderingTool"
+}
+
+export {barChartOptions, monthsFromNowToDBFFileMonthName, webpageSelectionEnums};
