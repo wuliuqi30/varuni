@@ -1,11 +1,13 @@
-export function ProductDisplayItem({ productData }) {
+export function ProductDisplayItem({ productData,clickCurrentSelectionItemHandler }) {
     //console.log("In product display item-------------");
 
     //console.log(productData);
     return (
         <>
 
-            <button className="current-selection-item">
+            <button 
+            className="current-selection-item"
+            onClick={clickCurrentSelectionItemHandler}>
                 {/* {Object.keys(productData).map((keyName, keyIndex) => {
                     console.log(`keyIndex: ${keyIndex}, keyName: ${keyName}, productData[keyIndex]:${productData[keyName]} `);
                     if (productData[keyName] !== undefined) {

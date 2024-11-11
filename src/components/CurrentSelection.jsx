@@ -1,26 +1,29 @@
 import { ProductDisplayItem } from "./ProductDisplayItem";
 
-export function CurrentSelection({data, selectedProductsList, onRemove}) {
+export function CurrentSelection({ data, selectedProductsList, onRemove, clickCurrentSelectionItemHandler }) {
 
-    
+
     return (
         <div className="current-selection-window">
-            <p> Currently Selected Products</p>
-            {selectedProductsList.map((index) => {
-                const thisProduct = data[index];
-                return (<>
+            <h2> Currently Selected Products</h2>
+            <ul className="current-selection-window-list">
+                {selectedProductsList.map((index) => {
+                    const thisProduct = data[index];
+                    return (<>
 
-                    <ul>
-                        <li key={thisProduct.CODE_NUM} id={`selection-${thisProduct.CODE_NUM}`} className='search-result-li'>
+
+                        <li key={thisProduct.CODE_NUM} id={`selection-${thisProduct.INDEX}`} className='search-result-li'>
                             <ProductDisplayItem
-                                productData={thisProduct} />
+                                productData={thisProduct}
+                                clickCurrentSelectionItemHandler={clickCurrentSelectionItemHandler} />
                             <button onClick={onRemove}> Remove </button>
                         </li>
-                    </ul>
 
-                </>)
-            })
-            }
+
+                    </>)
+                })
+                }
+            </ul>
         </div>
     )
 }

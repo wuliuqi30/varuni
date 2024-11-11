@@ -13,7 +13,7 @@ function App() {
     <>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <CssBaseline />
-        <h1>Varuni 1000</h1>
+        
         <DBFReader />
         <h1>Vite + React</h1>
         <div className="card">

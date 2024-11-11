@@ -2,7 +2,7 @@ import { TextField, RadioGroup, FormControl, FormLabel, FormControlLabel, Radio 
 import { useState } from 'react';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'; // Correct import
 import dayjs from 'dayjs';
-import { format, differenceInDays } from 'date-fns';
+import { format, differenceInDays, differenceInWeeks } from 'date-fns';
 import { monthsFromNowToDBFFileMonthName } from '../data/constants';
 import { SimpleProduct } from './ProductDisplayItem';
 import { Unstable_NumberInput as NumberInput } from '@mui/base';
@@ -10,7 +10,11 @@ import { styled } from '@mui/system';
 const StyledNumberInput = styled(NumberInput)
 
 
-export function AssortmentAnalyzerWindow({ data, productIndicesToAnalyze, importSelectionToAssortmentAnalyzerHandler }) {
+export function AssortmentAnalyzerWindow({ 
+    data, 
+    productIndicesToAnalyze, 
+    importSelectionToAssortmentAnalyzerHandler,
+    handleRemoveAssortmentItem }) {
     const suppressOutput = true;
     const exampleCalcs = false;
 
@@ -18,9 +22,6 @@ export function AssortmentAnalyzerWindow({ data, productIndicesToAnalyze, import
         console.log("Entered AssortmentAnalyzerWindow");
         console.log(productIndicesToAnalyze);
     }
-
-
-
 
     const todayDate = new Date();
     const todayDayjs = dayjs(todayDate);
@@ -30,11 +31,7 @@ export function AssortmentAnalyzerWindow({ data, productIndicesToAnalyze, import
     const [targetLastTillDate, setTargetLastTillDate] = useState(todayDayjs.add(1, 'year')); // How long you wish the supply to last
     const [analysisMethod, setAnalysisMethod] = useState('previous-year'); // previous-year, year-to-date, last-three-months
 
-
     const [productThingReorderAmounts, setProductThingReorderAmounts] = useState([]);
-
-
-    ///const [errorMessages, setErrorMessage] = useState(null);
 
 
     const productDataArray = [];
@@ -79,18 +76,10 @@ export function AssortmentAnalyzerWindow({ data, productIndicesToAnalyze, import
         reorderMonth = Math.max(reorderMonth, 0);
         // we sell out DURING month= reorderMonth. We can reorder then at the beginning of the month of the return date
         const reorderDate = new Date(todayDate.getFullYear(), todayDate.getMonth() + reorderMonth);
-        const reorderTimeDays = differenceInDays(reorderDate, todayDate);
-        return [reorderDate, reorderTimeDays];
+        const reorderTimeWeeks = differenceInWeeks(reorderDate, todayDate);
+        return [reorderDate, reorderTimeWeeks];
     }
 
-
-
-    // const handleEndAnalysisClick = () => {
-    //     console.log("Stop Analysis Clicked!");
-    //     setAnalysisState(false);
-
-
-    // }
 
     const changeNumberOfItemsHandler = (e) => {
 
@@ -169,7 +158,10 @@ export function AssortmentAnalyzerWindow({ data, productIndicesToAnalyze, import
     }
 
     const getOrderQuantities = () => {
-
+        if (!targetNumberOfItems){
+            console.log("No Cases Target! Returning...");
+            return;
+        }
         // // returns an array of number of things to be ordered
         const orderProductsArray = [];
         // Iterative Algorithm:
@@ -201,31 +193,43 @@ export function AssortmentAnalyzerWindow({ data, productIndicesToAnalyze, import
         }
 
         // Get the initial time array values
-        let timeArrayInDays = getTimeArrayFromOrderNumbers(productDataArray, orderProductsArray);
+        let timeArrayInWeeks = getTimeArrayFromOrderNumbers(productDataArray, orderProductsArray);
 
         // Iterative Algorithm: 
 
         // while max and min timarray are not within 45 days
-        const timeMaxMinEndCondition = 45;
+        const timeMaxMinEndConditionWeeks = 4;
         let diff = 1;
 
-        let mxIndex = getPseudoMaxIndex(timeArrayInDays, orderProductsArray, diff);
-        let mnIndex = getMinIndex(timeArrayInDays);
+        let mxIndex = getPseudoMaxIndex(timeArrayInWeeks, orderProductsArray, diff);
+        let mnIndex = getMinIndex(timeArrayInWeeks);
 
-        while (timeArrayInDays[mxIndex] - timeArrayInDays[mnIndex] > timeMaxMinEndCondition) {
+
+        console.log("Time Array: ");
+        console.log(timeArrayInWeeks);
+        console.log("Order Products: ");
+        console.log(orderProductsArray);
+
+        while ( timeArrayInWeeks[mxIndex] - timeArrayInWeeks[mnIndex] > timeMaxMinEndConditionWeeks) {
             // Subtract diff from the index of the productorder array that is the max, and add it to the minimum
-            
+
             orderProductsArray[mxIndex] -= diff;
             orderProductsArray[mnIndex] += diff;
             // recalculate time array: 
-            timeArrayInDays = getTimeArrayFromOrderNumbers(productDataArray, orderProductsArray);
 
+            timeArrayInWeeks = getTimeArrayFromOrderNumbers(productDataArray, orderProductsArray);
+            console.log("----New Time Array: ");
+            console.log(timeArrayInWeeks);
+            console.log("--------------Order Products: ");
+            console.log(orderProductsArray);
             // Recalculate the new max and mins
-            mxIndex = getPseudoMaxIndex(timeArrayInDays, orderProductsArray, diff);
-            mnIndex = getMinIndex(timeArrayInDays);
+            mxIndex = getPseudoMaxIndex(timeArrayInWeeks, orderProductsArray, diff);
+            mnIndex = getMinIndex(timeArrayInWeeks);
+            console.log(`Recalculated pseudo min/max: max: ${mxIndex} and min: ${mnIndex}`);
+           
         }
-        console.log("timeArrayInDays:");
-        console.log(timeArrayInDays);
+        console.log("Setting Order Amount States::");
+        setProductThingReorderAmounts(orderProductsArray);
 
 
     }
@@ -235,8 +239,8 @@ export function AssortmentAnalyzerWindow({ data, productIndicesToAnalyze, import
         // find the index of the element in timeArray that is the maximum
         let pseudoMaxValue = 0;
         let pseudoMaxIndex = NaN;
-        for (let i = 0; i < timeArray.length; i++){
-            if ((timeArray[i] > pseudoMaxValue) && (orderAmountsArray[i] >= minProductOrderAmount )){
+        for (let i = 0; i < timeArray.length; i++) {
+            if ((timeArray[i] > pseudoMaxValue) && (orderAmountsArray[i] >= minProductOrderAmount)) {
                 pseudoMaxValue = timeArray[i];
                 pseudoMaxIndex = i;
             }
@@ -255,6 +259,8 @@ export function AssortmentAnalyzerWindow({ data, productIndicesToAnalyze, import
         }
         return timeArrayDays;
     }
+
+ 
 
 
     if (!suppressOutput) {
@@ -309,27 +315,25 @@ export function AssortmentAnalyzerWindow({ data, productIndicesToAnalyze, import
                     {productDataArray.map((product, index) => {
                         return (
                             <li
-                                key={product.CODE_NUM}>
+                                key={product.CODE_NUM}
+                                id={`assortment-item-${product.INDEX}`}
+                                >
                                 <SimpleProduct
                                     productData={product} />
-                                <TextField
+                                <input
+                                type="text"
                                     name={`${index}`}
                                     label={`Ordering how many ${targetType}?`}
                                     onChange={changeOrderAmountHandler}
-                                    value={productThingReorderAmounts[index]}
+                                    value={productThingReorderAmounts[index] == null ? 0 : productThingReorderAmounts[index]}
                                 />
                                 <div>{`...runs out during ${format(calculateReorderPoint(product, productThingReorderAmounts[index])[0], 'M/yyyy')}`}</div>
+                                <button onClick={handleRemoveAssortmentItem}>Delete</button>
                             </li>
                         )
                     })}
                 </ul>
-                <NumberInput
-
-                    min={0}
-                    max={100}
-                    step={1}
-                    aria-label="Number input"
-                />
+                
             </div>
             {/* {!analysisState &&
                 <div> Nothing Being Analyzed </div>} */}

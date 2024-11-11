@@ -1,4 +1,4 @@
-import { TextField } from '@mui/material';
+
 import { useState, useMemo } from 'react';
 import trie from 'trie-prefix-tree';
 import { SearchDisplay } from './SearchDisplay';
@@ -10,7 +10,7 @@ import { AssortmentAnalyzerWindow } from './AssortmentAnalyzerWindow';
 
 const DBFReaderComponent = () => {
 
-    const suppressOutput = true;
+    const suppressOutput = false;
     if (!suppressOutput) {
         console.log("Entering DBF Reader Component");
     }
@@ -23,9 +23,9 @@ const DBFReaderComponent = () => {
     const [searchResult, setSearchResult] = useState([]);
     const [alphabetTrie, setAlphabetTree] = useState(trie([]));
     const [searchPageNumber, setSearchPageNumber] = useState(1); // 1 indexed.
-    const itemsPerPage = 10;
+    const itemsPerPage = 9;
 
-    // Stores the product.INDEX
+    // Stores the product.INDEX of the selected products
     const [selectedProductsList, setSelectedProductsList] = useState([]);
 
     // Assorted Products Analyzer Tool
@@ -33,9 +33,6 @@ const DBFReaderComponent = () => {
 
     // Details Panel
     const [viewDetailsProductList, setViewDetailsProductList] = useState([]);
-
-
-
 
 
     // Load And Read DBF File 
@@ -114,9 +111,9 @@ const DBFReaderComponent = () => {
                     //console.log(`record (${i}): is: `);
                     //console.log(record);
                     records.push(record);
-                    if (count > 400) {
-                        break;
-                    }
+                    // if (count > 400) {
+                    //     break;
+                    // }
                     count++;
 
                 }
@@ -163,18 +160,6 @@ const DBFReaderComponent = () => {
             return new Date(Number(readField.substring(0, 4)), Number(readField.substring(4, 6)) - 1, Number(readField.substring(6, 8)));
         }
 
-        // Parse the string as a floating-point number
-
-        //     // const value = view.getFloat64(fieldOffset, true);
-        //     // return value; // Display as decimal with 2 places
-        // } else if (field.type === 'D') { // Date
-        //     const year = view.getUint8(fieldOffset + 1);
-        //     const month = view.getUint8(fieldOffset + 2);
-        //     const day = view.getUint8(fieldOffset + 3);
-        //     return `${year}-${month}-${day}`;
-        // }
-
-
 
     };
 
@@ -214,11 +199,7 @@ const DBFReaderComponent = () => {
     // Now you can use these maps for lookups within the component
     const getProductIndicesByCode = (code) => productsByCodeNum.get(code);
     const getProductIndicesByBrand = (brand) => productsByBrand.get(brand) || [];
-    // const getProductIndicesByDescription = (description) => productsByDescription.get(description) || [];
 
-    // const searchForProductByCodeHandler = () => {
-    //     setSearchResult(getProductIndicesByCode(searchBarValue));
-    // };
 
     const searchForProductByBrandHandler = (term) => {
         //console.log("Searching for products with the input: " + term)
@@ -252,88 +233,76 @@ const DBFReaderComponent = () => {
     // };
 
     const handleCheckBoxClick = (e) => {
-        e.stopPropagation();
-        //console.log("handling check box click");
-        //console.log("event is");
-        //console.log(e);
+        //e.stopPropagation();
+
+        if (selectedProductsList === null) {
+            return;
+        }
+
         const parent = e.target.closest('li');
-        //console.log("parent: ");
-        //console.log(parent);
 
         const idstring = "search-result-";
-        const parentCodeNum = parent.getAttribute('id').substring(idstring.length);
-        //console.log(`parentCodeNum is ${parentCodeNum}`);
+        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
 
-        const product = data[getProductIndicesByCode(parentCodeNum)];
-        //const filteredList = selectedProductsList.filter(index => index != product.INDEX);
-        //console.log("selectedProductsList is: ");
-        ///console.log(selectedProductsList);
-        //console.log("fitlered list should be: ");
-        //console.log(filteredList);
-        // selected product list is an array with PROUDCT IDs (index)
-        setSelectedProductsList(product.CHECKED ? selectedProductsList.filter(index => index != product.INDEX) : [...selectedProductsList, product.INDEX]);
 
-        setData((prevData) => {
-            const updatedData = [...prevData];
+        if (!selectedProductsList.find(item => item === productIndex)) {
+            setSelectedProductsList((prevList) => { return [...prevList, productIndex] });
+        } else {
+            setSelectedProductsList((prevList) => { return prevList.filter(item => item !== productIndex) });
+        }
 
-            // console.log(`Old checkState is ${checkState}`);
-            //console.log(`Setting new checkState  to ${!checkState}`);
-            updatedData[product.INDEX] = { ...updatedData[product.INDEX], CHECKED: !updatedData[product.INDEX].CHECKED };
-            //console.log(`returning clone`);
-            return updatedData;
-        })
+
+
+    }
+
+    const handleUncheckAllClick = () => {
+        setSelectedProductsList([]);
     }
 
     const handleRemoveFromSelection = (e) => {
-        e.stopPropagation();
-        //console.log("handling check box click");
-        //console.log("event is");
-        //console.log(e);
+
+
+        if (selectedProductsList === null) {
+            return;
+        }
         const parent = e.target.closest('li');
-        //console.log("parent: ");
-        //console.log(parent);
 
         const idstring = "selection-";
-        const parentCodeNum = parent.getAttribute('id').substring(idstring.length);
-        //console.log(`parentCodeNum is ${parentCodeNum}`);
-
-        const product = data[getProductIndicesByCode(parentCodeNum)];
-        const filteredList = selectedProductsList.filter(index => index != product.INDEX);
-        //console.log("selectedProductsList is: ");
-        //console.log(selectedProductsList);
-        //console.log("fitlered list should be: ");
-        //console.log(filteredList);
-        setSelectedProductsList(product.CHECKED ? selectedProductsList.filter(index => index != product.INDEX) : [...selectedProductsList, product.INDEX]);
-        setData((prevData) => {
-            const clone = structuredClone(prevData);
-
-            // Toggle the CHECKED FIELD
+        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
 
 
-            const checkState = clone[product.INDEX].CHECKED;
-            //console.log(`Old checkState is ${checkState}`);
-            //console.log(`Setting new checkState  to ${!checkState}`);
-            clone[product.INDEX].CHECKED = !checkState;
-            //console.log(`returning clone`);
-            return clone;
-        })
+        setSelectedProductsList((prevList) => { return prevList.filter(item => item !== productIndex) });
+
     }
 
 
+    const clickCurrentSelectionItemHandler = (e) => {
+        
+        if (selectedProductsList === null) {
+            return;
+        }
+        const parent = e.target.closest('li');
+
+        const idstring = "selection-";
+        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
+
+
+        if (!viewDetailsProductList.includes(productIndex)) {
+            setViewDetailsProductList((prevArray) => [productIndex, ...prevArray]);
+        }
+
+    }
 
     const showProductDetailsHandler = (e) => {
-        // console.log("showProductDetailsHandler");
-        //console.log("event is");
-        //console.log(e);
+
         const searchIndexLocatorString = e.target.id;
         const idstring = "search-result-button-";
         const thisCodeNum = searchIndexLocatorString.substring(idstring.length);
-        //console.log(`thisCodeNum is ${thisCodeNum}`);
 
         const productIndexClicked = getProductIndicesByCode(thisCodeNum);
 
         if (!viewDetailsProductList.includes(productIndexClicked)) {
-            setViewDetailsProductList((prevArray) => [...prevArray, productIndexClicked]);
+            setViewDetailsProductList((prevArray) => [productIndexClicked, ...prevArray]);
         }
 
     };
@@ -368,29 +337,61 @@ const DBFReaderComponent = () => {
         setAssortmentAnalyzerProductList((prevArray) => [...prevArray, ...itemsToAdd]);
     }
 
+    const handleRemoveAssortmentItem = (e) => {
+        e.stopPropagation();
+
+        const parent = e.target.closest('li');
+        const idstring = "assortment-item-";
+        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
+
+        setAssortmentAnalyzerProductList((prevList) => { return prevList.filter(element => element !== productIndex) });
+
+    }
+
+    const removeProductDetailsHandler = (e) => {
+
+
+        const parent = e.target.closest('li');
+        const idstring = "product-details-item-";
+        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
+
+        setViewDetailsProductList((prevList) => { return prevList.filter(element => element !== productIndex) });
+
+    }
+
     if (!suppressOutput) {
-        console.log("data is: ");
-        console.log(data);
-        //console.log("Product Selection List Array is: ");
-        //console.log(selectedProductsList);
+        console.log(`data is a length ${data.length} array`);
+
+        console.log("selectedProductsList is: ");
+        console.log(selectedProductsList);
         console.log("viewDetailsProductList ");
         console.log(viewDetailsProductList);
+        console.log("assortmentAnalyzerProductList is");
+        console.log(assortmentAnalyzerProductList);
     }
     return (
         <>
+            <h1>Varuni 1000</h1>
+            <div className="main-header">
 
-            <input type="file" accept=".dbf" onChange={handleFileChange} />
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {data.length > 0 && (
-                <p>Data Loaded!</p>
-            )}
-            <TextField
-                className='search-bar'
-                id="select-product"
-                variant="outlined"
-                fullWidth
-                label="Search"
-                onChange={changeSearchHandler} />
+                <label htmlFor="file-upload" className="choose-file-button">
+                    Choose File
+                </label>
+                <input
+                    className="choose-file-input"
+                    id="file-upload"
+                    type="file"
+                    accept=".dbf"
+                    onChange={handleFileChange}
+                />
+
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+                {data.length > 0 && (
+                    <p>Data Loaded!</p>
+                )}
+            </div>
+
+           
             <div className='main-display'>
 
 
@@ -399,12 +400,15 @@ const DBFReaderComponent = () => {
                     {searchResult != null &&
                         <SearchDisplay
                             data={data}
+                            changeSearchHandler = {changeSearchHandler}
                             searchDisplayItemsArray={searchResult}
+                            selectedItemsIndicesArray={selectedProductsList}
                             handleCheckBoxClick={handleCheckBoxClick}
                             showDetailsHandler={showProductDetailsHandler}
                             itemsPerPage={itemsPerPage}
                             searchPageNumber={searchPageNumber}
-                            setSearchPageNumber={setSearchPageNumber} />
+                            setSearchPageNumber={setSearchPageNumber}
+                            handleUncheckAllClick={handleUncheckAllClick} />
                     }
                     {searchResult == null &&
                         <div className="search-result-window">{"Didn't find that."}</div>
@@ -416,17 +420,19 @@ const DBFReaderComponent = () => {
                 <CurrentSelection
                     data={data}
                     selectedProductsList={selectedProductsList}
-                    onRemove={handleRemoveFromSelection} />
+                    onRemove={handleRemoveFromSelection}
+                    clickCurrentSelectionItemHandler={clickCurrentSelectionItemHandler} />
                 <AssortmentAnalyzerWindow
                     data={data}
                     productIndicesToAnalyze={assortmentAnalyzerProductList}
                     importSelectionToAssortmentAnalyzerHandler={importSelectionToAssortmentAnalyzer}
-
+                    handleRemoveAssortmentItem={handleRemoveAssortmentItem}
                 />
 
                 <ProductDetailsPanel
                     data={data}
                     productDetailsIndexList={viewDetailsProductList}
+                    removeProductDetailsHandler={removeProductDetailsHandler}
                 />
 
 

@@ -1,6 +1,17 @@
 
 import { Checkbox } from '@mui/material';
-export function SearchDisplay({ data, searchDisplayItemsArray, handleCheckBoxClick, showDetailsHandler, itemsPerPage, searchPageNumber, setSearchPageNumber }) {
+import { TextField } from '@mui/material';
+export function SearchDisplay({
+    data,
+    changeSearchHandler,
+    searchDisplayItemsArray,
+    selectedItemsIndicesArray,
+    handleCheckBoxClick,
+    showDetailsHandler,
+    itemsPerPage,
+    searchPageNumber,
+    setSearchPageNumber,
+    handleUncheckAllClick }) {
 
     const lastPage = Math.ceil(searchDisplayItemsArray.length / itemsPerPage);
 
@@ -14,14 +25,25 @@ export function SearchDisplay({ data, searchDisplayItemsArray, handleCheckBoxCli
     let thisPageResult = searchDisplayItemsArray.slice((searchPageNumber - 1) * itemsPerPage, (searchPageNumber) * itemsPerPage);
     return (
         <div className="search-result-window">
-            <p> Search Results</p>
+            <h2 className="search-results-title">Search</h2>
+            <div className="search-results-header">
+                <input
+                    type="text"
+                    className='search-bar'
+                    id="select-product"
+                    label="Search"
+                    onChange={changeSearchHandler} />
+
+                <button className="search-results-clear-all-button" onClick={handleUncheckAllClick}> Uncheck All</button>
+            </div>
             <ul>
                 {thisPageResult.map((searchItemDataIndex) => {
                     const thisProduct = data[searchItemDataIndex];
+                    const thisIsChecked = selectedItemsIndicesArray !== null && selectedItemsIndicesArray.findIndex(item => item === thisProduct.INDEX) > -1;
                     return (
-                        <li id={`search-result-${thisProduct.CODE_NUM}`} key={thisProduct.CODE_NUM} className='search-result-li'>
+                        <li id={`search-result-${thisProduct.INDEX}`} key={thisProduct.CODE_NUM} className='search-result-li'>
                             <Checkbox
-                                checked={thisProduct.CHECKED}
+                                checked={thisIsChecked}
                                 onChange={handleCheckBoxClick}
                                 inputProps={{ 'aria-label': 'controlled' }}
                             />
@@ -29,7 +51,7 @@ export function SearchDisplay({ data, searchDisplayItemsArray, handleCheckBoxCli
                                 className="search-result-li-text"
                                 id={`search-result-button-${thisProduct.CODE_NUM}`}
                                 onClick={showDetailsHandler}>
-                                {thisProduct.BRAND} {thisProduct.DESCRIP} {thisProduct.SIZE} {"Click to view details"}
+                                {thisProduct.BRAND} {thisProduct.DESCRIP} {thisProduct.SIZE}
                             </button>
                         </li>)
                 })}
