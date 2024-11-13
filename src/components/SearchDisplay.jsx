@@ -22,6 +22,11 @@ export function SearchDisplay({
         setSearchPageNumber(Math.max(searchPageNumber - 1, 1));
     }
 
+    const onChangeSearch = (e) => {
+        setSearchPageNumber(1);
+        changeSearchHandler(e);
+    }
+
     let thisPageResult = searchDisplayItemsArray.slice((searchPageNumber - 1) * itemsPerPage, (searchPageNumber) * itemsPerPage);
     return (
         <div className="search-result-window">
@@ -32,7 +37,7 @@ export function SearchDisplay({
                     className='search-bar'
                     id="select-product"
                     label="Search"
-                    onChange={changeSearchHandler} />
+                    onChange={onChangeSearch} />
                 <div className="page-turn-div">
 
                     <button onClick={prevPageHandler}> {'<'} </button>

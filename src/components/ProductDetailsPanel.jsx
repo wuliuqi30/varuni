@@ -3,7 +3,11 @@ import { barChartOptions } from "../data/constants";
 
 
 
-export function ProductDetailsPanel({ data, productDetailsIndexList, removeProductDetailsHandler }) {
+export function ProductDetailsPanel({ 
+    data, 
+    productDetailsIndexList, 
+    removeProductDetailsHandler,
+    clearProductDetailsPanelHandler }) {
 
     const suppressOutput = true;
     if (!suppressOutput) {
@@ -21,7 +25,11 @@ export function ProductDetailsPanel({ data, productDetailsIndexList, removeProdu
         }
         return (
             <div className="product-details-window">
-                
+                    <div className="product-details-header">
+                    <h2 className="product-details-title">Product Details</h2>
+                    <button className="remove-items-button" onClick = {clearProductDetailsPanelHandler}>Clear Details Panel</button>
+                    </div>
+                     
                     {productDataArray.map((productData) => {
                         const productTitle = `${productData.BRAND} ${productData.DESCRIP} ${productData.SIZE}, On Hand: ${productData.QTY_ON_HND}`;
 

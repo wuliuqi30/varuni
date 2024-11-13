@@ -36,8 +36,6 @@ const DBFReaderComponent = () => {
     // Assorted Products Analyzer Tool
     const [assortmentAnalyzerProductList, setAssortmentAnalyzerProductList] = useState([]);
     
-
-
     // Details Panel
     const [viewDetailsProductList, setViewDetailsProductList] = useState([]);
 
@@ -337,6 +335,10 @@ const DBFReaderComponent = () => {
 
     };
 
+    const clearProductDetailsPanelHandler = () => {
+        setViewDetailsProductList([]);
+    }
+
     const changeSearchHandler = (e) => {
         const upperCaseVal = e.target.value.toUpperCase();
         searchForProductByBrandHandler(upperCaseVal);
@@ -375,6 +377,11 @@ const DBFReaderComponent = () => {
         const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
 
         setAssortmentAnalyzerProductList((prevList) => { return prevList.filter(element => element !== productIndex) });
+
+    }
+
+    const removeAllAssortedItemsHandler  = () => {
+        setAssortmentAnalyzerProductList([]);
 
     }
 
@@ -470,6 +477,7 @@ const DBFReaderComponent = () => {
                         importSelectionToAssortmentAnalyzerHandler={importSelectionToAssortmentAnalyzer}
                         handleRemoveAssortmentItem={handleRemoveAssortmentItem}
                         showDetailsHandler={handleAssortmentWindowShowProduct}
+                        removeAssortedItemsHandler={removeAllAssortedItemsHandler}
                     />}
 
                 {(webpageSelection === webpageSelectionEnums.main || webpageSelection === webpageSelectionEnums.assortmentTool) &&
@@ -477,6 +485,7 @@ const DBFReaderComponent = () => {
                         data={data}
                         productDetailsIndexList={viewDetailsProductList}
                         removeProductDetailsHandler={removeProductDetailsHandler}
+                        clearProductDetailsPanelHandler ={clearProductDetailsPanelHandler}
                     />}
 
 
