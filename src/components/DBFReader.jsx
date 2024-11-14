@@ -6,6 +6,7 @@ import { CurrentSelection } from './CurrentSelection';
 import { ProductDetailsPanel } from './ProductDetailsPanel';
 import { AssortmentAnalyzerWindow } from './AssortmentAnalyzerWindow';
 import { webpageSelectionEnums } from '../data/constants';
+import { NeedToReorderTool } from './NeedToReorderTool';
 
 
 const DBFReaderComponent = () => {
@@ -35,7 +36,7 @@ const DBFReaderComponent = () => {
 
     // Assorted Products Analyzer Tool
     const [assortmentAnalyzerProductList, setAssortmentAnalyzerProductList] = useState([]);
-    
+
     // Details Panel
     const [viewDetailsProductList, setViewDetailsProductList] = useState([]);
 
@@ -380,7 +381,7 @@ const DBFReaderComponent = () => {
 
     }
 
-    const removeAllAssortedItemsHandler  = () => {
+    const removeAllAssortedItemsHandler = () => {
         setAssortmentAnalyzerProductList([]);
 
     }
@@ -477,7 +478,7 @@ const DBFReaderComponent = () => {
                         importSelectionToAssortmentAnalyzerHandler={importSelectionToAssortmentAnalyzer}
                         handleRemoveAssortmentItem={handleRemoveAssortmentItem}
                         showDetailsHandler={handleAssortmentWindowShowProduct}
-                        removeAssortedItemsHandler={removeAllAssortedItemsHandler}
+                        removeAllAssortedItemsHandler={removeAllAssortedItemsHandler}
                     />}
 
                 {(webpageSelection === webpageSelectionEnums.main || webpageSelection === webpageSelectionEnums.assortmentTool) &&
@@ -485,8 +486,10 @@ const DBFReaderComponent = () => {
                         data={data}
                         productDetailsIndexList={viewDetailsProductList}
                         removeProductDetailsHandler={removeProductDetailsHandler}
-                        clearProductDetailsPanelHandler ={clearProductDetailsPanelHandler}
+                        clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
                     />}
+                
+                    <NeedToReorderTool data={data} />
 
 
 

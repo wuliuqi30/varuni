@@ -2,9 +2,12 @@ import { TextField, RadioGroup, FormControl, FormLabel, FormControlLabel, Radio 
 import { useState } from 'react';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'; // Correct import
 import dayjs from 'dayjs';
-import { printArrayToString, printOrderAndTime } from '../helper-fns/helperFunctions';
-import { format, differenceInWeeks, getWeeksInMonth,addWeeks } from 'date-fns';
-import { monthsFromNowToDBFFileMonthName, weeksFromNowToDBFFileMonthName, dateFromNowFromWeeks } from '../data/constants';
+import { printArrayToString, 
+    printOrderAndTime, 
+    calculateReorderPointFromQuantity,
+    getLastTwelveMonthSales } from '../helper-fns/helperFunctions';
+import { format} from 'date-fns';
+
 import { SimpleProduct } from './ProductDisplayItem';
 import { Unstable_NumberInput as NumberInput } from '@mui/base';
 import { styled } from '@mui/system';
@@ -34,7 +37,7 @@ export function AssortmentAnalyzerWindow({
     const [targetLastTillDate, setTargetLastTillDate] = useState(todayDayjs.add(1, 'year')); // How long you wish the supply to last
     const [analysisMethod, setAnalysisMethod] = useState('previous-year'); // previous-year, year-to-date, last-three-months
 
-    const [productThingReorderAmounts, setProductThingReorderAmounts] = useState([]);
+    const [productThingReorderAmounts, setProductThingReorderAmounts] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     const [calculationInfoMessage, setCalculationInfoMessage] = useState("");
 
 
@@ -47,107 +50,16 @@ export function AssortmentAnalyzerWindow({
     }
 
 
-
-
-    const extrapolateMonthlySales = (product, m) => {
-        // returns a value predicting the number of sales per month at month m, where m is number of months away from now
-        // m = 0 means the current month
-
-
-
-        switch (analysisMethod) {
-            case 'previous-year':
-                if (m === 0) {
-                    // Remainder of this month: 
-                    return Math.max(0, product[monthsFromNowToDBFFileMonthName[0]] - product['MTD']);
-                } else {
-                    return product[monthsFromNowToDBFFileMonthName[m % 12]];
-                }
-
-        }
-        return 0;
-
-
-    }
-
-    const extrapolateWeeklySales = (product, week) => {
-
-        // return the predicted sales per WEEK during the month that is MONTH months into the future
-
-        switch (analysisMethod) {
-            case 'previous-year': {
-                const salesPerThatWeeksMonth = product[weeksFromNowToDBFFileMonthName[week % 52]];
-                const weeksPerMonth = getWeeksInMonth(dateFromNowFromWeeks[week % 52]);
-                // for now just break up each month in
-                return Math.round(salesPerThatWeeksMonth / weeksPerMonth);
-            }
-
-
-        }
-        return 0;
-
-
-    }
-
-    const getLastTwelveMonthSales = (product) => {
-        let sum = 0;
-        for (let i = 1; i <= 12; i++) {
-            sum += extrapolateMonthlySales(product, i);
-        }
-        return sum;
-    }
-
     const calculateReorderPointWithOrderingSheet = (product, numCasesOrdered) => {
 
+        if (numCasesOrdered === undefined) {
+            return "Undefined"
+        }
 
         const startingAmount = product.QTY_ON_HND + product.QTY_CASE * numCasesOrdered;
 
-        return calculateReorderPointFromQuantity(product, startingAmount);
+        return calculateReorderPointFromQuantity(product, startingAmount, analysisMethod);
 
-    }
-
-
-    const calculateReorderPointFromQuantity = (product, startingQuantity) => {
-
-        // Given a certain quantity, calculate how many weeks until you run out based on monthly sales
-
-        let thingsUnsold = startingQuantity;
-        let reorderMonth = 0;
-        let reorderWeek = 0;
-
-        if (getLastTwelveMonthSales(product) === 0) {
-            return 'No Sales Projected';
-        } else if ((thingsUnsold > 0) && (startingQuantity !== undefined && startingQuantity !== null)) {
-
-            // if things unsold <=0, the reorderweek will be NOW, and we'll skip this.
-
-            // let thisMonthsSales = extrapolateMonthlySales(product, reorderMonth);
-            // while (thingsUnsold - thisMonthsSales > 0) {
-
-            //     thingsUnsold -= thisMonthsSales;
-
-            //     reorderMonth++;
-            //     thisMonthsSales = extrapolateMonthlySales(product, reorderMonth);
-
-            // }
-
-            let thisWeeksSales = extrapolateWeeklySales(product, reorderWeek);
-            while (thingsUnsold - thisWeeksSales > 0) {
-
-                thingsUnsold -= thisWeeksSales;
-
-                reorderWeek++;
-                thisWeeksSales = extrapolateWeeklySales(product, reorderWeek);
-
-            }
-
-        }
-
-
-        // we sell out DURING week= reorderWeek. 
-        const reorderDate = addWeeks(todayDate, reorderWeek);
-        const reorderTimeWeeks = Math.max(differenceInWeeks(reorderDate, todayDate), 0);
-        return [reorderDate, reorderTimeWeeks];
     }
 
 
@@ -294,7 +206,7 @@ export function AssortmentAnalyzerWindow({
         // Iterative Algorithm: 
 
         // while max and min timarray are not within 45 days
-        const timeMaxMinEndConditionWeeks = 4;
+        const timeMaxMinEndConditionWeeks = 2;
         let diff = 1;
 
         let currentMaxIndex = getPseudoMaxIndex(timeArrayInWeeks, orderProductsArray, diff);
@@ -308,6 +220,7 @@ export function AssortmentAnalyzerWindow({
         }
         let iterationCounter = 0;
         const maxIterations = 4000;
+        const printInfoFrequency = 1;
 
         let oldTimeArray = [];
         let oldOrderArray = []
@@ -316,7 +229,7 @@ export function AssortmentAnalyzerWindow({
             (timeArrayInWeeks[currentMaxIndex] - timeArrayInWeeks[currentMinIndex] > timeMaxMinEndConditionWeeks)) {
             // Subtract diff from the index of the productorder array that is the max, and add it to the minimum
             iterationCounter++;
-            if (!suppressOutput) {
+            if (!suppressOutput && (iterationCounter % printInfoFrequency == 0)) {
                 console.log("                                                    -");
                 console.log("                                                    -");
                 console.log(`Iteration ${iterationCounter}`);
@@ -340,23 +253,36 @@ export function AssortmentAnalyzerWindow({
             // Recalculate the new max and mins
             let newMaxIndex = getPseudoMaxIndex(timeArrayInWeeks, orderProductsArray, diff);
             let newMinIndex = getMinIndex(timeArrayInWeeks);
-            if (!suppressOutput) {
+            if (!suppressOutput && (iterationCounter % printInfoFrequency == 0)) {
+                console.log(`orderProductsArray :`);
+                console.log(orderProductsArray);
+                console.log('productThingReorderAmounts is: ');
+                console.log(productThingReorderAmounts);
                 printOrderAndTime("   Transition Matrix:", productDataArray, oldOrderArray, oldTimeArray, orderProductsArray, timeArrayInWeeks);
                 //printArrayToString("    Order Products (AFTER)", orderProductsArray, "cases");
                 //printArrayToString("    Products Last (AFTER) ", timeArrayInWeeks, "wks");
                 //printOrderAndTime("After:",productDataArray, orderProductsArray, timeArrayInWeeks );
                 console.log(`    New max: ${currentMaxIndex}, New min: ${currentMinIndex}`);
-
+                console.log(`orderProductsArray :`);
+                console.log(orderProductsArray);
 
             }
+
+            console.log(`orderProductsArray at the bottom of the loop cycle`);
+            console.log(orderProductsArray);
+
             if ((newMinIndex == currentMaxIndex) && (newMaxIndex == currentMinIndex)) {
-                console.log(`After exiting, time max was ${timeArrayInWeeks[currentMaxIndex]}, Time min was ${timeArrayInWeeks[currentMinIndex]}, difference was ${timeArrayInWeeks[currentMaxIndex] - timeArrayInWeeks[currentMinIndex]}, maxmin end condition was ${timeMaxMinEndConditionWeeks}`)
-                setCalculationInfoMessage(`Ending Calculation after ${iterationCounter} iterations due to revisiting previous state.`)
+
+                console.log(`Stopping algorithm due to revisiting previous state. time max was ${timeArrayInWeeks[currentMaxIndex]}, Time min was ${timeArrayInWeeks[currentMinIndex]}, difference was ${timeArrayInWeeks[currentMaxIndex] - timeArrayInWeeks[currentMinIndex]}, maxmin end condition was ${timeMaxMinEndConditionWeeks}`)
+                break;
             } else {
                 currentMaxIndex = newMaxIndex;
                 currentMinIndex = newMinIndex;
             }
         }
+        console.log(`Ending Calculation after ${iterationCounter} iterations.`)
+        console.log(`Exited. time max was ${timeArrayInWeeks[currentMaxIndex]}, Time min was ${timeArrayInWeeks[currentMinIndex]}, difference was ${timeArrayInWeeks[currentMaxIndex] - timeArrayInWeeks[currentMinIndex]}, maxmin end condition was ${timeMaxMinEndConditionWeeks}`)
+
 
         setProductThingReorderAmounts(orderProductsArray);
 
@@ -372,8 +298,8 @@ export function AssortmentAnalyzerWindow({
         }
 
         const calculationInvalidAlert = orderCalculationInvalid();
-        if (calculationInvalidAlert !== null) {
 
+        if (calculationInvalidAlert !== null) {
             setCalculationInfoMessage(calculationInvalidAlert);
             return;
         } else {
@@ -382,9 +308,8 @@ export function AssortmentAnalyzerWindow({
 
 
         // =========Algorithm===========
+
         const orderProductsArray = Array(productDataArray.length).fill(0);
-
-
 
         // Get the initial time array values
         let timeArrayInWeeks = getTimeArrayFromOrderNumbers(productDataArray, orderProductsArray);
@@ -402,23 +327,57 @@ export function AssortmentAnalyzerWindow({
 
 
         let iterationCounter = 0;
+        let totalSoFar = sumOfItems(productDataArray, orderProductsArray);
         const maxIterations = 4000;
-        while ((iterationCounter <= maxIterations) && (sumOfItems(productDataArray, orderProductsArray) < targetNumberOfItems)) {
+        const printInfoFrequency = 1;
+
+        let oldTimeArray;
+        let oldOrderArray;
+
+        console.log(`BEGINNING SLOWLY ADD MORE ALGORITHM. TARGET: ${targetNumberOfItems} ${targetType}`)
+        while ((iterationCounter <= maxIterations) && (totalSoFar < targetNumberOfItems)) {
+
+            if (!suppressOutput && (iterationCounter % printInfoFrequency == 0)) {
+                console.log("                                                    ");
+                console.log(`Iteration ${iterationCounter}. Total so far: ${totalSoFar}`);
+                console.log(`   Current min: ${currentMinIndex}`);
+                //printArrayToString("   Order Products (before)  ", orderProductsArray , "cases");
+                //printArrayToString("   Products last (before)   ", timeArrayInWeeks, "wks");
+
+                console.log(`   Adding One Case to ${productDataArray[currentMinIndex].SIZE}`);
+
+            }
+
 
             // 1. Add a case to the product which has the earliest runout time
+            oldTimeArray = [...timeArrayInWeeks];
+            oldOrderArray = [...orderProductsArray];
             orderProductsArray[currentMinIndex]++;
 
-            // 2. Recalculate time array for that one item that changed: 
-
+            // 2. Recalculate time array for that one item that changed:             
             timeArrayInWeeks[currentMinIndex] = getTimeArrayFromOrderNumbers([productDataArray[currentMinIndex]], [orderProductsArray[currentMinIndex]])[0];
 
             // 3. Calculate the new min          
-
             currentMinIndex = getMinIndex(timeArrayInWeeks);
 
+
+            if (!suppressOutput && (iterationCounter % printInfoFrequency == 0)) {
+                printOrderAndTime("   Transition Matrix:", productDataArray, oldOrderArray, oldTimeArray, orderProductsArray, timeArrayInWeeks);
+                //printArrayToString("    Order Products (AFTER)", orderProductsArray, "cases");
+                //printArrayToString("    Products Last (AFTER) ", timeArrayInWeeks, "wks");
+                //printOrderAndTime("After:",productDataArray, orderProductsArray, timeArrayInWeeks );
+                console.log(`     New min: ${currentMinIndex}`);
+
+
+            }
+            totalSoFar = sumOfItems(productDataArray, orderProductsArray);
             iterationCounter++;
         }
+        
+        console.log(`Finished Algorithm after ${iterationCounter} iterations. Total items is ${totalSoFar} ${targetType}`);
 
+        // TO DO: Reorder Products By Total Cases Ordered ???
+        // Reordering is based on decreasing order of orderProductsArray. 
         setProductThingReorderAmounts(orderProductsArray);
 
 
@@ -480,18 +439,19 @@ export function AssortmentAnalyzerWindow({
     // Calculate runout times for ordered products
     const runoutTimeLabelArray = [];
 
-    // for (let i = 0; i < productIndicesToAnalyze.length; i++) {
-    //     const reorderPoint = calculateReorderPointWithOrderingSheet(productDataArray[i], productThingReorderAmounts[i]);
-    //     let runoutLabel;
-    //     if (typeof reorderPoint === 'string') {
-    //         runoutLabel = reorderPoint;
-    //     } else {
-    //         runoutLabel = `...runs out during ${format(reorderPoint[0], 'M/yyyy')}`;
-    //     }
+    for (let i = 0; i < productIndicesToAnalyze.length; i++) {
+        const reorderPoint = calculateReorderPointWithOrderingSheet(productDataArray[i], productThingReorderAmounts[i]);
+        let runoutLabel;
+        if (typeof reorderPoint === 'string') {
+            runoutLabel = reorderPoint;
+        } else {
+            runoutLabel = `...runs out during ${format(reorderPoint[0], 'M/yyyy')}`;
+        }
 
-    //     runoutTimeLabelArray[i] = runoutLabel;
-    // }
+        runoutTimeLabelArray[i] = runoutLabel;
+    }
 
+    let totalThings = sumOfItems(productDataArray, productThingReorderAmounts);
 
     // if (!suppressOutput) {
     //     console.log("Rerendering The Analyzer Window");
@@ -551,40 +511,43 @@ export function AssortmentAnalyzerWindow({
             <div className="calculate-bar">
                 <button
                     className="assortment-analyzer-calculate-button"
-                    onClick={getOrderQuantitiesMethod1}
+                    onClick={getOrderQuantitiesMethod2}
                 > Calculate!</button>
                 <div className="calculation-info-message">{calculationInfoMessage}</div>
             </div>
             {/* {analysisState &&
                 <button onClick={handleEndAnalysisClick}>Close Assortment Analysis</button>} */}
 
-            <div className='assortment-analyzer'>
-                <div>{`Total ${targetType} selected: ${productThingReorderAmounts.reduce((accumulator, currentValue) => accumulator + currentValue, 0)}/${targetNumberOfItems}`}</div>
-                <ul className='assortment-analyzer-list'>
-                    {productDataArray.map((product, index) => {
-                        return (
-                            <li
-                                key={product.CODE_NUM}
-                                id={`assortment-item-${product.INDEX}`}
-                            >
-                                <SimpleProduct
-                                    productData={product}
-                                    clickHandler={showDetailsHandler} />
-                                <input
-                                    type="text"
-                                    name={`${index}`}
-                                    label={`Ordering how many ${targetType}?`}
-                                    onChange={changeOrderAmountHandler}
-                                    value={productThingReorderAmounts[index] == null ? 0 : productThingReorderAmounts[index]}
-                                />
-                                {/* <div>{runoutTimeLabelArray[index]}</div> */}
-                                <div>{`...runs out during ${format(calculateReorderPointWithOrderingSheet(product, productThingReorderAmounts[index])[0], 'M/yyyy')}`}</div>
-                                <button onClick={handleRemoveAssortmentItem}>Delete</button>
-                            </li>
-                        )
-                    })}
-                </ul>
-
+            <div className='assortment-analyzer-list-window'>
+                <div>{`Total ${targetType} selected: ${totalThings}/${targetNumberOfItems}`}</div>
+                <div className="assortment-analyzer-list-container">
+                    <ul className='assortment-analyzer-list'>
+                        {productDataArray.map((product, index) => {
+                            return (
+                                <li
+                                    key={product.CODE_NUM}
+                                    id={`assortment-item-${product.INDEX}`}
+                                >
+                                    <SimpleProduct
+                                        productData={product}
+                                        clickHandler={showDetailsHandler} />
+                                    <input
+                                        type="number"
+                                        name={`${index}`}
+                                        label={`Ordering how many ${targetType}?`}
+                                        className='case-order-amounts-input'
+                                        min={0}
+                                        onChange={changeOrderAmountHandler}
+                                        value={productThingReorderAmounts[index] == null ? 0 : productThingReorderAmounts[index]}
+                                    />
+                                    {/* <div>{runoutTimeLabelArray[index]}</div> */}
+                                    <div>{runoutTimeLabelArray[index]}</div>
+                                    <button onClick={handleRemoveAssortmentItem} className="assortment-analyzer-list-delete">Delete</button>
+                                </li>
+                            )
+                        })}
+                    </ul>
+                </div>
             </div>
             {/* {!analysisState &&
                 <div> Nothing Being Analyzed </div>} */}
