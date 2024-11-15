@@ -530,7 +530,7 @@ export function AssortmentAnalyzerWindow({
                                 >
                                     <SimpleProduct
                                         productData={product}
-                                        clickHandler={showDetailsHandler} />
+                                        clickHandler={(event) => showDetailsHandler(event, product.INDEX)} />
                                     <input
                                         type="number"
                                         name={`${index}`}

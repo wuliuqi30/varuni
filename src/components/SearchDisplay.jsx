@@ -61,7 +61,7 @@ export function SearchDisplay({
                             <button
                                 className="search-result-li-text"
                                 id={`search-result-button-${thisProduct.CODE_NUM}`}
-                                onClick={showDetailsHandler}>
+                                onClick={(event) => showDetailsHandler(event, thisProduct.INDEX)}>
                                 {thisProduct.BRAND} {thisProduct.DESCRIP} {thisProduct.SIZE}
                             </button>
                         </li>)

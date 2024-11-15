@@ -1,6 +1,10 @@
 import { ProductDisplayItem } from "./ProductDisplayItem";
 
-export function CurrentSelection({ data, selectedProductsList, onRemove, clickCurrentSelectionItemHandler }) {
+export function CurrentSelection({ 
+    data, 
+    selectedProductsList, 
+    onRemove, 
+    clickCurrentSelectionItemHandler }) {
 
 
     return (
@@ -15,7 +19,7 @@ export function CurrentSelection({ data, selectedProductsList, onRemove, clickCu
                         <li key={thisProduct.CODE_NUM} id={`selection-${thisProduct.INDEX}`} className='search-result-li'>
                             <ProductDisplayItem
                                 productData={thisProduct}
-                                clickCurrentSelectionItemHandler={clickCurrentSelectionItemHandler} />
+                                clickCurrentSelectionItemHandler={(event) => clickCurrentSelectionItemHandler(event, thisProduct.INDEX)} />
                             <button onClick={onRemove}> Remove </button>
                         </li>
 

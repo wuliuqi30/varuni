@@ -11,7 +11,7 @@ import { NeedToReorderTool } from './NeedToReorderTool';
 
 const DBFReaderComponent = () => {
 
-    const suppressOutput = false;
+    const suppressOutput = true;
     if (!suppressOutput) {
         console.log("Entering DBF Reader Component");
     }
@@ -308,30 +308,13 @@ const DBFReaderComponent = () => {
 
     }
 
-    const handleAssortmentWindowShowProduct = (e) => {
 
-        const parent = e.target.closest('li');
+    // -------------------Product Details Handler ----------------------
 
-        const idstring = "assortment-item-";
-        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
-
+    const showProductDetailsHandler = (e, productIndex) => {
 
         if (!viewDetailsProductList.includes(productIndex)) {
             setViewDetailsProductList((prevArray) => [productIndex, ...prevArray]);
-        }
-
-    }
-
-    const showProductDetailsHandler = (e) => {
-
-        const searchIndexLocatorString = e.target.id;
-        const idstring = "search-result-button-";
-        const thisCodeNum = searchIndexLocatorString.substring(idstring.length);
-
-        const productIndexClicked = getProductIndicesByCode(thisCodeNum);
-
-        if (!viewDetailsProductList.includes(productIndexClicked)) {
-            setViewDetailsProductList((prevArray) => [productIndexClicked, ...prevArray]);
         }
 
     };
@@ -470,14 +453,14 @@ const DBFReaderComponent = () => {
                         data={data}
                         selectedProductsList={selectedProductsList}
                         onRemove={handleRemoveFromSelection}
-                        clickCurrentSelectionItemHandler={clickCurrentSelectionItemHandler} />}
+                        clickCurrentSelectionItemHandler={showProductDetailsHandler} />}
                 {webpageSelection === webpageSelectionEnums.assortmentTool &&
                     <AssortmentAnalyzerWindow
                         data={data}
                         productIndicesToAnalyze={assortmentAnalyzerProductList}
                         importSelectionToAssortmentAnalyzerHandler={importSelectionToAssortmentAnalyzer}
                         handleRemoveAssortmentItem={handleRemoveAssortmentItem}
-                        showDetailsHandler={handleAssortmentWindowShowProduct}
+                        showDetailsHandler={showProductDetailsHandler}
                         removeAllAssortedItemsHandler={removeAllAssortedItemsHandler}
                     />}
 
@@ -489,7 +472,7 @@ const DBFReaderComponent = () => {
                         clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
                     />}
                 
-                    <NeedToReorderTool data={data} />
+                    {/* <NeedToReorderTool data={data} /> */}
 
 
 

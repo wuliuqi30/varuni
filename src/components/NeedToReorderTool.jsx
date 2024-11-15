@@ -1,8 +1,19 @@
 
-import {calculateReorderPointFromQuantity} from '../helper-fns/helperFunctions';
-export function NeedToReorderTool({data}){
+import { calculateReorderPointFromQuantity } from '../helper-fns/helperFunctions';
+import {ReorderListDisplayItem} from './ReorderListDisplayItem';
+export function NeedToReorderTool({ 
+    data,
+    addToOrderListHandler,
+    addToOutOfStockHandler,
+    addToDiscontinuedHandler,
+    markAlreadyOrderedHandler,
+    showProductDetailsHandler
 
-    const [searchPageNumber, setSearchPageNumber] = useState(1); // 1 indexed.
+ }) {
+
+    const [searchPageNumber, setSearchPageNumber] = useState(1); // 1 indexed
+    const [reorderItemsList, setReorderItemsList] = useState([]);  // Array of: { index: type int, reorderDate: type Date, reorderTimeWeeks: type int }
+  
     const itemsPerPage = 10;
 
     const lastPage = Math.ceil(searchDisplayItemsArray.length / itemsPerPage);
@@ -15,13 +26,13 @@ export function NeedToReorderTool({data}){
     }
 
 
-    let reorderItems = null;
+
 
     const getReorderListHandler = () => {
 
 
         // 1: Filter the data to just get products that have a YTD > 0
-        
+
         console.log("Filtering by YTD and by MTD");
         const filteredData = data.filter(element => element.YTD > 0).filter(element => element.MTD > 0);
         console.log("filteredData is: ");
@@ -32,18 +43,18 @@ export function NeedToReorderTool({data}){
 
 
         console.log("Starting Calculation of all reorder dates");
-        for (let i = 0; i < itemArray.length; i++ ){
+        for (let i = 0; i < itemArray.length; i++) {
             //console.log(`Calculating Item ${i}`);
             //console.log(filteredData[i]);
             const reorderResult = calculateReorderPointFromQuantity(filteredData[i],
-                filteredData[i].QTY_ON_HND,'previous-year');
-            if (typeof reorderResult !== 'string' ){
-                itemArray[i] = {index: filteredData[i].INDEX, reorderDate: reorderResult[0], reorderTimeWeeks: reorderResult[1]};
+                filteredData[i].QTY_ON_HND, 'previous-year');
+            if (typeof reorderResult !== 'string') {
+                itemArray[i] = { index: filteredData[i].INDEX, reorderDate: reorderResult[0], reorderTimeWeeks: reorderResult[1] };
             } else {
-                itemArray[i] = {index: filteredData[i].INDEX,  reorderDate: null, reorderTimeWeeks: null};
+                itemArray[i] = { index: filteredData[i].INDEX, reorderDate: null, reorderTimeWeeks: null };
             }
-           
-            if(i % 50 === 0){
+
+            if (i % 50 === 0) {
                 console.log(`Calculated Item ${i}`);
             }
         }
@@ -51,7 +62,7 @@ export function NeedToReorderTool({data}){
         console.log("itemArray is: ");
         console.log(itemArray);
 
-        itemArray.sort((a,b) => a.reorderTimeWeeks - b.reorderTimeWeeks );
+        itemArray.sort((a, b) => a.reorderTimeWeeks - b.reorderTimeWeeks);
         console.log("Finished sorting by reorder dates");
 
         console.log("Resultant array (reorderResult):");
@@ -70,12 +81,12 @@ export function NeedToReorderTool({data}){
         console.log(finalFilteredData);
 
         console.log("About to print product data:");
-        for (let i = finalFilteredData.length - 1; i > -1; i--){
+        for (let i = finalFilteredData.length - 1; i > -1; i--) {
             const product = data[finalFilteredData[i].index];
             console.log(`${i}: ${product.BRAND} ${product.DESCRIP} ${product.SIZE} QTY: ${product.QTY_ON_HND} lasts ${finalFilteredData[i].reorderTimeWeeks}`)
         }
 
-        reorderItems = finalFilteredData;
+        setReorderItemsList(finalFilteredData);
 
     }
 
@@ -84,15 +95,33 @@ export function NeedToReorderTool({data}){
             <h2>Ordering Tool</h2>
             <div className="need-to-reorder-button-bar">
                 <button onClick={getReorderListHandler}>Get Top Reorder Items</button>
+                {(reorderItemsList !== null) &&
+                    <div className="page-turn-div">
+
+                        <button onClick={prevPageHandler}> {'<'} </button>
+                        <button onClick={nextPageHandler}> {'>'} </button>
+                        <p>{`Page ${searchPageNumber}/${Math.ceil(setReorderItemsIndexList.length / itemsPerPage)}`}</p>
+
+                    </div>}
             </div>
-            <div className='reorder-items-list-display'>
-                { (reorderItems !== null) && 
-                 reorderItems.map((item,index)=>{
-                    const product = data[item.index];
-                    return (
-                        <p key={index}>{`${index}: ${product.BRAND} ${product.DESCRIP} ${product.SIZE} QTY: ${product.QTY_ON_HND} lasts ${item.reorderTimeWeeks}`}</p>
-                    )
-                 })}
+            <div className='reorder-list-grid'>
+                {(reorderItemsList !== null) &&
+                    reorderItemsList.map((item, index) => {
+                        const product = data[item.index];
+                        return (
+                            <ReorderListDisplayItem 
+                                key = {index}
+                                product = {product}
+                                reorderDate = {item.reorderDate}
+                                reorderTime = {item.reorderTimeWeeks}
+                                addToOrderListHandler = {addToOrderListHandler}
+                                addToOutOfStockHandler = {addToOutOfStockHandler}
+                                addToDiscontinuedHandler = {addToDiscontinuedHandler}
+                                markAlreadyOrderedHandler = {markAlreadyOrderedHandler}
+                                showProductDetailsHandler = {showProductDetailsHandler}
+                            />
+                        )
+                    })}
             </div>
 
         </div>
