@@ -7,14 +7,17 @@ import { ProductDetailsPanel } from './ProductDetailsPanel';
 import { AssortmentAnalyzerWindow } from './AssortmentAnalyzerWindow';
 import { webpageSelectionEnums } from '../data/constants';
 import { NeedToReorderTool } from './NeedToReorderTool';
+import { printArrayToString } from '../helper-fns/helperFunctions'
 
 
 const DBFReaderComponent = () => {
 
-    const suppressOutput = true;
+    const suppressOutput = false;
     if (!suppressOutput) {
         console.log("Entering DBF Reader Component");
     }
+
+    // -----------------State Information -----------------------
 
     // Data: 
     const [data, setData] = useState([]);
@@ -23,7 +26,6 @@ const DBFReaderComponent = () => {
     // Page View: 
     const [webpageSelection, setWebpageSelection] = useState(webpageSelectionEnums.main);
 
-
     // Search: 
     const [searchBarValue, setSearchBarValue] = useState(null);
     const [searchResult, setSearchResult] = useState([]);
@@ -31,7 +33,7 @@ const DBFReaderComponent = () => {
     const [searchPageNumber, setSearchPageNumber] = useState(1); // 1 indexed.
     const itemsPerPage = 9;
 
-    // Stores the product.INDEX of the selected products
+    // Selected Products From Search: Stores the product.INDEX of the selected products
     const [selectedProductsList, setSelectedProductsList] = useState([]);
 
     // Assorted Products Analyzer Tool
@@ -40,8 +42,14 @@ const DBFReaderComponent = () => {
     // Details Panel
     const [viewDetailsProductList, setViewDetailsProductList] = useState([]);
 
+    // Reorder Tool States: 
+    const [orderList, setOrderList] = useState([]);
+    const [outOfStockList, setOutOfStockList] = useState([]);
+    const [discontinuedList, setDiscontinuedList] = useState([]);
+    const [alreadyOrderedList, setAlreadyOrderedList] = useState([]);
 
-    // Load And Read DBF File 
+
+    // ----------------- Loading and Reading DBF file -----------------------
     const handleFileChange = async (event) => {
         console.log(`event is: `);
         console.log(event);
@@ -169,7 +177,7 @@ const DBFReaderComponent = () => {
 
     };
 
-    // Create Hashmaps: 
+    // --------------------------Create Hashmaps: -----------------------
     // Create the hash maps only once (or when `products` changes)
     const { productsByCodeNum, productsByBrand, productsByDescription } = useMemo(() => {
         const byCodeNum = new Map();
@@ -218,6 +226,32 @@ const DBFReaderComponent = () => {
     const getProductIndicesByBrand = (brand) => productsByBrand.get(brand) || [];
 
 
+    //------------Main Display Selection Handlers ------------------
+
+    const selectMainDisplayHandler = () => {
+        setWebpageSelection(webpageSelectionEnums.main);
+    }
+
+    const selectAssortmentDisplayHandler = () => {
+        setWebpageSelection(webpageSelectionEnums.assortmentTool);
+    }
+
+    const selectOrderingToolDisplayHandler = () => {
+        setWebpageSelection(webpageSelectionEnums.orderingTool);
+    }
+
+
+    // -----------------Search Stuff -----------------------
+
+
+    const changeSearchHandler = (e) => {
+        const upperCaseVal = e.target.value.toUpperCase();
+        searchForProductByBrandHandler(upperCaseVal);
+        //console.log("Setting Search Bar Value");
+        setSearchBarValue(upperCaseVal);
+    }
+
+
     const searchForProductByBrandHandler = (term) => {
 
         if (term.trim() === "") {
@@ -235,17 +269,11 @@ const DBFReaderComponent = () => {
 
             newSearchResultArray.push(...allProductsForThisBrand);
         }
-        //console.log("newSearchResultArray is: ");
-        //console.log(newSearchResultArray);
+
         setSearchResult(newSearchResultArray);
 
     };
 
-
-    // const searchForProductByDescripHandler = () => {
-    //     //console.log("Searching for products by DESCRIP" + searchBarValue)
-    //     setSearchResult(getProductIndicesByDescription(searchBarValue));
-    // };
 
     const handleCheckBoxClick = (e) => {
         //e.stopPropagation();
@@ -267,13 +295,14 @@ const DBFReaderComponent = () => {
         }
 
 
-
     }
 
     const handleUncheckAllClick = () => {
         setSelectedProductsList([]);
     }
 
+
+    // -----------------Selection Window  -----------------------
     const handleRemoveFromSelection = (e) => {
 
 
@@ -291,23 +320,6 @@ const DBFReaderComponent = () => {
     }
 
 
-    const clickCurrentSelectionItemHandler = (e) => {
-
-        if (selectedProductsList === null) {
-            return;
-        }
-        const parent = e.target.closest('li');
-
-        const idstring = "selection-";
-        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
-
-
-        if (!viewDetailsProductList.includes(productIndex)) {
-            setViewDetailsProductList((prevArray) => [productIndex, ...prevArray]);
-        }
-
-    }
-
 
     // -------------------Product Details Handler ----------------------
 
@@ -323,15 +335,19 @@ const DBFReaderComponent = () => {
         setViewDetailsProductList([]);
     }
 
-    const changeSearchHandler = (e) => {
-        const upperCaseVal = e.target.value.toUpperCase();
-        searchForProductByBrandHandler(upperCaseVal);
-        //console.log("Setting Search Bar Value");
-        setSearchBarValue(upperCaseVal);
+    const removeProductDetailsHandler = (e) => {
+
+        const parent = e.target.closest('li');
+        const idstring = "product-details-item-";
+        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
+
+        setViewDetailsProductList((prevList) => { return prevList.filter(element => element !== productIndex) });
+
     }
 
 
-    // Import Selection to Assorted Analyzer Selection
+
+    // ------------------ Assortment Tool--------------------
 
     const importSelectionToAssortmentAnalyzer = () => {
 
@@ -369,36 +385,58 @@ const DBFReaderComponent = () => {
 
     }
 
-    const removeProductDetailsHandler = (e) => {
+
+    // Reorder Tool
+
+    const handleAddToOrderListClick = (e, productIndex) => {
+
+        if (!orderList.includes(productIndex)) {
+            setOrderList((prevArray) => [...prevArray, productIndex]);
+        }
+
+    };
+
+    const handleAddToOutOfStockListClick = (e, productIndex) => {
+
+        if (!outOfStockList.includes(productIndex)) {
+            setOutOfStockList((prevArray) => [...prevArray, productIndex]);
+        }
+
+    };
+
+    const handleAddToDiscontinuedListClick = (e, productIndex) => {
+
+        if (!discontinuedList.includes(productIndex)) {
+            setDiscontinuedList((prevArray) => [...prevArray, productIndex]);
+        }
+
+    };
+
+    const handleAddToAlreadyOrderedListClick = (e, productIndex) => {
+
+        if (!alreadyOrderedList.includes(productIndex)) {
+            setAlreadyOrderedList((prevArray) => [...prevArray, productIndex]);
+        }
+
+    };
 
 
-        const parent = e.target.closest('li');
-        const idstring = "product-details-item-";
-        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
-
-        setViewDetailsProductList((prevList) => { return prevList.filter(element => element !== productIndex) });
-
-    }
-
-    const selectMainDisplayHandler = () => {
-        setWebpageSelection(webpageSelectionEnums.main);
-    }
-
-    const selectAssortmentDisplayHandler = () => {
-        setWebpageSelection(webpageSelectionEnums.assortmentTool);
-    }
 
 
     if (!suppressOutput) {
         console.log(`data is a length ${data.length} array`);
 
-        console.log("selectedProductsList is: ");
-        console.log(selectedProductsList);
-        console.log("viewDetailsProductList ");
-        console.log(viewDetailsProductList);
-        console.log("assortmentAnalyzerProductList is");
-        console.log(assortmentAnalyzerProductList);
+        printArrayToString("SelectedProductsList ", selectedProductsList);
+        printArrayToString("Details Panel List", viewDetailsProductList);
+        printArrayToString("Assortment Items in Assortment Display",assortmentAnalyzerProductList);
+
+        printArrayToString('Order List', orderList);
+        printArrayToString('outOfStockList List', outOfStockList);
+        printArrayToString('discontinuedList', discontinuedList);
+        printArrayToString('alreadyOrderedList List', alreadyOrderedList);
+        printArrayToString('assortmentAnalyzerProductList ', assortmentAnalyzerProductList);
     }
+
     return (
         <>
             <h1>Varuni 1000</h1>
@@ -421,7 +459,8 @@ const DBFReaderComponent = () => {
                 )}
                 <div className="page-selection-bar">
                     <button onClick={selectMainDisplayHandler}>Search Window</button>
-                    <button onClick={selectAssortmentDisplayHandler}>Assortment Tool</button>
+                    <button onClick={selectAssortmentDisplayHandler}>Show Assortment Tool</button>
+                    <button onClick={selectOrderingToolDisplayHandler}>Show Reorder Tool</button>
                 </div>
             </div>
 
@@ -430,7 +469,7 @@ const DBFReaderComponent = () => {
 
 
 
-                {webpageSelection === webpageSelectionEnums.main && <div className="search-select-window">
+                <div className="search-select-window">
                     {searchResult != null &&
                         <SearchDisplay
                             data={data}
@@ -447,13 +486,20 @@ const DBFReaderComponent = () => {
                     {searchResult == null &&
                         <div className="search-result-window">{"Didn't find that."}</div>
                     }
-                </div>}
-                {(webpageSelection === webpageSelectionEnums.main || webpageSelection === webpageSelectionEnums.assortmentTool) &&
                     <CurrentSelection
                         data={data}
                         selectedProductsList={selectedProductsList}
                         onRemove={handleRemoveFromSelection}
-                        clickCurrentSelectionItemHandler={showProductDetailsHandler} />}
+                        clickCurrentSelectionItemHandler={showProductDetailsHandler} />
+                </div>
+                {(webpageSelection === webpageSelectionEnums.main || webpageSelection === webpageSelectionEnums.assortmentTool) &&
+                    <ProductDetailsPanel
+                        data={data}
+                        productDetailsIndexList={viewDetailsProductList}
+                        removeProductDetailsHandler={removeProductDetailsHandler}
+                        clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
+                    />}
+
                 {webpageSelection === webpageSelectionEnums.assortmentTool &&
                     <AssortmentAnalyzerWindow
                         data={data}
@@ -464,15 +510,16 @@ const DBFReaderComponent = () => {
                         removeAllAssortedItemsHandler={removeAllAssortedItemsHandler}
                     />}
 
-                {(webpageSelection === webpageSelectionEnums.main || webpageSelection === webpageSelectionEnums.assortmentTool) &&
-                    <ProductDetailsPanel
+
+
+                {webpageSelection === webpageSelectionEnums.orderingTool &&
+                    <NeedToReorderTool
                         data={data}
-                        productDetailsIndexList={viewDetailsProductList}
-                        removeProductDetailsHandler={removeProductDetailsHandler}
-                        clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
-                    />}
-                
-                    {/* <NeedToReorderTool data={data} /> */}
+                        addToOrderListHandler={handleAddToOrderListClick}
+                        addToOutOfStockHandler={handleAddToOutOfStockListClick}
+                        addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
+                        markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick}
+                        showProductDetailsHandler={showProductDetailsHandler} />}
 
 
 

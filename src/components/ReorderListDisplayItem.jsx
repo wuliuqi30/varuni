@@ -1,3 +1,5 @@
+import { format } from "date-fns"
+
 export function ReorderListDisplayItem({
     product,
     reorderDate,
@@ -14,47 +16,51 @@ export function ReorderListDisplayItem({
 
             <button
                 className="simple-product"
-                onClick={(event) =>showProductDetailsHandler(event,product.INDEX)}>
-                {productData["SIZE"]} {productData["DESCRIP"]}
+                onClick={(event) => showProductDetailsHandler(event, product.INDEX)}>
+                {product["BRAND"]} {product["DESCRIP"]} {product["SIZE"]}
 
             </button>
 
-
-            <div className="">
-
+            <div>
+                {product["QTY_ON_HND"]}
             </div>
 
-            <div className="">
-
+            <div>
+                {format(reorderDate, 'MMM/yy')}
             </div>
 
-            <div className="">
-
+            <div>
+                {reorderTime}
             </div>
 
-            <div className="">
-
+            <div>
+                {product["MTD"]}
             </div>
 
-            <div className="">
-
+            <div>
+                {product["ELEVE"]}
             </div>
 
-            <div className="">
-
+            <div>
+                {product["TENTH"]}
             </div>
 
-            <div className="">
+            <button onClick={(event) => addToOrderListHandler(event, product.INDEX)}>
+                Add To Order List
+            </button>
 
-            </div>
+            <button onClick={(event) => addToOutOfStockHandler(event, product.INDEX)}>
+                Mark Out Of Stock
+            </button>
 
-            <div className="">
+            <button onClick={(event) => addToDiscontinuedHandler(event, product.INDEX)}>
+                Mark Discontinued
+            </button>
 
-            </div>
-
-            <div className="">
-
-            </div>
+            <button onClick={(event) => markAlreadyOrderedHandler(event, product.INDEX)}>
+                Already Ordered?
+            </button>
+            
 
 
         </>

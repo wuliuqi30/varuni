@@ -21,7 +21,7 @@ export function AssortmentAnalyzerWindow({
     handleRemoveAssortmentItem,
     showDetailsHandler,
     removeAllAssortedItemsHandler }) {
-    const suppressOutput = false;
+    const suppressOutput = true;
     const exampleCalcs = false;
 
     if (!suppressOutput) {

@@ -14,7 +14,7 @@ function printArrayToString(titleString, array, unit) {
         unit = "";
     }
     if (array.length < 1) {
-        console.log("Not an array");
+        outstring += " Empty."
     } else {
 
         for (let a = 0; a < array.length - 1; a++) {

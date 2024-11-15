@@ -1,7 +1,12 @@
 
+
+import { useState } from 'react';
 import { calculateReorderPointFromQuantity } from '../helper-fns/helperFunctions';
-import {ReorderListDisplayItem} from './ReorderListDisplayItem';
-export function NeedToReorderTool({ 
+import { ReorderListDisplayItem } from './ReorderListDisplayItem';
+import { ReorderListHeader } from './ReorderListHeader'
+import { printArrayToString } from '../helper-fns/helperFunctions'
+
+export function NeedToReorderTool({
     data,
     addToOrderListHandler,
     addToOutOfStockHandler,
@@ -9,14 +14,16 @@ export function NeedToReorderTool({
     markAlreadyOrderedHandler,
     showProductDetailsHandler
 
- }) {
+}) {
+
+    const suppressOutput = false;
 
     const [searchPageNumber, setSearchPageNumber] = useState(1); // 1 indexed
     const [reorderItemsList, setReorderItemsList] = useState([]);  // Array of: { index: type int, reorderDate: type Date, reorderTimeWeeks: type int }
-  
+
     const itemsPerPage = 10;
 
-    const lastPage = Math.ceil(searchDisplayItemsArray.length / itemsPerPage);
+    const lastPage = reorderItemsList.length > 0 ? Math.ceil(reorderItemsList.length / itemsPerPage) : 1;
 
     const nextPageHandler = () => {
         setSearchPageNumber(Math.min(searchPageNumber + 1, lastPage));
@@ -89,6 +96,18 @@ export function NeedToReorderTool({
         setReorderItemsList(finalFilteredData);
 
     }
+    let thisPageResult;
+    if (reorderItemsList.length > 0) {
+        thisPageResult = reorderItemsList.slice((searchPageNumber - 1) * itemsPerPage, (searchPageNumber) * itemsPerPage);
+    } else {
+        thisPageResult = [];
+    }
+
+
+    if (!suppressOutput){
+        printArrayToString('This Pages Items', thisPageResult);
+    }
+    
 
     return (
         <div className="need-to-reorder-window">
@@ -100,28 +119,33 @@ export function NeedToReorderTool({
 
                         <button onClick={prevPageHandler}> {'<'} </button>
                         <button onClick={nextPageHandler}> {'>'} </button>
-                        <p>{`Page ${searchPageNumber}/${Math.ceil(setReorderItemsIndexList.length / itemsPerPage)}`}</p>
+                        <p>{`Page ${searchPageNumber}/${lastPage}`}</p>
 
                     </div>}
             </div>
             <div className='reorder-list-grid'>
+                <ReorderListHeader />
                 {(reorderItemsList !== null) &&
-                    reorderItemsList.map((item, index) => {
+
+
+                    thisPageResult.map((item, index) => {
                         const product = data[item.index];
                         return (
-                            <ReorderListDisplayItem 
-                                key = {index}
-                                product = {product}
-                                reorderDate = {item.reorderDate}
-                                reorderTime = {item.reorderTimeWeeks}
-                                addToOrderListHandler = {addToOrderListHandler}
-                                addToOutOfStockHandler = {addToOutOfStockHandler}
-                                addToDiscontinuedHandler = {addToDiscontinuedHandler}
-                                markAlreadyOrderedHandler = {markAlreadyOrderedHandler}
-                                showProductDetailsHandler = {showProductDetailsHandler}
+                            <ReorderListDisplayItem
+                                key={index}
+                                product={product}
+                                reorderDate={item.reorderDate}
+                                reorderTime={item.reorderTimeWeeks}
+                                addToOrderListHandler={addToOrderListHandler}
+                                addToOutOfStockHandler={addToOutOfStockHandler}
+                                addToDiscontinuedHandler={addToDiscontinuedHandler}
+                                markAlreadyOrderedHandler={markAlreadyOrderedHandler}
+                                showProductDetailsHandler={showProductDetailsHandler}
                             />
                         )
-                    })}
+                    })
+
+                }
             </div>
 
         </div>
