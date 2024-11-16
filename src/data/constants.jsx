@@ -1,5 +1,5 @@
 
-import { format, addWeeks,differenceInMonths } from "date-fns";
+import { format, addWeeks, differenceInMonths } from "date-fns";
 
 const now = new Date();
 
@@ -89,9 +89,9 @@ for (let w = 0; w < 52; w++) {
     // add remainder weeks to current date to get a new date and the month of the new date 
     // subtract month of new date from month of current date
     dateFromNowFromWeeks[w] = addWeeks(now, w);
-    const dateFromNowDifferenceInMonths = differenceInMonths(dateFromNowFromWeeks[w],now);
+    const dateFromNowDifferenceInMonths = differenceInMonths(dateFromNowFromWeeks[w], now);
     // now we have m
-    weeksFromNowToDBFFileMonthName[w] = monthsFromNowToDBFFileMonthName[dateFromNowDifferenceInMonths%12];
+    weeksFromNowToDBFFileMonthName[w] = monthsFromNowToDBFFileMonthName[dateFromNowDifferenceInMonths % 12];
 
 }
 
@@ -101,4 +101,18 @@ const webpageSelectionEnums = {
     orderingTool: "orderingTool"
 }
 
-export { barChartOptions, monthsFromNowToDBFFileMonthName, webpageSelectionEnums, weeksFromNowToDBFFileMonthName,dateFromNowFromWeeks };
+const listSelectionsEnums = {
+    selectionList: { name: "selection-list", displayName: "Selected Items" },
+    orderList: { name: "order-list", displayName: "Order List" },
+    reorderedAlreadyList: { name: "already-ordered-list", displayName: "Already Ordered This Week" },
+    outOfStockList: { name: "out-of-stock-list", displayName: "Out Of Stock Items" },
+    discontinuedList: { name: "discontinued-list", displayName: "Discontinued Items" }
+
+}
+
+export { barChartOptions, 
+    monthsFromNowToDBFFileMonthName, 
+    webpageSelectionEnums, 
+    weeksFromNowToDBFFileMonthName, 
+    dateFromNowFromWeeks,
+    listSelectionsEnums };

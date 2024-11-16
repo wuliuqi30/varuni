@@ -1,9 +1,9 @@
 import { ProductDisplayItem } from "./ProductDisplayItem";
 
-export function CurrentSelection({ 
-    data, 
-    selectedProductsList, 
-    onRemove, 
+export function CurrentSelection({
+    data,
+    selectedProductsList,
+    onRemove,
     clickCurrentSelectionItemHandler }) {
 
 
@@ -13,8 +13,7 @@ export function CurrentSelection({
             <ul className="current-selection-window-list">
                 {selectedProductsList.map((index) => {
                     const thisProduct = data[index];
-                    return (<>
-
+                    return (
 
                         <li key={thisProduct.CODE_NUM} id={`selection-${thisProduct.INDEX}`} className='search-result-li'>
                             <ProductDisplayItem
@@ -24,7 +23,7 @@ export function CurrentSelection({
                         </li>
 
 
-                    </>)
+                    )
                 })
                 }
             </ul>

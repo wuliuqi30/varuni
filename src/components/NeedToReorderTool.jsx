@@ -8,6 +8,11 @@ import { printArrayToString } from '../helper-fns/helperFunctions'
 
 export function NeedToReorderTool({
     data,
+    reorderItemsList,
+    setReorderItemsList,
+    removeFromReorderItemsListHandler,
+    reorderToolPageNumber,
+    setReorderToolPageNumber,
     addToOrderListHandler,
     addToOutOfStockHandler,
     addToDiscontinuedHandler,
@@ -18,21 +23,50 @@ export function NeedToReorderTool({
 
     const suppressOutput = false;
 
-    const [searchPageNumber, setSearchPageNumber] = useState(1); // 1 indexed
-    const [reorderItemsList, setReorderItemsList] = useState([]);  // Array of: { index: type int, reorderDate: type Date, reorderTimeWeeks: type int }
-
+    
+    
     const itemsPerPage = 10;
 
     const lastPage = reorderItemsList.length > 0 ? Math.ceil(reorderItemsList.length / itemsPerPage) : 1;
 
     const nextPageHandler = () => {
-        setSearchPageNumber(Math.min(searchPageNumber + 1, lastPage));
+        setReorderToolPageNumber(Math.min(reorderToolPageNumber + 1, lastPage));
     }
     const prevPageHandler = () => {
-        setSearchPageNumber(Math.max(searchPageNumber - 1, 1));
+        setReorderToolPageNumber(Math.max(reorderToolPageNumber - 1, 1));
     }
 
+    // Handling of clicking the buttons: After clicking, the item should disappear from the list!
 
+    // addToOrderListHandler={addToOrderListHandler}
+    //                             addToOutOfStockHandler={addToOutOfStockHandler}
+    //                             addToDiscontinuedHandler={addToDiscontinuedHandler}
+    //                             markAlreadyOrderedHandler={markAlreadyOrderedHandler}
+    //                             showProductDetailsHandler={showProductDetailsHandler}
+
+    const addToOrderListHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
+
+        removeFromReorderItemsListHandler(event, productIndex);
+        addToOrderListHandler(event, productIndex);
+
+    }
+
+    const addToOutOfStockHandlerAndRemoveFromReorderListHandler  = (event, productIndex) => {
+
+        removeFromReorderItemsListHandler(event, productIndex);
+        addToOutOfStockHandler(event, productIndex);
+    }
+    
+    const addToDiscontinuedHandlerAndRemoveFromReorderListHandler  = (event, productIndex)=> {
+        removeFromReorderItemsListHandler(event, productIndex);
+        addToDiscontinuedHandler(event, productIndex);
+    }
+    
+    const markAlreadyOrderedHandlerAndRemoveFromReorderListHandler  = (event, productIndex)=> {
+        removeFromReorderItemsListHandler(event, productIndex);
+        markAlreadyOrderedHandler(event, productIndex);
+    }
+    
 
 
     const getReorderListHandler = () => {
@@ -96,9 +130,10 @@ export function NeedToReorderTool({
         setReorderItemsList(finalFilteredData);
 
     }
+
     let thisPageResult;
     if (reorderItemsList.length > 0) {
-        thisPageResult = reorderItemsList.slice((searchPageNumber - 1) * itemsPerPage, (searchPageNumber) * itemsPerPage);
+        thisPageResult = reorderItemsList.slice((reorderToolPageNumber - 1) * itemsPerPage, (reorderToolPageNumber) * itemsPerPage);
     } else {
         thisPageResult = [];
     }
@@ -119,7 +154,7 @@ export function NeedToReorderTool({
 
                         <button onClick={prevPageHandler}> {'<'} </button>
                         <button onClick={nextPageHandler}> {'>'} </button>
-                        <p>{`Page ${searchPageNumber}/${lastPage}`}</p>
+                        <p>{`Page ${reorderToolPageNumber}/${lastPage}`}</p>
 
                     </div>}
             </div>
@@ -136,10 +171,10 @@ export function NeedToReorderTool({
                                 product={product}
                                 reorderDate={item.reorderDate}
                                 reorderTime={item.reorderTimeWeeks}
-                                addToOrderListHandler={addToOrderListHandler}
-                                addToOutOfStockHandler={addToOutOfStockHandler}
-                                addToDiscontinuedHandler={addToDiscontinuedHandler}
-                                markAlreadyOrderedHandler={markAlreadyOrderedHandler}
+                                addToOrderListHandler={addToOrderListHandlerAndRemoveFromReorderListHandler}
+                                addToOutOfStockHandler={addToOutOfStockHandlerAndRemoveFromReorderListHandler}
+                                addToDiscontinuedHandler={addToDiscontinuedHandlerAndRemoveFromReorderListHandler}
+                                markAlreadyOrderedHandler={markAlreadyOrderedHandlerAndRemoveFromReorderListHandler}
                                 showProductDetailsHandler={showProductDetailsHandler}
                             />
                         )

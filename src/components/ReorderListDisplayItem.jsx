@@ -15,33 +15,33 @@ export function ReorderListDisplayItem({
         <>
 
             <button
-                className="simple-product"
+                className="reorder-list-product-info"
                 onClick={(event) => showProductDetailsHandler(event, product.INDEX)}>
                 {product["BRAND"]} {product["DESCRIP"]} {product["SIZE"]}
 
             </button>
 
-            <div>
+            <div className="reorder-list-numerical-item">
                 {product["QTY_ON_HND"]}
             </div>
 
-            <div>
+            <div className="reorder-list-numerical-item">
                 {format(reorderDate, 'MMM/yy')}
             </div>
 
-            <div>
+            <div className="reorder-list-numerical-item">
                 {reorderTime}
             </div>
 
-            <div>
+            <div className="reorder-list-numerical-item">
                 {product["MTD"]}
             </div>
 
-            <div>
+            <div className="reorder-list-numerical-item">
                 {product["ELEVE"]}
             </div>
 
-            <div>
+            <div className="reorder-list-numerical-item">
                 {product["TENTH"]}
             </div>
 

@@ -4,6 +4,7 @@ import trie from 'trie-prefix-tree';
 import { SearchDisplay } from './SearchDisplay';
 import { CurrentSelection } from './CurrentSelection';
 import { ProductDetailsPanel } from './ProductDetailsPanel';
+import { ListDisplays } from './ListDisplays';
 import { AssortmentAnalyzerWindow } from './AssortmentAnalyzerWindow';
 import { webpageSelectionEnums } from '../data/constants';
 import { NeedToReorderTool } from './NeedToReorderTool';
@@ -43,10 +44,15 @@ const DBFReaderComponent = () => {
     const [viewDetailsProductList, setViewDetailsProductList] = useState([]);
 
     // Reorder Tool States: 
+    const [reorderItemsList, setReorderItemsList] = useState([]);  // Array of: { index: type int, reorderDate: type Date, reorderTimeWeeks: type int }
+    const [reorderToolPageNumber, setReorderToolPageNumber] = useState(1); // 1 indexed
+
     const [orderList, setOrderList] = useState([]);
     const [outOfStockList, setOutOfStockList] = useState([]);
     const [discontinuedList, setDiscontinuedList] = useState([]);
     const [alreadyOrderedList, setAlreadyOrderedList] = useState([]);
+
+
 
 
     // ----------------- Loading and Reading DBF file -----------------------
@@ -243,7 +249,6 @@ const DBFReaderComponent = () => {
 
     // -----------------Search Stuff -----------------------
 
-
     const changeSearchHandler = (e) => {
         const upperCaseVal = e.target.value.toUpperCase();
         searchForProductByBrandHandler(upperCaseVal);
@@ -388,6 +393,14 @@ const DBFReaderComponent = () => {
 
     // Reorder Tool
 
+    const removeFromReorderItemsListHandler = (e, productIndex) => {
+        console.log(`removing product: ${productIndex}`);
+        setReorderItemsList((prevList) => { 
+            
+            return prevList.filter(item => item.index !== productIndex) });
+
+    }
+
     const handleAddToOrderListClick = (e, productIndex) => {
 
         if (!orderList.includes(productIndex)) {
@@ -428,8 +441,9 @@ const DBFReaderComponent = () => {
 
         printArrayToString("SelectedProductsList ", selectedProductsList);
         printArrayToString("Details Panel List", viewDetailsProductList);
-        printArrayToString("Assortment Items in Assortment Display",assortmentAnalyzerProductList);
+        printArrayToString("Assortment Items in Assortment Display", assortmentAnalyzerProductList);
 
+        printArrayToString('reorderItemsList',reorderItemsList)
         printArrayToString('Order List', orderList);
         printArrayToString('outOfStockList List', outOfStockList);
         printArrayToString('discontinuedList', discontinuedList);
@@ -492,13 +506,12 @@ const DBFReaderComponent = () => {
                         onRemove={handleRemoveFromSelection}
                         clickCurrentSelectionItemHandler={showProductDetailsHandler} />
                 </div>
-                {(webpageSelection === webpageSelectionEnums.main || webpageSelection === webpageSelectionEnums.assortmentTool) &&
-                    <ProductDetailsPanel
-                        data={data}
-                        productDetailsIndexList={viewDetailsProductList}
-                        removeProductDetailsHandler={removeProductDetailsHandler}
-                        clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
-                    />}
+                <ProductDetailsPanel
+                    data={data}
+                    productDetailsIndexList={viewDetailsProductList}
+                    removeProductDetailsHandler={removeProductDetailsHandler}
+                    clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
+                />
 
                 {webpageSelection === webpageSelectionEnums.assortmentTool &&
                     <AssortmentAnalyzerWindow
@@ -510,11 +523,28 @@ const DBFReaderComponent = () => {
                         removeAllAssortedItemsHandler={removeAllAssortedItemsHandler}
                     />}
 
-
+                <ListDisplays
+                    data={data}
+                    clickItemHandler={showProductDetailsHandler}
+                    selectedProductsList={selectedProductsList}
+                    setSelectedProductsList={setSelectedProductsList}
+                    orderList={orderList}
+                    setOrderList={setOrderList}
+                    outOfStockList={outOfStockList}
+                    setOutOfStockList={setOutOfStockList}
+                    discontinuedList={discontinuedList}
+                    setDiscontinuedList={setDiscontinuedList}
+                    alreadyOrderedList={alreadyOrderedList}
+                    setAlreadyOrderedList={setAlreadyOrderedList} />
 
                 {webpageSelection === webpageSelectionEnums.orderingTool &&
                     <NeedToReorderTool
                         data={data}
+                        reorderItemsList={reorderItemsList}
+                        setReorderItemsList={setReorderItemsList}
+                        removeFromReorderItemsListHandler={removeFromReorderItemsListHandler}
+                        reorderToolPageNumber={reorderToolPageNumber}
+                        setReorderToolPageNumber={setReorderToolPageNumber}
                         addToOrderListHandler={handleAddToOrderListClick}
                         addToOutOfStockHandler={handleAddToOutOfStockListClick}
                         addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
