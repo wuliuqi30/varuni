@@ -10,9 +10,9 @@
 
   --main-top-width: 1000px;
   --main-bottom-width: 500px;
-  --main-left-width: 620px;
-  --main-center-width: 900px;
-  --main-right-width: 1500px;
+  --main-left-width: 800px;
+  --main-center-width: 1150px;
+  --main-right-width: 600px;
   --window-padding: 15px;
   --common-border-radius: 10px;
 
@@ -22,13 +22,13 @@
   --reorder-list-header-height: 100px;
   --reorder-list-auto-height: 60px;
 
-  --reorder-list-grid-col-width-1: 320px;
+  --reorder-list-grid-col-width-1: 300px;
   --reorder-list-grid-col-width-2: 50px; /* qty on hnd */
-  --reorder-list-grid-col-width-3: 70px; /* reorder */
-  --reorder-list-grid-col-width-4: 80px; /* weeks left */
+  --reorder-list-grid-col-width-3: 65px; /* reorder */
+  --reorder-list-grid-col-width-4: 65px; /* weeks left */
   --reorder-list-grid-col-width-5: 40px; /* MTD */
-  --reorder-list-grid-col-width-6: 100px; /* next months */
-  --reorder-list-grid-col-width-7: 100px; /* following months sales */
+  --reorder-list-grid-col-width-6: 40px; /* next months */
+  --reorder-list-grid-col-width-7: 40px; /* following months sales */
   --reorder-list-grid-col-width-8: 120px; /* qty on hnd */
   --reorder-list-grid-col-width-9: 120px; /* qty on hnd */
   --reorder-list-grid-col-width-10: 120px; /* qty on hnd */
@@ -60,6 +60,9 @@ p {
 
 /* -------------------------------------------------------*/
 
+h2 {
+  font-size: 2rem;
+}
 .liquor-app {
 
   display: flex;
@@ -126,12 +129,12 @@ p {
   overflow-y: auto;
   overflow-x: hidden;
   border: 2px solid red;
-  height: 100%;
+  height: 550px;
   display: flex;
   flex-direction: column;
 
   flex: 0 0 auto;
-  height: 600px;
+ 
 
 }
 
@@ -170,6 +173,7 @@ p {
   flex-direction: row;
   gap: 3px;
   justify-content: space-between;
+  height: 38px;
 
 }
 
@@ -398,8 +402,8 @@ p {
 .list-display-window {
   width: 100%;
 
-  grid-column: 1 / 2;
-  grid-row: 2 / 3;
+  grid-column: 3 / 4;
+  grid-row: 1 / 2;
   flex: 0 0 auto;
   border: 2px solid blue;
   overflow-y: auto;
@@ -408,18 +412,32 @@ p {
 /* ------------- Need to Reorder ---------*/
 
 h4{
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .need-to-reorder-window {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
   gap: 20px;
-  grid-column: 3 / 4;
+  grid-column: 2 / 3;
   grid-row: 1 / 2;
+  overflow: hidden;
 }
+
+.reorder-list-grid {
+  display: grid;
+  border: 1px solid black;
+  grid-template-columns: var(--reorder-list-grid-col-width-1) var(--reorder-list-grid-col-width-2) var(--reorder-list-grid-col-width-3) var(--reorder-list-grid-col-width-4) var(--reorder-list-grid-col-width-5) var(--reorder-list-grid-col-width-6) var(--reorder-list-grid-col-width-7) var(--reorder-list-grid-col-width-8) var(--reorder-list-grid-col-width-9) var(--reorder-list-grid-col-width-10) var(--reorder-list-grid-col-width-11);
+  grid-template-rows: var(--reorder-list-header-height);
+  grid-auto-rows: var(--reorder-list-auto-height);
+  align-items: center;
+  gap: 5px;
+  row-gap: 5px;
+  padding: 5px;
+}
+
 
 .need-to-reorder-button-bar{
   display: flex;
@@ -433,23 +451,21 @@ h4{
 
 .reorder-list-product-info{
   font-weight: 600;
+  font-size: 1rem;
   color: blue;
 }
 
 .reorder-list-numerical-item{
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   justify-self: center;
+  
 }
 
-.reorder-list-grid {
-  display: grid;
-  grid-template-columns: var(--reorder-list-grid-col-width-1) var(--reorder-list-grid-col-width-2) var(--reorder-list-grid-col-width-3) var(--reorder-list-grid-col-width-4) var(--reorder-list-grid-col-width-5) var(--reorder-list-grid-col-width-6) var(--reorder-list-grid-col-width-7) var(--reorder-list-grid-col-width-8) var(--reorder-list-grid-col-width-9) var(--reorder-list-grid-col-width-10) var(--reorder-list-grid-col-width-11);
-  grid-template-rows: var(--reorder-list-header-height);
-  grid-auto-rows: var(--reorder-list-auto-height);
-  align-items: center;
-  gap: 15px;
-  row-gap: 35px;
+.reorder-list-click-button{
+  font-size: 1rem;
+  padding: 2px;
 }
+
 
 
 

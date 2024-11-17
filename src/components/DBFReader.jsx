@@ -395,9 +395,10 @@ const DBFReaderComponent = () => {
 
     const removeFromReorderItemsListHandler = (e, productIndex) => {
         console.log(`removing product: ${productIndex}`);
-        setReorderItemsList((prevList) => { 
-            
-            return prevList.filter(item => item.index !== productIndex) });
+        setReorderItemsList((prevList) => {
+
+            return prevList.filter(item => item.index !== productIndex)
+        });
 
     }
 
@@ -443,7 +444,7 @@ const DBFReaderComponent = () => {
         printArrayToString("Details Panel List", viewDetailsProductList);
         printArrayToString("Assortment Items in Assortment Display", assortmentAnalyzerProductList);
 
-        printArrayToString('reorderItemsList',reorderItemsList)
+        printArrayToString('reorderItemsList', reorderItemsList)
         printArrayToString('Order List', orderList);
         printArrayToString('outOfStockList List', outOfStockList);
         printArrayToString('discontinuedList', discontinuedList);
@@ -453,7 +454,7 @@ const DBFReaderComponent = () => {
 
     return (
         <>
-            <h1>Varuni 1000</h1>
+            <h2>Varuni 1000</h2>
             <div className="main-header">
 
                 <label htmlFor="file-upload" className="choose-file-button">
@@ -500,18 +501,19 @@ const DBFReaderComponent = () => {
                     {searchResult == null &&
                         <div className="search-result-window">{"Didn't find that."}</div>
                     }
-                    <CurrentSelection
+                    {/* <CurrentSelection
                         data={data}
                         selectedProductsList={selectedProductsList}
                         onRemove={handleRemoveFromSelection}
-                        clickCurrentSelectionItemHandler={showProductDetailsHandler} />
+                        clickCurrentSelectionItemHandler={showProductDetailsHandler} /> */}
+                    <ProductDetailsPanel
+                        data={data}
+                        productDetailsIndexList={viewDetailsProductList}
+                        removeProductDetailsHandler={removeProductDetailsHandler}
+                        clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
+                    />
                 </div>
-                <ProductDetailsPanel
-                    data={data}
-                    productDetailsIndexList={viewDetailsProductList}
-                    removeProductDetailsHandler={removeProductDetailsHandler}
-                    clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
-                />
+
 
                 {webpageSelection === webpageSelectionEnums.assortmentTool &&
                     <AssortmentAnalyzerWindow

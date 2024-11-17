@@ -45,19 +45,19 @@ export function ReorderListDisplayItem({
                 {product["TENTH"]}
             </div>
 
-            <button onClick={(event) => addToOrderListHandler(event, product.INDEX)}>
+            <button className="reorder-list-click-button" onClick={(event) => addToOrderListHandler(event, product.INDEX)}>
                 Add To Order List
             </button>
 
-            <button onClick={(event) => addToOutOfStockHandler(event, product.INDEX)}>
+            <button  className="reorder-list-click-button" onClick={(event) => addToOutOfStockHandler(event, product.INDEX)}>
                 Mark Out Of Stock
             </button>
 
-            <button onClick={(event) => addToDiscontinuedHandler(event, product.INDEX)}>
+            <button  className="reorder-list-click-button" onClick={(event) => addToDiscontinuedHandler(event, product.INDEX)}>
                 Mark Discontinued
             </button>
 
-            <button onClick={(event) => markAlreadyOrderedHandler(event, product.INDEX)}>
+            <button  className="reorder-list-click-button" onClick={(event) => markAlreadyOrderedHandler(event, product.INDEX)}>
                 Already Ordered?
             </button>
             

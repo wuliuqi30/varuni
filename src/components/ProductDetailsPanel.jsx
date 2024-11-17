@@ -26,7 +26,7 @@ export function ProductDetailsPanel({
         return (
             <div className="product-details-window">
                     <div className="product-details-header">
-                    <h2 className="product-details-title">Product Details</h2>
+                    {/* <h2 className="product-details-title">Product Details</h2> */}
                     <button className="remove-items-button" onClick = {clearProductDetailsPanelHandler}>Clear Details Panel</button>
                     </div>
                      
@@ -54,6 +54,10 @@ export function ProductDetailsPanel({
                             legend: { position: 'none' },
                             annotations: {
                                 alwaysOutside: true
+                            },
+                            chartArea: {
+                                left: 20,
+                                right: 20
                             }
                         }
 
