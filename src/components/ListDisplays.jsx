@@ -76,23 +76,23 @@ export function ListDisplays({
     }
     return (
         <div className='list-display-window'>
+            <div className="list-header">
+                <label htmlFor="list-dropdown">
+                    Select A List
+                </label>
+                <select
+                    id="list-dropdown"
+                    value={selectedOption}
+                    onChange={handleChange}>
+                    {Object.values(listSelectionsEnums).map((listObject) => {
+                        return (
+                            <option key={listObject.name} value={listObject.name}> {listObject.displayName}</option>
+                        )
+                    })}
 
-            <label htmlFor="list-dropdown">
-                Select A List
-            </label>
-            <select
-                id="list-dropdown"
-                value={selectedOption}
-                onChange={handleChange}>
-                {Object.values(listSelectionsEnums).map((listObject) => {
-                    return (
-                        <option key={listObject.name} value={listObject.name}> {listObject.displayName}</option>
-                    )
-                })}
 
-
-            </select>
-            <h2> Selection: </h2>
+                </select>
+            </div>
             {currentlyDisplayedList.length > 0 &&
                 <ul className="current-selection-window-list">
                     {currentlyDisplayedList.map((index) => {

@@ -1,13 +1,17 @@
+
 #root {
 
-  margin: 0 auto;
-  padding: 2rem;
+  margin: 0px;
+  box-sizing: border-box;
   text-align: center;
-  margin: auto;
+  margin-left: 10px;
 
-  padding: 2rem;
+  padding: 0px;
+  width: 100%;
+  height: 97vh;
 
-
+  display: flex;
+  justify-content: flex-start;
   --main-top-width: 1000px;
   --main-bottom-width: 500px;
   --main-left-width: 800px;
@@ -16,6 +20,9 @@
   --window-padding: 15px;
   --common-border-radius: 10px;
 
+  --product-details-window-width: 600px;
+
+  --small-button-font-size: .8rem;
   --basic-font-size: 1.2rem;
 
   /* Reorder List Grid Dimensions */
@@ -50,6 +57,7 @@ h6 {
 ul,
 ol {
   list-style-type: none;
+  padding-inline-start: 10px;
 }
 
 li,
@@ -61,38 +69,47 @@ p {
 /* -------------------------------------------------------*/
 
 h2 {
-  font-size: 2rem;
+  font-size: 1.6rem;
 }
 .liquor-app {
 
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
-  align-items: center;
-
+  height: 95vh;
+  box-sizing: border-box;
+  padding: 15px;
   flex-direction: column;
+
 }
 
 
 .main-header {
   display: flex;
   gap: 20px;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   margin: 20px;
   align-self: flex-start;
+  width: 100%;
 }
 
 .page-selection-bar {
   display: flex;
   gap: 20px;
+  justify-content: center;
+  flex: 0 0 auto;
 }
 
 .main-display {
-  display: grid;
+  /* display: grid;
   grid-template-columns: var(--main-left-width) var(--main-center-width) var(--main-right-width);
   grid-auto-rows: var(--main-top-width) var(--main-bottom-width);
-  gap: 15px;
+  gap: 15px; */
+  display: flex; 
+  gap: 20px;
+  flex: 0 0 auto;
+  height: 85%;
 }
 
 
@@ -112,13 +129,13 @@ h2 {
 
 
 .search-select-window {
-  grid-column: 1 / 2;
-  grid-row: 1 / 2;
+  width: 600px;
   display: flex;
   flex-direction: column;
   border: 2px solid green;
   gap: 20px;
-  padding: var(--window-padding);
+ 
+
 
   
 }
@@ -128,12 +145,14 @@ h2 {
 
   overflow-y: auto;
   overflow-x: hidden;
-  border: 2px solid red;
-  height: 550px;
+  width: 600px;
+  
   display: flex;
   flex-direction: column;
 
-  flex: 0 0 auto;
+
+  padding: 10px;
+  height: 100%;
  
 
 }
@@ -168,6 +187,11 @@ h2 {
   border: 2px solid red;
 }
 
+.search-list{
+  width: 100%;
+
+}
+
 .search-result-li {
   display: flex;
   flex-direction: row;
@@ -177,16 +201,47 @@ h2 {
 
 }
 
-
 .search-result-li-text {
   text-align: left;
-  white-space: nowrap;
   border: none;
   background-color: white;
   margin-right: auto;
+  display: flex;
+
+  flex: 0 0 auto;
+  width: 67%;
+}
+
+.search-list-li-brand{
+
+  white-space: nowrap;
+  overflow-x:hidden;
+  margin-right: 6px;
+  text-overflow: ellipsis;
+}
+
+.search-list-li-descrip{
+  width: 120px;
+  white-space: nowrap;
+  overflow-x:hidden;
+  margin-right: 6px;
+  text-overflow: ellipsis;
+ 
+}
+
+.search-list-li-size{
+  width: 50px;
+  white-space: nowrap;
+  overflow-x:hidden;
+}
+
+.search-result-dropdown{
+  width: 120px;
+  flex: 0 0 auto;
 }
 
 .page-turn-div {
+
   margin-top: auto;
   display: flex;
   gap: 8px;
@@ -194,6 +249,7 @@ h2 {
   align-items: center;
   margin-right: 10px;
   margin-bottom: 10px;
+  justify-self: flex-end;
 }
 
 
@@ -203,10 +259,9 @@ h2 {
 
 .assortment-analyzer-main-window {
 
-  grid-column: 3 / 4;
-  grid-row: 1 / 2;
+  
   border: 2px solid orange;
-
+  width: 700px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -214,6 +269,7 @@ h2 {
   align-items: center;
   padding: var(--window-padding);
   overflow-y: auto;
+  flex: 0 0 auto;
 }
 
 .assortment-analyzer-button-bar {
@@ -302,11 +358,11 @@ h2 {
 
 .product-details-window {
 
-  grid-column: 2 / 3;
-  grid-row: 1 / 2;
-
+  
+  width: var(--product-details-window-width);
   border: 2px solid blue;
 
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -314,6 +370,7 @@ h2 {
   padding: var(--window-padding);
 
   overflow-y: auto;
+
 
 }
 
@@ -351,13 +408,20 @@ h2 {
 .product-details-chart-title {
   color: red;
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   justify-self: center;
   margin-left: 19%;
 }
 
 .remove-product-details-button {
   margin-left: auto;
+  height: 30px;
+  padding: 0px;
+  padding-left: 3px;
+  padding-right: 3px;
+  
+  border: 2px solid black;
+  font-size: var(--small-button-font-size);
 }
 
 .extra-details-block {
@@ -400,13 +464,23 @@ h2 {
 
 /* ------------Lists Window -----------*/
 .list-display-window {
-  width: 100%;
+  width: 500px;
 
-  grid-column: 3 / 4;
-  grid-row: 1 / 2;
+ 
   flex: 0 0 auto;
   border: 2px solid blue;
   overflow-y: auto;
+}
+
+.list-header{
+  display: flex;
+  gap: 15px;
+  padding: 5px;
+  justify-content: center;
+}
+
+#list-dropdown{
+  font-size: 1.1rem;
 }
 
 /* ------------- Need to Reorder ---------*/
@@ -421,12 +495,14 @@ h4{
   justify-content: flex-start;
   align-items: flex-start;
   gap: 20px;
-  grid-column: 2 / 3;
-  grid-row: 1 / 2;
+
+  
   overflow: hidden;
+  flex: 0 0 auto;
 }
 
 .reorder-list-grid {
+  
   display: grid;
   border: 1px solid black;
   grid-template-columns: var(--reorder-list-grid-col-width-1) var(--reorder-list-grid-col-width-2) var(--reorder-list-grid-col-width-3) var(--reorder-list-grid-col-width-4) var(--reorder-list-grid-col-width-5) var(--reorder-list-grid-col-width-6) var(--reorder-list-grid-col-width-7) var(--reorder-list-grid-col-width-8) var(--reorder-list-grid-col-width-9) var(--reorder-list-grid-col-width-10) var(--reorder-list-grid-col-width-11);
@@ -435,7 +511,7 @@ h4{
   align-items: center;
   gap: 5px;
   row-gap: 5px;
-  padding: 5px;
+  padding: 15px;
 }
 
 
@@ -467,7 +543,10 @@ h4{
 }
 
 
-
+.search-list-click-button{
+  font-size: .7rem;
+  padding: 2px;
+}
 
 
 @keyframes logo-spin {

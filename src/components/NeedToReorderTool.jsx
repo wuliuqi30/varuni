@@ -1,6 +1,6 @@
 
 
-import { useState } from 'react';
+
 import { calculateReorderPointFromQuantity } from '../helper-fns/helperFunctions';
 import { ReorderListDisplayItem } from './ReorderListDisplayItem';
 import { ReorderListHeader } from './ReorderListHeader'
@@ -25,7 +25,7 @@ export function NeedToReorderTool({
 
     
     
-    const itemsPerPage = 10;
+    const itemsPerPage = 7;
 
     const lastPage = reorderItemsList.length > 0 ? Math.ceil(reorderItemsList.length / itemsPerPage) : 1;
 

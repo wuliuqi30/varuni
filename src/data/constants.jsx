@@ -96,7 +96,7 @@ for (let w = 0; w < 52; w++) {
 }
 
 const webpageSelectionEnums = {
-    main: "main",
+    home: "home",
     assortmentTool: "assortmentTool",
     orderingTool: "orderingTool"
 }
@@ -110,9 +110,19 @@ const listSelectionsEnums = {
 
 }
 
+const actionSelectionsEnums = {
+    
+    orderList: { name: "order-list", displayName: "Add to Order List" },
+    reorderedAlreadyList: { name: "already-ordered-list", displayName: "Mark Already Ordered" },
+    outOfStockList: { name: "out-of-stock-list", displayName: "Mark Out of Stock" },
+    discontinuedList: { name: "discontinued-list", displayName: "Mark Discontinued" }
+
+}
+
 export { barChartOptions, 
     monthsFromNowToDBFFileMonthName, 
     webpageSelectionEnums, 
     weeksFromNowToDBFFileMonthName, 
     dateFromNowFromWeeks,
-    listSelectionsEnums };
+    listSelectionsEnums,
+    actionSelectionsEnums };

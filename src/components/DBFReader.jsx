@@ -25,14 +25,14 @@ const DBFReaderComponent = () => {
     const [error, setError] = useState(null);
 
     // Page View: 
-    const [webpageSelection, setWebpageSelection] = useState(webpageSelectionEnums.main);
+    const [webpageSelection, setWebpageSelection] = useState(webpageSelectionEnums.home);
 
     // Search: 
     const [searchBarValue, setSearchBarValue] = useState(null);
     const [searchResult, setSearchResult] = useState([]);
     const [alphabetTrie, setAlphabetTree] = useState(trie([]));
     const [searchPageNumber, setSearchPageNumber] = useState(1); // 1 indexed.
-    const itemsPerPage = 9;
+  
 
     // Selected Products From Search: Stores the product.INDEX of the selected products
     const [selectedProductsList, setSelectedProductsList] = useState([]);
@@ -235,7 +235,7 @@ const DBFReaderComponent = () => {
     //------------Main Display Selection Handlers ------------------
 
     const selectMainDisplayHandler = () => {
-        setWebpageSelection(webpageSelectionEnums.main);
+        setWebpageSelection(webpageSelectionEnums.home);
     }
 
     const selectAssortmentDisplayHandler = () => {
@@ -482,38 +482,35 @@ const DBFReaderComponent = () => {
 
             <div className='main-display'>
 
-
-
-                <div className="search-select-window">
-                    {searchResult != null &&
-                        <SearchDisplay
-                            data={data}
-                            changeSearchHandler={changeSearchHandler}
-                            searchDisplayItemsArray={searchResult}
-                            selectedItemsIndicesArray={selectedProductsList}
-                            handleCheckBoxClick={handleCheckBoxClick}
-                            showDetailsHandler={showProductDetailsHandler}
-                            itemsPerPage={itemsPerPage}
-                            searchPageNumber={searchPageNumber}
-                            setSearchPageNumber={setSearchPageNumber}
-                            handleUncheckAllClick={handleUncheckAllClick} />
-                    }
-                    {searchResult == null &&
-                        <div className="search-result-window">{"Didn't find that."}</div>
-                    }
-                    {/* <CurrentSelection
+                {((webpageSelection === webpageSelectionEnums.home) ||
+                    (webpageSelection === webpageSelectionEnums.assortmentTool)) && <div className="search-select-window">
+                        {searchResult != null &&
+                            <SearchDisplay
+                                data={data}
+                                changeSearchHandler={changeSearchHandler}
+                                searchDisplayItemsArray={searchResult}
+                                selectedItemsIndicesArray={selectedProductsList}
+                                handleCheckBoxClick={handleCheckBoxClick}
+                                showDetailsHandler={showProductDetailsHandler}
+                              
+                                searchPageNumber={searchPageNumber}
+                                setSearchPageNumber={setSearchPageNumber}
+                                handleUncheckAllClick={handleUncheckAllClick}
+                                addToOrderListHandler={handleAddToOrderListClick}
+                                addToOutOfStockHandler={handleAddToOutOfStockListClick}
+                                addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
+                                markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick} />
+                        }
+                        {searchResult == null &&
+                            <div className="search-result-window">{"Didn't find that."}</div>
+                        }
+                        {/* <CurrentSelection
                         data={data}
                         selectedProductsList={selectedProductsList}
                         onRemove={handleRemoveFromSelection}
                         clickCurrentSelectionItemHandler={showProductDetailsHandler} /> */}
-                    <ProductDetailsPanel
-                        data={data}
-                        productDetailsIndexList={viewDetailsProductList}
-                        removeProductDetailsHandler={removeProductDetailsHandler}
-                        clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
-                    />
-                </div>
 
+                    </div>}
 
                 {webpageSelection === webpageSelectionEnums.assortmentTool &&
                     <AssortmentAnalyzerWindow
@@ -524,6 +521,26 @@ const DBFReaderComponent = () => {
                         showDetailsHandler={showProductDetailsHandler}
                         removeAllAssortedItemsHandler={removeAllAssortedItemsHandler}
                     />}
+                {webpageSelection === webpageSelectionEnums.orderingTool &&
+                    <NeedToReorderTool
+                        data={data}
+                        reorderItemsList={reorderItemsList}
+                        setReorderItemsList={setReorderItemsList}
+                        removeFromReorderItemsListHandler={removeFromReorderItemsListHandler}
+                        reorderToolPageNumber={reorderToolPageNumber}
+                        setReorderToolPageNumber={setReorderToolPageNumber}
+                        addToOrderListHandler={handleAddToOrderListClick}
+                        addToOutOfStockHandler={handleAddToOutOfStockListClick}
+                        addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
+                        markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick}
+                        showProductDetailsHandler={showProductDetailsHandler} />}
+                <ProductDetailsPanel
+                    data={data}
+                    productDetailsIndexList={viewDetailsProductList}
+                    removeProductDetailsHandler={removeProductDetailsHandler}
+                    clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
+                />
+
 
                 <ListDisplays
                     data={data}
@@ -539,19 +556,7 @@ const DBFReaderComponent = () => {
                     alreadyOrderedList={alreadyOrderedList}
                     setAlreadyOrderedList={setAlreadyOrderedList} />
 
-                {webpageSelection === webpageSelectionEnums.orderingTool &&
-                    <NeedToReorderTool
-                        data={data}
-                        reorderItemsList={reorderItemsList}
-                        setReorderItemsList={setReorderItemsList}
-                        removeFromReorderItemsListHandler={removeFromReorderItemsListHandler}
-                        reorderToolPageNumber={reorderToolPageNumber}
-                        setReorderToolPageNumber={setReorderToolPageNumber}
-                        addToOrderListHandler={handleAddToOrderListClick}
-                        addToOutOfStockHandler={handleAddToOutOfStockListClick}
-                        addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
-                        markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick}
-                        showProductDetailsHandler={showProductDetailsHandler} />}
+
 
 
 

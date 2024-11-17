@@ -1,6 +1,8 @@
 
 import { Checkbox } from '@mui/material';
 import { TextField } from '@mui/material';
+import { useState } from 'react';
+import { actionSelectionsEnums } from '../data/constants';
 export function SearchDisplay({
     data,
     changeSearchHandler,
@@ -8,16 +10,21 @@ export function SearchDisplay({
     selectedItemsIndicesArray,
     handleCheckBoxClick,
     showDetailsHandler,
-    itemsPerPage,
     searchPageNumber,
     setSearchPageNumber,
-    handleUncheckAllClick }) {
+    handleUncheckAllClick,
+    addToOrderListHandler,
+    addToOutOfStockHandler,
+    addToDiscontinuedHandler,
+    markAlreadyOrderedHandler }) {
 
+    const itemsPerPage = 12;
     const lastPage = Math.ceil(searchDisplayItemsArray.length / itemsPerPage);
 
     const nextPageHandler = () => {
         setSearchPageNumber(Math.min(searchPageNumber + 1, lastPage));
     }
+
     const prevPageHandler = () => {
         setSearchPageNumber(Math.max(searchPageNumber - 1, 1));
     }
@@ -26,6 +33,32 @@ export function SearchDisplay({
         setSearchPageNumber(1);
         changeSearchHandler(e);
     }
+
+    // Action Buttons
+    const [selectedOption, setSelectedOption] = useState(actionSelectionsEnums.orderList.name);
+    const defaultOption = 'Click for Actions';
+
+    const handleActionChange = (event, productIndex) => {
+        // Add item to appropriate list. Also set the selected option.
+        const actionName = event.target.value;
+        switch (actionName) {
+            case actionSelectionsEnums.orderList.name:
+                addToOrderListHandler(event, productIndex);
+                break;
+            case actionSelectionsEnums.reorderedAlreadyList.name:
+                markAlreadyOrderedHandler(event, productIndex);
+                break;
+            case actionSelectionsEnums.outOfStockList.name:
+                addToOutOfStockHandler(event, productIndex);
+                break;
+            case actionSelectionsEnums.discontinuedList.name:
+                addToDiscontinuedHandler(event, productIndex);
+                break;
+            default: console.log("Selection Invalid");
+
+        }
+        setSelectedOption(actionName);
+    };
 
     let thisPageResult = searchDisplayItemsArray.slice((searchPageNumber - 1) * itemsPerPage, (searchPageNumber) * itemsPerPage);
     return (
@@ -47,7 +80,7 @@ export function SearchDisplay({
                 </div>
                 <button className="search-results-clear-all-button" onClick={handleUncheckAllClick}> Uncheck All</button>
             </div>
-            <ul>
+            <ul className="search-list">
                 {thisPageResult.map((searchItemDataIndex) => {
                     const thisProduct = data[searchItemDataIndex];
                     const thisIsChecked = selectedItemsIndicesArray !== null && selectedItemsIndicesArray.findIndex(item => item === thisProduct.INDEX) > -1;
@@ -62,8 +95,27 @@ export function SearchDisplay({
                                 className="search-result-li-text"
                                 id={`search-result-button-${thisProduct.CODE_NUM}`}
                                 onClick={(event) => showDetailsHandler(event, thisProduct.INDEX)}>
-                                {thisProduct.BRAND} {thisProduct.DESCRIP} {thisProduct.SIZE}
+                                    <div className="search-list-li-brand">{thisProduct.BRAND}  </div> 
+                                    <div className="search-list-li-descrip">  {thisProduct.DESCRIP} </div>
+                                    <div className="search-list-li-size">{thisProduct.SIZE} </div>
+                                 
                             </button>
+
+
+                            <select
+                                
+                                value={defaultOption}
+                                className="search-result-dropdown"
+                                onChange={(event) => handleActionChange(event, thisProduct.INDEX)}>
+                                <option key={defaultOption} value={defaultOption}> {defaultOption}</option>
+                                {Object.values(actionSelectionsEnums).map((listObject) => {
+                                    return (
+                                        <option key={listObject.name} value={listObject.name}> {listObject.displayName}</option>
+                                    )
+                                })}
+
+
+                            </select>
                         </li>)
                 })}
             </ul>
