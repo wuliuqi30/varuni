@@ -32,7 +32,7 @@ const DBFReaderComponent = () => {
     const [searchResult, setSearchResult] = useState([]);
     const [alphabetTrie, setAlphabetTree] = useState(trie([]));
     const [searchPageNumber, setSearchPageNumber] = useState(1); // 1 indexed.
-  
+
 
     // Selected Products From Search: Stores the product.INDEX of the selected products
     const [selectedProductsList, setSelectedProductsList] = useState([]);
@@ -330,8 +330,14 @@ const DBFReaderComponent = () => {
 
     const showProductDetailsHandler = (e, productIndex) => {
 
+        // Only allow 2 items in the window
         if (!viewDetailsProductList.includes(productIndex)) {
-            setViewDetailsProductList((prevArray) => [productIndex, ...prevArray]);
+            if (viewDetailsProductList.length < 1) {
+                setViewDetailsProductList([productIndex]);
+            } else {
+                setViewDetailsProductList((prevArray) => [productIndex, prevArray[0]]);
+            }
+
         }
 
     };
@@ -455,33 +461,46 @@ const DBFReaderComponent = () => {
     return (
         <>
             <h2>Varuni 1000</h2>
-            <div className="main-header">
 
-                <label htmlFor="file-upload" className="choose-file-button">
-                    Choose File
-                </label>
-                <input
-                    className="choose-file-input"
-                    id="file-upload"
-                    type="file"
-                    accept=".dbf"
-                    onChange={handleFileChange}
-                />
-
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {data.length > 0 && (
-                    <p>Data Loaded!</p>
-                )}
-                <div className="page-selection-bar">
-                    <button onClick={selectMainDisplayHandler}>Search Window</button>
-                    <button onClick={selectAssortmentDisplayHandler}>Show Assortment Tool</button>
-                    <button onClick={selectOrderingToolDisplayHandler}>Show Reorder Tool</button>
-                </div>
-            </div>
 
 
             <div className='main-display'>
+                <div className="main-nav">
 
+                    <label htmlFor="file-upload" className="choose-file-button">
+                        Choose File
+                    </label>
+                    <input
+                        className="choose-file-input"
+                        id="file-upload"
+                        type="file"
+                        accept=".dbf"
+                        onChange={handleFileChange}
+                    />
+
+                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {data.length > 0 && (
+                        <p>Data Loaded!</p>
+                    )}
+                    <div className="page-selection-bar">
+                        <button className="nav-bar-button" onClick={selectMainDisplayHandler}>Search Window</button>
+                        <button className="nav-bar-button" onClick={selectAssortmentDisplayHandler}>Show Assortment Tool</button>
+                        <button className="nav-bar-button" onClick={selectOrderingToolDisplayHandler}>Show Reorder Tool</button>
+                    </div>
+                    <ListDisplays
+                    data={data}
+                    clickItemHandler={showProductDetailsHandler}
+                    selectedProductsList={selectedProductsList}
+                    setSelectedProductsList={setSelectedProductsList}
+                    orderList={orderList}
+                    setOrderList={setOrderList}
+                    outOfStockList={outOfStockList}
+                    setOutOfStockList={setOutOfStockList}
+                    discontinuedList={discontinuedList}
+                    setDiscontinuedList={setDiscontinuedList}
+                    alreadyOrderedList={alreadyOrderedList}
+                    setAlreadyOrderedList={setAlreadyOrderedList} />
+                </div>
                 {((webpageSelection === webpageSelectionEnums.home) ||
                     (webpageSelection === webpageSelectionEnums.assortmentTool)) && <div className="search-select-window">
                         {searchResult != null &&
@@ -492,7 +511,7 @@ const DBFReaderComponent = () => {
                                 selectedItemsIndicesArray={selectedProductsList}
                                 handleCheckBoxClick={handleCheckBoxClick}
                                 showDetailsHandler={showProductDetailsHandler}
-                              
+
                                 searchPageNumber={searchPageNumber}
                                 setSearchPageNumber={setSearchPageNumber}
                                 handleUncheckAllClick={handleUncheckAllClick}
@@ -534,27 +553,16 @@ const DBFReaderComponent = () => {
                         addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
                         markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick}
                         showProductDetailsHandler={showProductDetailsHandler} />}
-                <ProductDetailsPanel
+                { webpageSelection === webpageSelectionEnums.home && <ProductDetailsPanel
                     data={data}
                     productDetailsIndexList={viewDetailsProductList}
                     removeProductDetailsHandler={removeProductDetailsHandler}
                     clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
-                />
+                    flexDirection={'column'}
+                />}
 
 
-                <ListDisplays
-                    data={data}
-                    clickItemHandler={showProductDetailsHandler}
-                    selectedProductsList={selectedProductsList}
-                    setSelectedProductsList={setSelectedProductsList}
-                    orderList={orderList}
-                    setOrderList={setOrderList}
-                    outOfStockList={outOfStockList}
-                    setOutOfStockList={setOutOfStockList}
-                    discontinuedList={discontinuedList}
-                    setDiscontinuedList={setDiscontinuedList}
-                    alreadyOrderedList={alreadyOrderedList}
-                    setAlreadyOrderedList={setAlreadyOrderedList} />
+                
 
 
 

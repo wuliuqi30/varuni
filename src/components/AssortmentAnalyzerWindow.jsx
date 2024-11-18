@@ -2,11 +2,13 @@ import { TextField, RadioGroup, FormControl, FormLabel, FormControlLabel, Radio 
 import { useState } from 'react';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'; // Correct import
 import dayjs from 'dayjs';
-import { printArrayToString, 
-    printOrderAndTime, 
+import {
+    printArrayToString,
+    printOrderAndTime,
     calculateReorderPointFromQuantity,
-    getLastTwelveMonthSales } from '../helper-fns/helperFunctions';
-import { format} from 'date-fns';
+    getLastTwelveMonthSales
+} from '../helper-fns/helperFunctions';
+import { format } from 'date-fns';
 
 import { SimpleProduct } from './ProductDisplayItem';
 import { Unstable_NumberInput as NumberInput } from '@mui/base';
@@ -373,7 +375,7 @@ export function AssortmentAnalyzerWindow({
             totalSoFar = sumOfItems(productDataArray, orderProductsArray);
             iterationCounter++;
         }
-        
+
         console.log(`Finished Algorithm after ${iterationCounter} iterations. Total items is ${totalSoFar} ${targetType}`);
 
         // TO DO: Reorder Products By Total Cases Ordered ???
@@ -445,7 +447,7 @@ export function AssortmentAnalyzerWindow({
         if (typeof reorderPoint === 'string') {
             runoutLabel = reorderPoint;
         } else {
-            runoutLabel = `...runs out during ${format(reorderPoint[0], 'M/yyyy')}`;
+            runoutLabel = `..runs out ${format(reorderPoint[0], 'M/yy')}`;
         }
 
         runoutTimeLabelArray[i] = runoutLabel;
@@ -500,6 +502,11 @@ export function AssortmentAnalyzerWindow({
                     variant="outlined"
                     label={`Number of ${targetType}`}
                     onChange={changeNumberOfItemsHandler} />
+                {/* <input className='assortment-analyzer-options-item'
+                    id="select-number-of-items"
+                    label={`Number of ${targetType}`}
+                    onChange={changeNumberOfItemsHandler}
+                    value ={targetNumberOfItems}/> */}
                 <DatePicker
                     label="Last Until End Of?"
                     views={['month', 'year']}
@@ -528,9 +535,12 @@ export function AssortmentAnalyzerWindow({
                                     key={product.CODE_NUM}
                                     id={`assortment-item-${product.INDEX}`}
                                 >
-                                    <SimpleProduct
-                                        productData={product}
-                                        clickHandler={(event) => showDetailsHandler(event, product.INDEX)} />
+                                    <button
+                                        className="assortment-list-info"
+                                        onClick={(event) => showDetailsHandler(event, product.INDEX)}>
+                                        {product["SIZE"]} {product["DESCRIP"]}
+
+                                    </button>
                                     <input
                                         type="number"
                                         name={`${index}`}
@@ -542,7 +552,7 @@ export function AssortmentAnalyzerWindow({
                                     />
                                     {/* <div>{runoutTimeLabelArray[index]}</div> */}
                                     <div>{runoutTimeLabelArray[index]}</div>
-                                    <button onClick={handleRemoveAssortmentItem} className="assortment-analyzer-list-delete">Delete</button>
+                                    <button onClick={handleRemoveAssortmentItem} className="assortment-analyzer-list-delete">X</button>
                                 </li>
                             )
                         })}

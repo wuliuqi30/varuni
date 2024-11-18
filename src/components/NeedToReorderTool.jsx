@@ -23,8 +23,8 @@ export function NeedToReorderTool({
 
     const suppressOutput = false;
 
-    
-    
+
+
     const itemsPerPage = 7;
 
     const lastPage = reorderItemsList.length > 0 ? Math.ceil(reorderItemsList.length / itemsPerPage) : 1;
@@ -51,22 +51,22 @@ export function NeedToReorderTool({
 
     }
 
-    const addToOutOfStockHandlerAndRemoveFromReorderListHandler  = (event, productIndex) => {
+    const addToOutOfStockHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
 
         removeFromReorderItemsListHandler(event, productIndex);
         addToOutOfStockHandler(event, productIndex);
     }
-    
-    const addToDiscontinuedHandlerAndRemoveFromReorderListHandler  = (event, productIndex)=> {
+
+    const addToDiscontinuedHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
         removeFromReorderItemsListHandler(event, productIndex);
         addToDiscontinuedHandler(event, productIndex);
     }
-    
-    const markAlreadyOrderedHandlerAndRemoveFromReorderListHandler  = (event, productIndex)=> {
+
+    const markAlreadyOrderedHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
         removeFromReorderItemsListHandler(event, productIndex);
         markAlreadyOrderedHandler(event, productIndex);
     }
-    
+
 
 
     const getReorderListHandler = () => {
@@ -139,15 +139,16 @@ export function NeedToReorderTool({
     }
 
 
-    if (!suppressOutput){
+    if (!suppressOutput) {
         printArrayToString('This Pages Items', thisPageResult);
     }
-    
+
 
     return (
         <div className="need-to-reorder-window">
-            <h2>Ordering Tool</h2>
+
             <div className="need-to-reorder-button-bar">
+                <h2>Ordering Tool</h2>
                 <button onClick={getReorderListHandler}>Get Top Reorder Items</button>
                 {(reorderItemsList !== null) &&
                     <div className="page-turn-div">
@@ -159,26 +160,27 @@ export function NeedToReorderTool({
                     </div>}
             </div>
             <div className='reorder-list-grid'>
-                <ReorderListHeader />
-                {(reorderItemsList !== null) &&
 
-
-                    thisPageResult.map((item, index) => {
-                        const product = data[item.index];
-                        return (
-                            <ReorderListDisplayItem
-                                key={index}
-                                product={product}
-                                reorderDate={item.reorderDate}
-                                reorderTime={item.reorderTimeWeeks}
-                                addToOrderListHandler={addToOrderListHandlerAndRemoveFromReorderListHandler}
-                                addToOutOfStockHandler={addToOutOfStockHandlerAndRemoveFromReorderListHandler}
-                                addToDiscontinuedHandler={addToDiscontinuedHandlerAndRemoveFromReorderListHandler}
-                                markAlreadyOrderedHandler={markAlreadyOrderedHandlerAndRemoveFromReorderListHandler}
-                                showProductDetailsHandler={showProductDetailsHandler}
-                            />
-                        )
-                    })
+                {(reorderItemsList !== null && reorderItemsList.length > 0) &&
+                    <>
+                        <ReorderListHeader />
+                        {thisPageResult.map((item, index) => {
+                            const product = data[item.index];
+                            return (
+                                <ReorderListDisplayItem
+                                    key={index}
+                                    product={product}
+                                    reorderDate={item.reorderDate}
+                                    reorderTime={item.reorderTimeWeeks}
+                                    addToOrderListHandler={addToOrderListHandlerAndRemoveFromReorderListHandler}
+                                    addToOutOfStockHandler={addToOutOfStockHandlerAndRemoveFromReorderListHandler}
+                                    addToDiscontinuedHandler={addToDiscontinuedHandlerAndRemoveFromReorderListHandler}
+                                    markAlreadyOrderedHandler={markAlreadyOrderedHandlerAndRemoveFromReorderListHandler}
+                                    showProductDetailsHandler={showProductDetailsHandler}
+                                />
+                            )
+                        })}
+                    </>
 
                 }
             </div>

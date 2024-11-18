@@ -23,7 +23,7 @@
   --product-details-window-width: 600px;
 
   --small-button-font-size: .8rem;
-  --basic-font-size: 1.2rem;
+  --basic-font-size: 1rem;
 
   /* Reorder List Grid Dimensions */
   --reorder-list-header-height: 100px;
@@ -84,22 +84,74 @@ h2 {
 }
 
 
-.main-header {
+.main-nav {
   display: flex;
+  flex-direction: column;
   gap: 20px;
   justify-content: center;
   align-items: center;
-  margin: 20px;
+  margin-top: 15px;
   align-self: flex-start;
-  width: 100%;
+
+  flex: 0 0 auto;
+
+  font-size: 1rem;
 }
 
 .page-selection-bar {
   display: flex;
+  flex-direction: column;
   gap: 20px;
   justify-content: center;
   flex: 0 0 auto;
+  
 }
+.nav-bar-button{
+  padding: 4px;
+}
+
+/* ------------Lists Window -----------*/
+.list-display-window {
+  
+  flex: 0 0 auto;
+  border: 2px solid blue;
+  overflow-y: auto;
+  width: 230px;
+  height: 420px;
+}
+
+.list-dropdown-styles{
+  width: 140px;
+}
+
+.list-result-li{
+  display:flex;
+  gap: 5px;
+  justify-content: space-around;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.list-display-info{
+  width: 150px;
+  text-align: start;
+  overflow: visible;
+  
+}
+
+
+
+.list-delete-button{
+  padding-right: 6px;
+  padding-left: 6px;
+  width: 35px;
+  border: 2px solid black;
+  color: black;
+  margin-left: auto;
+  height: 30px;
+}
+
+
 
 .main-display {
   /* display: grid;
@@ -261,7 +313,7 @@ h2 {
 
   
   border: 2px solid orange;
-  width: 700px;
+  width: 500px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -294,16 +346,16 @@ h2 {
 
 
 .assortment-analyzer-options-item .MuiInputBase-root {
-  width: 150px;
+  width: 90px;
 }
 
 .assortment-analyzer-list-window {
-  height: 1200px;
+
 }
 
 .assortment-analyzer-list-container {
   overflow-y: auto;
-  height: 1200px;
+
 }
 
 .assortment-analyzer-list {
@@ -328,6 +380,22 @@ h2 {
 .assortment-analyzer-list-delete {
   margin-left: auto;
 }
+
+.assortment-list-info {
+  border: 2px solid black;
+  border-radius: 10px;
+
+  justify-self: center;
+  padding: 5px;
+  width: 200px;
+  text-align: left;
+  white-space: nowrap;
+
+  overflow-x: hidden;
+
+  height: 50px;
+}
+
 
 .simple-product {
   border: 2px solid black;
@@ -356,7 +424,7 @@ h2 {
 /* -------------- Product Details----------------------------------------*/
 
 
-.product-details-window {
+.product-details-window-column {
 
   
   width: var(--product-details-window-width);
@@ -365,6 +433,24 @@ h2 {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+  justify-content: flex-start;
+  padding: var(--window-padding);
+
+  overflow-y: auto;
+
+
+}
+
+.product-details-window-row {
+
+  
+  width: var(--product-details-window-width);
+  border: 2px solid blue;
+
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
   gap: 10px;
   justify-content: flex-start;
   padding: var(--window-padding);
@@ -462,15 +548,6 @@ h2 {
   border: 2px solid green;
 }
 
-/* ------------Lists Window -----------*/
-.list-display-window {
-  width: 500px;
-
- 
-  flex: 0 0 auto;
-  border: 2px solid blue;
-  overflow-y: auto;
-}
 
 .list-header{
   display: flex;
@@ -493,31 +570,36 @@ h4{
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: flex-start;
-  gap: 20px;
+  align-items: center;
 
+  border: 1px solid black;
   
   overflow: hidden;
   flex: 0 0 auto;
+  font-size: 0.9rem;
 }
 
 .reorder-list-grid {
   
   display: grid;
-  border: 1px solid black;
+  
   grid-template-columns: var(--reorder-list-grid-col-width-1) var(--reorder-list-grid-col-width-2) var(--reorder-list-grid-col-width-3) var(--reorder-list-grid-col-width-4) var(--reorder-list-grid-col-width-5) var(--reorder-list-grid-col-width-6) var(--reorder-list-grid-col-width-7) var(--reorder-list-grid-col-width-8) var(--reorder-list-grid-col-width-9) var(--reorder-list-grid-col-width-10) var(--reorder-list-grid-col-width-11);
   grid-template-rows: var(--reorder-list-header-height);
   grid-auto-rows: var(--reorder-list-auto-height);
   align-items: center;
   gap: 5px;
   row-gap: 5px;
+  column-gap: 4px;
   padding: 15px;
+  padding-top: 0px;
 }
 
 
 .need-to-reorder-button-bar{
   display: flex;
   justify-content: center;
+  gap: 15px;
+  align-items: center;
 }
 
 .reorder-list-header-orientation{
@@ -527,19 +609,21 @@ h4{
 
 .reorder-list-product-info{
   font-weight: 600;
-  font-size: 1rem;
+  
   color: blue;
 }
 
 .reorder-list-numerical-item{
-  font-size: 1.2rem;
+  font-size: 1rem;
   justify-self: center;
   
 }
 
 .reorder-list-click-button{
-  font-size: 1rem;
-  padding: 2px;
+
+  padding: 6px;
+  width: 110px;
+  border: 1px solid green;
 }
 
 

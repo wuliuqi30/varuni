@@ -1,5 +1,5 @@
 import { listSelectionsEnums } from '../data/constants';
-import { ProductDisplayItem } from './/ProductDisplayItem';
+import { ListDisplayItem } from './/ProductDisplayItem';
 import { printArrayToString } from '../helper-fns/helperFunctions'
 import { useState } from 'react';
 
@@ -78,10 +78,10 @@ export function ListDisplays({
         <div className='list-display-window'>
             <div className="list-header">
                 <label htmlFor="list-dropdown">
-                    Select A List
                 </label>
                 <select
                     id="list-dropdown"
+                    className="list-dropdown-styles"
                     value={selectedOption}
                     onChange={handleChange}>
                     {Object.values(listSelectionsEnums).map((listObject) => {
@@ -98,11 +98,19 @@ export function ListDisplays({
                     {currentlyDisplayedList.map((index) => {
                         const thisProduct = data[index];
                         return (
-                            <li key={thisProduct.CODE_NUM} id={`selection-${thisProduct.INDEX}`} className='search-result-li'>
-                                <ProductDisplayItem
-                                    productData={thisProduct}
-                                    clickCurrentSelectionItemHandler={(event) => clickItemHandler(event, thisProduct.INDEX)} />
-                                <button onClick={(event) => setListFunction(event, thisProduct.INDEX)}> Remove </button>
+                            <li
+                                key={thisProduct.CODE_NUM}
+                                id={`selection-${thisProduct.INDEX}`}
+                                className='list-result-li'>
+                               
+
+                                <button
+                                    className="list-display-info"
+                                    onClick={(event) => clickItemHandler(event, thisProduct.INDEX)}>
+                                    <p>{thisProduct["BRAND"]} {thisProduct["DESCRIP"]} {thisProduct["SIZE"]}</p>
+                                 
+                                </button>
+                                <button className="list-delete-button" onClick={(event) => setListFunction(event, thisProduct.INDEX)}>X</button>
                             </li>
 
 

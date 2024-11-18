@@ -47,3 +47,23 @@ export function SimpleProduct({ productData, clickHandler }) {
     )
 
 }
+
+export function ListDisplayItem({ productData, clickCurrentSelectionItemHandler }) {
+    //console.log("In product display item-------------");
+
+    //console.log(productData);
+    return (
+        <>
+
+            <button
+                className="list-display-info"
+                onClick={clickCurrentSelectionItemHandler}>
+                <p >{productData["BRAND"]}</p>
+                <p >{productData["DESCRIP"]}</p>
+                <p >{productData["SIZE"]}</p>
+            </button>
+
+        </>
+    )
+
+}
