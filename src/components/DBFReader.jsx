@@ -97,7 +97,7 @@ const DBFReaderComponent = () => {
                 let currentOffset = 0
                 for (let i = headerHeaderLength; i < headerSize; i += fieldDescriptorSize) {
 
-                    const fieldName = String.fromCharCode.apply(null, new Uint8Array(buffer, i, 11)).replace(/\0/g, '');
+                    const fieldName = String.fromCharCode.apply(null, new Uint8Array(buffer, i, 11)).replace(/[\u0000-\u001F]/g, '');
                     const fieldType = String.fromCharCode(view.getUint8(i + 11));
                     const fieldLength = view.getUint8(i + 16); //
                     //console.log(`i is ${i}, fieldName ${fieldName}, fieldType ${fieldType} fieldLength: ${fieldLength}`);
