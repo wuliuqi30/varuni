@@ -8,8 +8,7 @@ export function ListDisplays({
     clickItemHandler,
     selectedProductsList,
     setSelectedProductsList,
-    orderList,
-    setOrderList,
+   
     outOfStockList,
     setOutOfStockList,
     discontinuedList,
@@ -38,10 +37,7 @@ export function ListDisplays({
             currentlyDisplayedList = selectedProductsList;
             currentListSetterCallback = setSelectedProductsList;
             break;
-        case 'order-list':
-            currentlyDisplayedList = orderList;
-            currentListSetterCallback = setOrderList;
-            break;
+        
 
         case 'out-of-stock-list':
             currentlyDisplayedList = outOfStockList;

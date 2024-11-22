@@ -1,6 +1,7 @@
-body, html{
+body, html, button{
   margin: 0;
   padding: 0;
+  background-color: white;
 
   
 }
@@ -22,11 +23,13 @@ body, html{
   display: flex;
   justify-content: flex-start;
 
-  --main-top-width: 1fr;
-  --main-bottom-width: 1fr;
+  --main-top-width: 50%;
+  --main-bottom-width: 50%;
+
   --main-left-width: 1fr;
   --main-center-width: 1fr;
-  --main-right-width: 1fr;
+  --main-right-width: 0.6fr;
+  --main-right-right-width: 0.6fr;
 
   --window-padding: 15px;
   --common-border-radius: 10px;
@@ -127,12 +130,12 @@ h2 {
 
 .main-display {
   display: grid;
-  grid-template-columns: var(--main-left-width) var(--main-center-width) var(--main-right-width);
-  grid-auto-rows: var(--main-top-width) var(--main-bottom-width);
+  grid-template-columns: var(--main-left-width) var(--main-center-width) var(--main-right-width) var(--main-right-right-width);
+  grid-template-rows: var(--main-top-width) var(--main-bottom-width) ;
   gap: 15px;
   
-  gap: 20px;
-  flex: 0 0 auto;
+
+ 
   height: 90vh;
   padding: 10px;
 }
@@ -169,8 +172,7 @@ h2 {
 
   overflow-y: auto;
   overflow-x: hidden;
-  width: 600px;
-  
+
   display: flex;
   flex-direction: column;
 
@@ -211,19 +213,7 @@ h2 {
   border: 2px solid red;
 }
 
-.search-list{
-  width: 100%;
 
-}
-
-.search-result-li {
-  display: flex;
-  flex-direction: row;
-  gap: 3px;
-  justify-content: space-between;
-  height: 38px;
-
-}
 
 .search-result-li-text {
   text-align: left;
@@ -245,16 +235,17 @@ h2 {
 }
 
 .search-list-li-descrip{
-  width: 120px;
+ 
   white-space: nowrap;
   overflow-x:hidden;
-  margin-right: 6px;
+  margin-right: auto;
+  margin-left: 0;
   text-overflow: ellipsis;
  
 }
 
 .search-list-li-size{
-  width: 50px;
+  margin-left: auto;
   white-space: nowrap;
   overflow-x:hidden;
 }
@@ -404,39 +395,22 @@ h2 {
 
 .product-details-window-column {
   grid-row: 1 / 2;
-  grid-column: 3 / 4;
+  grid-column: 3 / 5;
   
-  width: var(--product-details-window-width);
+
   border: 2px solid blue;
 
   display: flex;
   flex-direction: column;
   gap: 10px;
-  justify-content: flex-start;
-  padding: var(--window-padding);
+
+
 
   overflow-y: auto;
 
 
 }
 
-.product-details-window-row {
-
-  
-  width: var(--product-details-window-width);
-  border: 2px solid blue;
-
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  justify-content: flex-start;
-  padding: var(--window-padding);
-
-  overflow-y: auto;
-
-
-}
 
 
 .product-details-header {
@@ -452,7 +426,7 @@ h2 {
 }
 
 .product-details-item {
-  border: 1px solid blue;
+ 
   border-radius: 20px;
 
   display: flex;
@@ -510,6 +484,30 @@ h2 {
   flex-direction: column;
   gap: 10px;
   padding: 15px;
+}
+
+
+
+.order-list-window {
+  grid-row: 2 / 3;
+  grid-column: 3 / 4;
+
+
+  border: 2px solid blue;
+  
+}
+
+.order-list-header{
+  height: 10%;
+}
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  height: 90%;
+  overflow-y: scroll;
 }
 
 .current-selection-item {
@@ -619,13 +617,12 @@ h4{
 
 .list-display-window {
   grid-row: 2 / 3;
-  grid-column: 3 / 4;
+  grid-column: 4 / 5;
 
 
   border: 2px solid blue;
   overflow-y: auto;
-  width: 230px;
-  height: 420px;
+  
 }
 
 .list-dropdown-styles{

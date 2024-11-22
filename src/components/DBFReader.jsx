@@ -2,9 +2,11 @@
 import { useState, useMemo } from 'react';
 import trie from 'trie-prefix-tree';
 import { SearchDisplay } from './SearchDisplay';
+import { SearchWindow } from './SearchWindow'
 import { CurrentSelection } from './CurrentSelection';
 import { ProductDetailsPanel } from './ProductDetailsPanel';
-import { ListDisplays } from './ListDisplays';
+import { OrderListDisplay } from './OrderListDisplay';
+import {ListDisplays} from './ListDisplays'
 import { AssortmentAnalyzerWindow } from './AssortmentAnalyzerWindow';
 import { webpageSelectionEnums } from '../data/constants';
 import { NeedToReorderTool } from './NeedToReorderTool';
@@ -280,17 +282,12 @@ const DBFReaderComponent = () => {
     };
 
 
-    const handleCheckBoxClick = (e) => {
+    const handleCheckBoxClick = (e, productIndex) => {
         //e.stopPropagation();
 
         if (selectedProductsList === null) {
             return;
         }
-
-        const parent = e.target.closest('li');
-
-        const idstring = "search-result-";
-        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
 
 
         if (!selectedProductsList.find(item => item === productIndex)) {
@@ -330,16 +327,16 @@ const DBFReaderComponent = () => {
 
     const showProductDetailsHandler = (e, productIndex) => {
 
-        // Only allow 2 items in the window
-        if (!viewDetailsProductList.includes(productIndex)) {
-            if (viewDetailsProductList.length < 1) {
-                setViewDetailsProductList([productIndex]);
-            } else {
-                setViewDetailsProductList((prevArray) => [productIndex, prevArray[0]]);
-            }
+        // // Only allow 2 items in the window
+        // if (!viewDetailsProductList.includes(productIndex)) {
+        //     if (viewDetailsProductList.length < 1) {
+        //         setViewDetailsProductList([productIndex]);
+        //     } else {
+        //         setViewDetailsProductList((prevArray) => [productIndex, prevArray[0]]);
+        //     }
 
-        }
-
+        // }
+        setViewDetailsProductList([productIndex]);
     };
 
     const clearProductDetailsPanelHandler = () => {
@@ -492,7 +489,7 @@ const DBFReaderComponent = () => {
 
                 {(webpageSelection === webpageSelectionEnums.home) && <div className="search-select-window">
                     {searchResult != null &&
-                        <SearchDisplay
+                        <SearchWindow
                             data={data}
                             changeSearchHandler={changeSearchHandler}
                             searchDisplayItemsArray={searchResult}
@@ -553,19 +550,27 @@ const DBFReaderComponent = () => {
                     flexDirection={'column'}
                 />
 
-                <ListDisplays
+                <OrderListDisplay
                     data={data}
                     clickItemHandler={showProductDetailsHandler}
                     selectedProductsList={selectedProductsList}
                     setSelectedProductsList={setSelectedProductsList}
                     orderList={orderList}
-                    setOrderList={setOrderList}
-                    outOfStockList={outOfStockList}
-                    setOutOfStockList={setOutOfStockList}
-                    discontinuedList={discontinuedList}
-                    setDiscontinuedList={setDiscontinuedList}
-                    alreadyOrderedList={alreadyOrderedList}
-                    setAlreadyOrderedList={setAlreadyOrderedList} />
+                    setOrderList={setOrderList} />
+
+                <ListDisplays
+                    data={data}
+                    clickItemHandler={showProductDetailsHandler}
+                    selectedProductsList={selectedProductsList}
+                    setSelectedProductsList={setSelectedProductsList}
+                    
+                    outOfStockList={orderList}
+                    setOutOfStockList={setOrderList}
+                    discontinuedList={orderList}
+                    setDiscontinuedList={setOrderList}
+                    alreadyOrderedList={orderList}
+                    setAlreadyOrderedList={setOrderList}
+                     />
 
 
 
