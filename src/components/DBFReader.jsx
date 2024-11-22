@@ -460,76 +460,64 @@ const DBFReaderComponent = () => {
 
     return (
         <>
-            <h2>Varuni 1000</h2>
 
 
+
+            <div className="main-nav">
+                <h2>Varuni 1000</h2>
+                <label htmlFor="file-upload" className="choose-file-button">
+                    Choose File
+                </label>
+                <input
+                    className="choose-file-input"
+                    id="file-upload"
+                    type="file"
+                    accept=".dbf"
+                    onChange={handleFileChange}
+                />
+
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+                {data.length > 0 && (
+                    <p>Data Loaded!</p>
+                )}
+                <div className="page-selection-bar">
+                    <button className="nav-bar-button" onClick={selectMainDisplayHandler}>Search Window</button>
+                    <button className="nav-bar-button" onClick={selectAssortmentDisplayHandler}>Show Assortment Tool</button>
+                    <button className="nav-bar-button" onClick={selectOrderingToolDisplayHandler}>Show Reorder Tool</button>
+                </div>
+
+            </div>
 
             <div className='main-display'>
-                <div className="main-nav">
 
-                    <label htmlFor="file-upload" className="choose-file-button">
-                        Choose File
-                    </label>
-                    <input
-                        className="choose-file-input"
-                        id="file-upload"
-                        type="file"
-                        accept=".dbf"
-                        onChange={handleFileChange}
-                    />
+                {(webpageSelection === webpageSelectionEnums.home) && <div className="search-select-window">
+                    {searchResult != null &&
+                        <SearchDisplay
+                            data={data}
+                            changeSearchHandler={changeSearchHandler}
+                            searchDisplayItemsArray={searchResult}
+                            selectedItemsIndicesArray={selectedProductsList}
+                            handleCheckBoxClick={handleCheckBoxClick}
+                            showDetailsHandler={showProductDetailsHandler}
 
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
-                    {data.length > 0 && (
-                        <p>Data Loaded!</p>
-                    )}
-                    <div className="page-selection-bar">
-                        <button className="nav-bar-button" onClick={selectMainDisplayHandler}>Search Window</button>
-                        <button className="nav-bar-button" onClick={selectAssortmentDisplayHandler}>Show Assortment Tool</button>
-                        <button className="nav-bar-button" onClick={selectOrderingToolDisplayHandler}>Show Reorder Tool</button>
-                    </div>
-                    <ListDisplays
-                    data={data}
-                    clickItemHandler={showProductDetailsHandler}
-                    selectedProductsList={selectedProductsList}
-                    setSelectedProductsList={setSelectedProductsList}
-                    orderList={orderList}
-                    setOrderList={setOrderList}
-                    outOfStockList={outOfStockList}
-                    setOutOfStockList={setOutOfStockList}
-                    discontinuedList={discontinuedList}
-                    setDiscontinuedList={setDiscontinuedList}
-                    alreadyOrderedList={alreadyOrderedList}
-                    setAlreadyOrderedList={setAlreadyOrderedList} />
-                </div>
-                {((webpageSelection === webpageSelectionEnums.home) ||
-                    (webpageSelection === webpageSelectionEnums.assortmentTool)) && <div className="search-select-window">
-                        {searchResult != null &&
-                            <SearchDisplay
-                                data={data}
-                                changeSearchHandler={changeSearchHandler}
-                                searchDisplayItemsArray={searchResult}
-                                selectedItemsIndicesArray={selectedProductsList}
-                                handleCheckBoxClick={handleCheckBoxClick}
-                                showDetailsHandler={showProductDetailsHandler}
-
-                                searchPageNumber={searchPageNumber}
-                                setSearchPageNumber={setSearchPageNumber}
-                                handleUncheckAllClick={handleUncheckAllClick}
-                                addToOrderListHandler={handleAddToOrderListClick}
-                                addToOutOfStockHandler={handleAddToOutOfStockListClick}
-                                addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
-                                markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick} />
-                        }
-                        {searchResult == null &&
-                            <div className="search-result-window">{"Didn't find that."}</div>
-                        }
-                        {/* <CurrentSelection
+                            searchPageNumber={searchPageNumber}
+                            setSearchPageNumber={setSearchPageNumber}
+                            handleUncheckAllClick={handleUncheckAllClick}
+                            addToOrderListHandler={handleAddToOrderListClick}
+                            addToOutOfStockHandler={handleAddToOutOfStockListClick}
+                            addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
+                            markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick} />
+                    }
+                    {searchResult == null &&
+                        <div className="search-result-window">{"Didn't find that."}</div>
+                    }
+                    {/* <CurrentSelection
                         data={data}
                         selectedProductsList={selectedProductsList}
                         onRemove={handleRemoveFromSelection}
                         clickCurrentSelectionItemHandler={showProductDetailsHandler} /> */}
 
-                    </div>}
+                </div>}
 
                 {webpageSelection === webpageSelectionEnums.assortmentTool &&
                     <AssortmentAnalyzerWindow
@@ -539,7 +527,9 @@ const DBFReaderComponent = () => {
                         handleRemoveAssortmentItem={handleRemoveAssortmentItem}
                         showDetailsHandler={showProductDetailsHandler}
                         removeAllAssortedItemsHandler={removeAllAssortedItemsHandler}
-                    />}
+                    />
+                }
+
                 {webpageSelection === webpageSelectionEnums.orderingTool &&
                     <NeedToReorderTool
                         data={data}
@@ -552,17 +542,31 @@ const DBFReaderComponent = () => {
                         addToOutOfStockHandler={handleAddToOutOfStockListClick}
                         addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
                         markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick}
-                        showProductDetailsHandler={showProductDetailsHandler} />}
-                { webpageSelection === webpageSelectionEnums.home && <ProductDetailsPanel
+                        showProductDetailsHandler={showProductDetailsHandler} />
+                }
+
+                <ProductDetailsPanel
                     data={data}
                     productDetailsIndexList={viewDetailsProductList}
                     removeProductDetailsHandler={removeProductDetailsHandler}
                     clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
                     flexDirection={'column'}
-                />}
+                />
 
+                <ListDisplays
+                    data={data}
+                    clickItemHandler={showProductDetailsHandler}
+                    selectedProductsList={selectedProductsList}
+                    setSelectedProductsList={setSelectedProductsList}
+                    orderList={orderList}
+                    setOrderList={setOrderList}
+                    outOfStockList={outOfStockList}
+                    setOutOfStockList={setOutOfStockList}
+                    discontinuedList={discontinuedList}
+                    setDiscontinuedList={setDiscontinuedList}
+                    alreadyOrderedList={alreadyOrderedList}
+                    setAlreadyOrderedList={setAlreadyOrderedList} />
 
-                
 
 
 

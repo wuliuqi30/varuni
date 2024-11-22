@@ -32,12 +32,12 @@ export function ProductDetailsPanel({
         }
         return (
             <div className={windowClassName}>
-                {(flexDirection === 'column') &&
+                {/* {(flexDirection === 'column') &&
                     <div className="product-details-header">
 
                         <button className="remove-items-button" onClick={clearProductDetailsPanelHandler}>Clear Details Panel</button>
                     </div>
-                }
+                } */}
                 {productDataArray.map((productData) => {
                     const productTitle = `${productData.BRAND} ${productData.DESCRIP} ${productData.SIZE}, On Hand: ${productData.QTY_ON_HND}`;
 

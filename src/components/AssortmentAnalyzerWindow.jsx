@@ -467,6 +467,7 @@ export function AssortmentAnalyzerWindow({
     return (
         <div className='assortment-analyzer-main-window'>
             <h2>Assorted Ordering Tool</h2>
+            <p>Instructions: Find products using the search window and click the check box to &quot;select&quot; them. </p>
             <div className="assortment-analyzer-button-bar">
                 <button
                     className="assortment-analyzer-button"
@@ -507,13 +508,13 @@ export function AssortmentAnalyzerWindow({
                     label={`Number of ${targetType}`}
                     onChange={changeNumberOfItemsHandler}
                     value ={targetNumberOfItems}/> */}
-                <DatePicker
+                {/* <DatePicker
                     label="Last Until End Of?"
                     views={['month', 'year']}
                     orientation="landscape"
                     value={targetLastTillDate}
                     onChange={changeLastTillDateHandler}
-                />
+                /> */}
             </div>
             <div className="calculate-bar">
                 <button
