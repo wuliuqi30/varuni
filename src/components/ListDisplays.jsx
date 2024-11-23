@@ -8,7 +8,6 @@ export function ListDisplays({
     clickItemHandler,
     selectedProductsList,
     setSelectedProductsList,
-   
     outOfStockList,
     setOutOfStockList,
     discontinuedList,
@@ -18,7 +17,7 @@ export function ListDisplays({
 
 }) {
 
-    const suppressOutput = false;
+    const suppressOutput = true;
 
     const [selectedOption, setSelectedOption] = useState(listSelectionsEnums.selectionList.name);
 
@@ -56,7 +55,7 @@ export function ListDisplays({
 
     }
 
-    const setListFunction = (event, productIndex) => {
+    const deleteFunction = (event, productIndex) => {
 
         currentListSetterCallback((prevList) => { return prevList.filter(item => item !== productIndex) });
 
@@ -106,7 +105,7 @@ export function ListDisplays({
                                     <p>{thisProduct["BRAND"]} {thisProduct["DESCRIP"]} {thisProduct["SIZE"]}</p>
                                  
                                 </button>
-                                <button className="list-delete-button" onClick={(event) => setListFunction(event, thisProduct.INDEX)}>X</button>
+                                <button className="list-delete-button" onClick={(event) => deleteFunction(event, thisProduct.INDEX)}>X</button>
                             </li>
 
 

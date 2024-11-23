@@ -6,13 +6,16 @@ import { useState } from 'react';
 export function OrderListDisplay({
     data,
     clickItemHandler,
-    selectedProductsList,
-    setSelectedProductsList,
     orderList,
     setOrderList
 
 }) {
 
+    const deleteFunction = (event, productIndex) => {
+
+        setOrderList((prevList) => { return prevList.filter(item => item !== productIndex) });
+
+    }
 
     return (
         <div className='order-list-window'>
@@ -34,7 +37,7 @@ export function OrderListDisplay({
                                     <p>{thisProduct["BRAND"]} {thisProduct["DESCRIP"]} {thisProduct["SIZE"]}</p>
 
                                 </button>
-                                <button className="list-delete-button" onClick={(event) => setListFunction(event, thisProduct.INDEX)}>X</button>
+                                <button className="list-delete-button" onClick={(event) => deleteFunction(event, thisProduct.INDEX)}>X</button>
                             </li>
 
 

@@ -50,6 +50,8 @@ const DBFReaderComponent = () => {
     const [reorderToolPageNumber, setReorderToolPageNumber] = useState(1); // 1 indexed
 
     const [orderList, setOrderList] = useState([]);
+
+    const [orderListFileContent, setOrderListFileContent] = useState('');
     const [outOfStockList, setOutOfStockList] = useState([]);
     const [discontinuedList, setDiscontinuedList] = useState([]);
     const [alreadyOrderedList, setAlreadyOrderedList] = useState([]);
@@ -72,22 +74,6 @@ const DBFReaderComponent = () => {
             const buffer = await response.arrayBuffer();
             console.log("Fetched file as ArrayBuffer:", buffer);
 
-            // console.log(`event is: `);
-            // console.log(event);
-            // const file = event.target.files[0];
-            // console.log(`file (type ${typeof file}) is: `);
-            // console.log(file);
-            // if (!file) return;
-
-            // const reader = new FileReader();
-            // console.log("instantiated a file reader");
-
-
-
-
-
-
-            // const buffer = e.target.result;
             console.log("found buffer");
             console.log(buffer);
             const view = new DataView(buffer);
@@ -105,8 +91,7 @@ const DBFReaderComponent = () => {
             const recordLength = view.getInt16(10, true); // Record length
             const shouldBeZero = view.getInt16(12, true); // Record length
 
-            //console.log(`year: ${year} month: ${month} day: ${day} headerLength: ${headerHeaderLength}, numRecords ${numRecords}, headerNumBytes (from file) ${headerSize} and recordLengthBytes ${recordLength}, shouldBeZero: ${shouldBeZero}`)
-            // Read field descriptors (after the header)
+
             const fields = [];
             let currentOffset = 0
             for (let i = headerHeaderLength; i < headerSize; i += fieldDescriptorSize) {
@@ -139,12 +124,9 @@ const DBFReaderComponent = () => {
                     //console.log(`fieldValue is ${fieldValue} field.name is ${field.name}`);
                     record[field.name] = fieldValue;
                 }
-                // custon fields
-                record["CHECKED"] = false;
-                record["INDEX"] = count;
-                //console.log(`record (${i}): is: `);
-                //console.log(record);
+
                 records.push(record);
+                record["INDEX"] = count;
                 // if (count > 400) {
                 //     break;
                 // }
@@ -192,7 +174,49 @@ const DBFReaderComponent = () => {
 
     };
 
+    // ----------------- Loading and Reading OrderList File-----------------------
 
+    const readListDataFile = async () => {
+        try {
+
+            const filePath = '/data/currentdata/listdata.json';
+            console.log("filePath", filePath);
+            // Fetch the file from the path
+            const response = await fetch(filePath);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch file: ${response.statusText}`);
+            }
+            const listData = await response.json();
+            
+            console.log("List data:", listData);
+            setOrderList(listData.orderlist);
+            setOutOfStockList(listData.outOfStockList);
+            setDiscontinuedList(listData.discontinuedList);
+            setAlreadyOrderedList(listData.alreadyOrderedList);
+
+
+        } catch (err) {
+            console.error("Error reading order list file:", err.message);
+
+        }
+    }
+
+    const saveArraysToFileHandler = () => {
+
+        const listsSaveJSON = {
+            orderlist:orderList,
+            outOfStockList: outOfStockList,
+            discontinuedList: discontinuedList, 
+            alreadyOrderedList: alreadyOrderedList
+        }
+        const blob = new Blob([JSON.stringify(listsSaveJSON, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = 'listdata.json';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
 
     // --------------------------Create Hashmaps: -----------------------
     // Create the hash maps only once (or when `products` changes)
@@ -438,10 +462,14 @@ const DBFReaderComponent = () => {
     };
 
 
+
+
     useEffect(() => {
         readFile(); // Call the function only once
+        readListDataFile();
     }, []); // Empty dependency array ensures this runs only once
 
+   
 
     // if (!suppressOutput) {
     //     console.log(`data is a length ${data.length} array`);
@@ -465,27 +493,19 @@ const DBFReaderComponent = () => {
 
             <div className="main-nav">
                 <h2>Varuni 1000</h2>
-                <label htmlFor="file-upload" className="choose-file-button">
-                    Choose File
-                </label>
-                <input
-                    className="choose-file-input"
-                    id="file-upload"
-                    type="file"
-                    accept=".dbf"
-                    
-                />
 
+
+                <div className="page-selection-bar">
+                    <button className="nav-bar-button" onClick={selectMainDisplayHandler}>Search</button>
+                    <button className="nav-bar-button" onClick={selectAssortmentDisplayHandler}>Assortment Tool</button>
+                    <button className="nav-bar-button" onClick={selectOrderingToolDisplayHandler}>Reorder Tool</button>
+                    <button className="nav-bar-button" onClick={saveArraysToFileHandler}>Save Data</button>
+                    <button className="nav-bar-button" onClick={readListDataFile}>Read Data</button>
+                </div>
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 {data.length > 0 && (
                     <p>Data Loaded!</p>
                 )}
-                <div className="page-selection-bar">
-                    <button className="nav-bar-button" onClick={selectMainDisplayHandler}>Search Window</button>
-                    <button className="nav-bar-button" onClick={selectAssortmentDisplayHandler}>Show Assortment Tool</button>
-                    <button className="nav-bar-button" onClick={selectOrderingToolDisplayHandler}>Show Reorder Tool</button>
-                </div>
-
             </div>
 
             <div className='main-display'>
@@ -562,8 +582,6 @@ const DBFReaderComponent = () => {
                 <OrderListDisplay
                     data={data}
                     clickItemHandler={showProductDetailsHandler}
-                    selectedProductsList={selectedProductsList}
-                    setSelectedProductsList={setSelectedProductsList}
                     orderList={orderList}
                     setOrderList={setOrderList} />
 
@@ -573,12 +591,12 @@ const DBFReaderComponent = () => {
                     selectedProductsList={selectedProductsList}
                     setSelectedProductsList={setSelectedProductsList}
 
-                    outOfStockList={orderList}
-                    setOutOfStockList={setOrderList}
-                    discontinuedList={orderList}
-                    setDiscontinuedList={setOrderList}
-                    alreadyOrderedList={orderList}
-                    setAlreadyOrderedList={setOrderList}
+                    outOfStockList={outOfStockList}
+                    setOutOfStockList={setOutOfStockList}
+                    discontinuedList={discontinuedList}
+                    setDiscontinuedList={setDiscontinuedList}
+                    alreadyOrderedList={alreadyOrderedList}
+                    setAlreadyOrderedList={setAlreadyOrderedList}
                 />
 
 

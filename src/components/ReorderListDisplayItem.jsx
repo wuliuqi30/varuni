@@ -1,8 +1,11 @@
 import { format } from "date-fns"
+import React, { useRef, useEffect } from "react";
 
 export function ReorderListDisplayItem({
     product,
-    refInput,
+    listIndex,
+    refList,
+    handleFocus,
     reorderDate,
     reorderTime,
     addToOrderListHandler,
@@ -12,61 +15,70 @@ export function ReorderListDisplayItem({
     showProductDetailsHandler
 }) {
 
+
+
     return (
-        <>
+        <tr
+            ref={(el) => (refList.current[listIndex] = el)}
+            tabIndex="0"
+            onFocus={(event) => handleFocus(event, product.INDEX,listIndex)}
+        >
 
-            <button
-                className="reorder-list-product-info"
-                onClick={(event) => showProductDetailsHandler(event, product.INDEX)}
-                ref={refInput}
-            >
-                {product["BRAND"]} {product["DESCRIP"]} {product["SIZE"]}
-
-            </button>
-
-            <div className="reorder-list-numerical-item">
+            <td>{product["BRAND"]}</td>
+            <td>{product["DESCRIP"]}</td>
+            <td className="reorder-list-numerical-item">{product["SIZE"]}</td>
+            <td className="reorder-list-numerical-item">
                 {product["QTY_ON_HND"]}
-            </div>
-
-            <div className="reorder-list-numerical-item">
+            </td>
+            <td className="reorder-list-numerical-item">
                 {format(reorderDate, 'MMM/yy')}
-            </div>
-
-            <div className="reorder-list-numerical-item">
+            </td>
+            <td className="reorder-list-numerical-item">
                 {reorderTime}
-            </div>
+            </td>
 
-            <div className="reorder-list-numerical-item">
+            <td className="reorder-list-numerical-item">
                 {product["MTD"]}
-            </div>
+            </td>
 
-            <div className="reorder-list-numerical-item">
+            <td className="reorder-list-numerical-item">
                 {product["ELEVE"]}
-            </div>
+            </td>
 
-            <div className="reorder-list-numerical-item">
+            <td className="reorder-list-numerical-item">
                 {product["TENTH"]}
-            </div>
+            </td>
+            <td className="reorder-button-cell">
+                <button
+                    tabIndex="-1"
+                    className="reorder-list-click-button" onClick={(event) => addToOrderListHandler(event, product.INDEX)}>
+                    Add To Order List
+                </button>
 
-            <button className="reorder-list-click-button" onClick={(event) => addToOrderListHandler(event, product.INDEX)}>
-                Add To Order List
-            </button>
+                <button
+                    tabIndex="-1"
+                    className="reorder-list-click-button" onClick={(event) => addToOutOfStockHandler(event, product.INDEX)}>
+                    Mark Out Of Stock
+                </button>
 
-            <button className="reorder-list-click-button" onClick={(event) => addToOutOfStockHandler(event, product.INDEX)}>
-                Mark Out Of Stock
-            </button>
+                <button
+                    tabIndex="-1"
+                    className="reorder-list-click-button" onClick={(event) => addToDiscontinuedHandler(event, product.INDEX)}>
+                    Mark Discontinued
+                </button>
 
-            <button className="reorder-list-click-button" onClick={(event) => addToDiscontinuedHandler(event, product.INDEX)}>
-                Mark Discontinued
-            </button>
+                <button
+                    tabIndex="-1"
+                    className="reorder-list-click-button"
+                    onClick={(event) => markAlreadyOrderedHandler(event, product.INDEX)}>
+                    Already Ordered?
+                </button>
+            </td>
 
-            <button className="reorder-list-click-button" onClick={(event) => markAlreadyOrderedHandler(event, product.INDEX)}>
-                Already Ordered?
-            </button>
+
+        </tr>
 
 
-
-        </>
     )
 
 

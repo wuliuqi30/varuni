@@ -1,11 +1,16 @@
-body, html, button{
+body, html, button, table,td{
   margin: 0;
   padding: 0;
-  background-color: white;
+  border-width: 0px;
 
   
 }
 
+body, html, button{
+
+  background-color: white;
+
+}
 *{
   box-sizing: border-box;
 }
@@ -23,8 +28,8 @@ body, html, button{
   display: flex;
   justify-content: flex-start;
 
-  --main-top-width: 50%;
-  --main-bottom-width: 50%;
+  --main-top-width: 40%;
+  --main-bottom-width: 60%;
 
   --main-left-width: 1fr;
   --main-center-width: 1fr;
@@ -125,7 +130,8 @@ h2 {
   
 }
 .nav-bar-button{
-  padding: 4px;
+  padding: 8px;
+  border: 2px solid green;
 }
 
 .main-display {
@@ -255,13 +261,12 @@ h2 {
 
 .page-turn-div {
 
-  margin-top: auto;
+
   display: flex;
   gap: 8px;
   justify-content: flex-end;
   align-items: center;
-  margin-right: 10px;
-  margin-bottom: 10px;
+  justify-content: center;
   justify-self: flex-end;
 }
 
@@ -490,7 +495,6 @@ h2 {
   grid-row: 2 / 3;
   grid-column: 3 / 4;
 
-
   border: 2px solid blue;
   
 }
@@ -504,8 +508,9 @@ h2 {
   flex-direction: column;
   gap: 10px;
   padding: 15px;
-  height: 90%;
-  overflow-y: scroll;
+  height: 80%;
+  overflow-y: auto;
+  border: 1px solid green;
 }
 
 .current-selection-item {
@@ -555,9 +560,63 @@ h4{
   overflow: hidden;
   
   font-size: 0.9rem;
+  padding: 5px;
 }
 
-.reorder-list-grid {
+.calculate-reorder-items-button{
+  padding: 8px;
+  border: 2px solid blue;
+}
+
+.left-right-arrow{
+  font-size: 1rem;
+  padding: 5px;
+  border: 2px solid blue;
+  width: 100px;
+}
+
+.need-to-reorder-window table{
+  border-collapse: collapse;
+  border-spacing: 2px;
+  width: 97%;
+}
+
+td{
+  text-align: left;
+  border: 1px solid black;
+  padding: 4px;
+  
+}
+
+td.reorder-list-numerical-item{
+  text-align: center
+  
+}
+
+tbody tr:nth-child(odd) {
+  background-color: #f2f2f2;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+tbody tr:focus{
+  background-color: rgb(160, 179, 233);
+  font-weight: 700;
+  
+}
+
+td.reorder-button-cell {
+  display: block;
+  width: 280px;
+  height: 100px;
+  
+ 
+  text-align: center;
+}
+
+/* .reorder-list-grid {
   
   display: grid;
   
@@ -570,7 +629,7 @@ h4{
   column-gap: 4px;
   padding: 15px;
   padding-top: 0px;
-}
+} */
 
 
 .need-to-reorder-button-bar{
@@ -624,7 +683,8 @@ h4{
 }
 
 .list-dropdown-styles{
-  width: 140px;
+  width: 200px;
+  height: 40px;
 }
 
 .list-result-li{

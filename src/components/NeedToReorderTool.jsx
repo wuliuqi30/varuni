@@ -5,7 +5,8 @@ import { calculateReorderPointFromQuantity } from '../helper-fns/helperFunctions
 import { ReorderListDisplayItem } from './ReorderListDisplayItem';
 import { ReorderListHeader } from './ReorderListHeader'
 import { printArrayToString } from '../helper-fns/helperFunctions';
-import { useRef } from "react"; // Import useRef
+import { useRef, useEffect, useState } from "react"; // Import useRef
+import { barChartOptions } from '../data/constants';
 
 export function NeedToReorderTool({
     data,
@@ -24,9 +25,38 @@ export function NeedToReorderTool({
 
     const suppressOutput = false;
 
-    const firstItemButtonRef = useRef(null);
+    const listOfRefs = useRef([]);
+    const [focusedIndex, setFocusedIndex] = useState(0);
 
+    // Function to handle keydown event
+    const handleKeyDown = (e) => {
+        if (e.key === "ArrowDown") {
+            // Move focus to the next element
+            setFocusedIndex((prevIndex) => Math.min(prevIndex + 1, listOfRefs.current.length - 1));
+        } else if (e.key === "ArrowUp") {
+            // Move focus to the previous element
+            setFocusedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+        }
+    };
 
+    useEffect(() => {
+        // Add event listener for keydown
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            // Cleanup event listener on unmount
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, []);
+
+    useEffect(() => {
+        // Focus the element at the focused index
+        if (listOfRefs.current[focusedIndex]) {
+            listOfRefs.current[focusedIndex].focus();
+        }
+      }, [focusedIndex]);
+
+      
     const itemsPerPage = 7;
 
 
@@ -39,40 +69,24 @@ export function NeedToReorderTool({
         setReorderToolPageNumber(Math.max(reorderToolPageNumber - 1, 1));
     }
 
-    // Handling of clicking the buttons: After clicking, the item should disappear from the list!
-
-    // addToOrderListHandler={addToOrderListHandler}
-    //                             addToOutOfStockHandler={addToOutOfStockHandler}
-    //                             addToDiscontinuedHandler={addToDiscontinuedHandler}
-    //                             markAlreadyOrderedHandler={markAlreadyOrderedHandler}
-    //                             showProductDetailsHandler={showProductDetailsHandler}
 
     const addToOrderListHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
-
         removeFromReorderItemsListHandler(event, productIndex);
         addToOrderListHandler(event, productIndex);
-   
 
     }
-
     const addToOutOfStockHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
-
         removeFromReorderItemsListHandler(event, productIndex);
         addToOutOfStockHandler(event, productIndex);
-        
     }
-
     const addToDiscontinuedHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
         removeFromReorderItemsListHandler(event, productIndex);
         addToDiscontinuedHandler(event, productIndex);
     }
-
     const markAlreadyOrderedHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
         removeFromReorderItemsListHandler(event, productIndex);
         markAlreadyOrderedHandler(event, productIndex);
     }
-
-
 
     const getReorderListHandler = () => {
 
@@ -133,11 +147,23 @@ export function NeedToReorderTool({
         }
 
         setReorderItemsList(finalFilteredData);
-        if (firstItemButtonRef.current){
-            firstItemButtonRef.current.click();
-        }
+
 
     }
+
+
+    const handleFocus = (event, productIndex,listIndex) => {
+        console.log(`Product of Index ${productIndex} is focused!`);
+        setFocusedIndex(listIndex);
+        showProductDetailsHandler(event, productIndex);
+    }
+
+    useEffect(() => {  
+        // Automatically focus the component when it mounts
+        if (listOfRefs.current.length > 0) {
+            listOfRefs.current[0].focus();
+        }
+    }, [reorderItemsList]);
 
     let thisPageResult;
     if (reorderItemsList.length > 0) {
@@ -157,43 +183,66 @@ export function NeedToReorderTool({
 
             <div className="need-to-reorder-button-bar">
                 <h2>Ordering Tool</h2>
-                <button onClick={getReorderListHandler}>Get Top Reorder Items</button>
+                <button 
+                onClick={getReorderListHandler}
+                className ="calculate-reorder-items-button">Get Top Reorder Items</button>
                 {(reorderItemsList !== null) &&
                     <div className="page-turn-div">
 
-                        <button onClick={prevPageHandler}> {'<'} </button>
-                        <button onClick={nextPageHandler}> {'>'} </button>
+                        <button onClick={prevPageHandler} className="left-right-arrow">Previous</button>
+                        <button onClick={nextPageHandler} className="left-right-arrow">Next</button>
                         <p>{`Page ${reorderToolPageNumber}/${lastPage}`}</p>
 
                     </div>}
             </div>
-            <div className='reorder-list-grid'>
+            <table>
+                <thead>
+                    <tr tabIndex="0">
 
-                {(reorderItemsList !== null && reorderItemsList.length > 0) &&
-                    <>
-                        <ReorderListHeader />
-                        {thisPageResult.map((item, index) => {
-                            const product = data[item.index];
-                            const refInput = null;
-                            return (
-                                <ReorderListDisplayItem
-                                    key={index}
-                                    refInput={refInput}
-                                    product={product}
-                                    reorderDate={item.reorderDate}
-                                    reorderTime={item.reorderTimeWeeks}
-                                    addToOrderListHandler={addToOrderListHandlerAndRemoveFromReorderListHandler}
-                                    addToOutOfStockHandler={addToOutOfStockHandlerAndRemoveFromReorderListHandler}
-                                    addToDiscontinuedHandler={addToDiscontinuedHandlerAndRemoveFromReorderListHandler}
-                                    markAlreadyOrderedHandler={markAlreadyOrderedHandlerAndRemoveFromReorderListHandler}
-                                    showProductDetailsHandler={showProductDetailsHandler}
-                                />
-                            )
-                        })}
-                    </>
+                        <th>Brand</th>
+                        <th>Description</th>
+                        <th>Size</th>
+                        <th>QTY</th>
+                        <th>Reorder Date</th>
+                        <th>Weeks of Item Left</th>
+                        <th>MTD</th>
+                        <th>{barChartOptions[13].xlabel.toUpperCase()}</th>
+                        <th>{barChartOptions[12].xlabel.toUpperCase()}</th>
+                        <th>Actions</th>
 
-                }
-            </div>
+                    </tr>
+                </thead>
+                <tbody>
+                    {(reorderItemsList !== null && reorderItemsList.length > 0) &&
+                        <>
+
+                            {thisPageResult.map((item, index) => {
+                                const product = data[item.index];
+
+                                return (
+                                    <ReorderListDisplayItem
+                                        key={index}
+                                        listIndex={index}
+                                        refList={listOfRefs}
+                                        handleFocus={handleFocus}
+                                        product={product}
+                                        reorderDate={item.reorderDate}
+                                        reorderTime={item.reorderTimeWeeks}
+                                        addToOrderListHandler={addToOrderListHandlerAndRemoveFromReorderListHandler}
+                                        addToOutOfStockHandler={addToOutOfStockHandlerAndRemoveFromReorderListHandler}
+                                        addToDiscontinuedHandler={addToDiscontinuedHandlerAndRemoveFromReorderListHandler}
+                                        markAlreadyOrderedHandler={markAlreadyOrderedHandlerAndRemoveFromReorderListHandler}
+                                        showProductDetailsHandler={showProductDetailsHandler}
+                                    />
+                                )
+                            })}
+                        </>
+
+                    }
+                </tbody>
+            </table>
+
+
 
         </div>
     )
