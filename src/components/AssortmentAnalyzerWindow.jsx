@@ -467,7 +467,7 @@ export function AssortmentAnalyzerWindow({
     return (
         <div className='assortment-analyzer-main-window'>
             <h2>Assorted Ordering Tool</h2>
-            <p>Instructions: Find products using the search window and click the check box to &quot;select&quot; them. </p>
+            <p>Instructions: Find products using the search window and click the check box to &quot;select&quot; them. Once you have selected all the products you want </p>
             <div className="assortment-analyzer-button-bar">
                 <button
                     className="assortment-analyzer-button"

@@ -1,12 +1,12 @@
 
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import trie from 'trie-prefix-tree';
-import { SearchDisplay } from './SearchDisplay';
+import { SmallSearchWindow } from './SmallSearchWindow';
 import { SearchWindow } from './SearchWindow'
 import { CurrentSelection } from './CurrentSelection';
 import { ProductDetailsPanel } from './ProductDetailsPanel';
 import { OrderListDisplay } from './OrderListDisplay';
-import {ListDisplays} from './ListDisplays'
+import { ListDisplays } from './ListDisplays'
 import { AssortmentAnalyzerWindow } from './AssortmentAnalyzerWindow';
 import { webpageSelectionEnums } from '../data/constants';
 import { NeedToReorderTool } from './NeedToReorderTool';
@@ -57,106 +57,113 @@ const DBFReaderComponent = () => {
 
 
 
+
     // ----------------- Loading and Reading DBF file -----------------------
-    const handleFileChange = async (event) => {
-        console.log(`event is: `);
-        console.log(event);
-        const file = event.target.files[0];
-        console.log(`file (type ${typeof file}) is: `);
-        console.log(file);
-        if (!file) return;
+    const readFile = async () => {
+        try {
 
-        const reader = new FileReader();
-        console.log("instantiated a file reader");
-
-
-
-
-
-        reader.onload = (e) => {
-            try {
-                const buffer = e.target.result;
-                console.log("found buffer");
-                console.log(buffer);
-                const view = new DataView(buffer);
-
-                console.log("About to get data from \"view\"");
-
-                const headerHeaderLength = 32;
-                const fieldDescriptorSize = 32;
-                const year = view.getUint8(1) + 2000; // Add 1900 to the YY value
-                const month = view.getUint8(2);        // Get the MM value
-                const day = view.getUint8(3);          // Get the DD value
-
-                const numRecords = view.getInt32(4, true);
-                const headerSize = view.getInt16(8, true); // Header size
-                const recordLength = view.getInt16(10, true); // Record length
-                const shouldBeZero = view.getInt16(12, true); // Record length
-
-                //console.log(`year: ${year} month: ${month} day: ${day} headerLength: ${headerHeaderLength}, numRecords ${numRecords}, headerNumBytes (from file) ${headerSize} and recordLengthBytes ${recordLength}, shouldBeZero: ${shouldBeZero}`)
-                // Read field descriptors (after the header)
-                const fields = [];
-                let currentOffset = 0
-                for (let i = headerHeaderLength; i < headerSize; i += fieldDescriptorSize) {
-
-                    const fieldName = String.fromCharCode.apply(null, new Uint8Array(buffer, i, 11)).replace(/[\u0000\u0001\u00FF]/g, '');
-                    const fieldType = String.fromCharCode(view.getUint8(i + 11));
-                    const fieldLength = view.getUint8(i + 16); //
-                    //console.log(`i is ${i}, fieldName ${fieldName}, fieldType ${fieldType} fieldLength: ${fieldLength}`);
-                    if (fieldName === '') break; // End of fields
-                    if (fieldType == '5') break;
-                    fields.push({ name: fieldName, type: fieldType, length: fieldLength, offset: currentOffset });
-                    currentOffset += fieldLength;
-                }
-
-                console.log("fields: ");
-                console.log(fields);
-
-                // Read records
-                const records = [];
-                //console.log(`headerSize ${headerSize}, buffer.byteLength ${buffer.byteLength} and recordLength ${recordLength}`);
-                let count = 0;
-                for (let i = headerSize; i < buffer.byteLength; i += recordLength) {
-                    //console.log(`in for loop for records, i: ${i})`);
-
-                    const record = {};
-                    for (const field of fields) {
-                        //console.log('field:');
-                        //console.log(field);
-                        const fieldValue = readFieldValue(view, i, field);
-                        //console.log(`fieldValue is ${fieldValue} field.name is ${field.name}`);
-                        record[field.name] = fieldValue;
-                    }
-                    // custon fields
-                    record["CHECKED"] = false;
-                    record["INDEX"] = count;
-                    //console.log(`record (${i}): is: `);
-                    //console.log(record);
-                    records.push(record);
-                    // if (count > 400) {
-                    //     break;
-                    // }
-                    count++;
-
-                }
-                records.pop();
-                setData(records);
-                console.log("records: ");
-                console.log(records);
-                console.log("finished console logging records");
-
-            } catch (err) {
-                console.log("Catching an erro");
-                setError('Error reading DBF file: ' + err.message);
+            const filePath = '/data/currentdata/data.dbf';
+            console.log("filePath", filePath);
+            // Fetch the file from the path
+            const response = await fetch(filePath);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch file: ${response.statusText}`);
             }
-        };
-        console.log("declare  reader.onerror");
-        reader.onerror = (err) => {
-            setError('File reading failed: ' + err.message);
-        };
-        console.log("About to call reader.readAsArrayBuffer(file);");
-        reader.readAsArrayBuffer(file); // Read the file as an ArrayBuffer
-    };
+            const buffer = await response.arrayBuffer();
+            console.log("Fetched file as ArrayBuffer:", buffer);
+
+            // console.log(`event is: `);
+            // console.log(event);
+            // const file = event.target.files[0];
+            // console.log(`file (type ${typeof file}) is: `);
+            // console.log(file);
+            // if (!file) return;
+
+            // const reader = new FileReader();
+            // console.log("instantiated a file reader");
+
+
+
+
+
+
+            // const buffer = e.target.result;
+            console.log("found buffer");
+            console.log(buffer);
+            const view = new DataView(buffer);
+
+            console.log("About to get data from \"view\"");
+
+            const headerHeaderLength = 32;
+            const fieldDescriptorSize = 32;
+            const year = view.getUint8(1) + 2000; // Add 1900 to the YY value
+            const month = view.getUint8(2);        // Get the MM value
+            const day = view.getUint8(3);          // Get the DD value
+
+            const numRecords = view.getInt32(4, true);
+            const headerSize = view.getInt16(8, true); // Header size
+            const recordLength = view.getInt16(10, true); // Record length
+            const shouldBeZero = view.getInt16(12, true); // Record length
+
+            //console.log(`year: ${year} month: ${month} day: ${day} headerLength: ${headerHeaderLength}, numRecords ${numRecords}, headerNumBytes (from file) ${headerSize} and recordLengthBytes ${recordLength}, shouldBeZero: ${shouldBeZero}`)
+            // Read field descriptors (after the header)
+            const fields = [];
+            let currentOffset = 0
+            for (let i = headerHeaderLength; i < headerSize; i += fieldDescriptorSize) {
+
+                const fieldName = String.fromCharCode.apply(null, new Uint8Array(buffer, i, 11)).replace(/[\u0000\u0001\u00FF]/g, '');
+                const fieldType = String.fromCharCode(view.getUint8(i + 11));
+                const fieldLength = view.getUint8(i + 16); //
+                //console.log(`i is ${i}, fieldName ${fieldName}, fieldType ${fieldType} fieldLength: ${fieldLength}`);
+                if (fieldName === '') break; // End of fields
+                if (fieldType == '5') break;
+                fields.push({ name: fieldName, type: fieldType, length: fieldLength, offset: currentOffset });
+                currentOffset += fieldLength;
+            }
+
+            console.log("fields: ");
+            console.log(fields);
+
+            // Read records
+            const records = [];
+            //console.log(`headerSize ${headerSize}, buffer.byteLength ${buffer.byteLength} and recordLength ${recordLength}`);
+            let count = 0;
+            for (let i = headerSize; i < buffer.byteLength; i += recordLength) {
+                //console.log(`in for loop for records, i: ${i})`);
+
+                const record = {};
+                for (const field of fields) {
+                    //console.log('field:');
+                    //console.log(field);
+                    const fieldValue = readFieldValue(view, i, field);
+                    //console.log(`fieldValue is ${fieldValue} field.name is ${field.name}`);
+                    record[field.name] = fieldValue;
+                }
+                // custon fields
+                record["CHECKED"] = false;
+                record["INDEX"] = count;
+                //console.log(`record (${i}): is: `);
+                //console.log(record);
+                records.push(record);
+                // if (count > 400) {
+                //     break;
+                // }
+                count++;
+
+            }
+            records.pop();
+            setData(records);
+            console.log("records: ");
+            console.log(records);
+            console.log("finished console logging records");
+
+
+
+        } catch (err) {
+            console.error("Error reading file:", err.message);
+            setError('Error reading DBF file: ' + err.message);
+        }
+    }
 
     const readFieldValue = (view, offset, field) => {
 
@@ -184,6 +191,8 @@ const DBFReaderComponent = () => {
 
 
     };
+
+
 
     // --------------------------Create Hashmaps: -----------------------
     // Create the hash maps only once (or when `products` changes)
@@ -327,15 +336,6 @@ const DBFReaderComponent = () => {
 
     const showProductDetailsHandler = (e, productIndex) => {
 
-        // // Only allow 2 items in the window
-        // if (!viewDetailsProductList.includes(productIndex)) {
-        //     if (viewDetailsProductList.length < 1) {
-        //         setViewDetailsProductList([productIndex]);
-        //     } else {
-        //         setViewDetailsProductList((prevArray) => [productIndex, prevArray[0]]);
-        //     }
-
-        // }
         setViewDetailsProductList([productIndex]);
     };
 
@@ -394,14 +394,14 @@ const DBFReaderComponent = () => {
     }
 
 
-    // Reorder Tool
+    //----------------------------- Reorder Tool ----------------------
 
     const removeFromReorderItemsListHandler = (e, productIndex) => {
         console.log(`removing product: ${productIndex}`);
-        setReorderItemsList((prevList) => {
 
-            return prevList.filter(item => item.index !== productIndex)
-        });
+        const newList = reorderItemsList.filter(item => item.index !== productIndex);
+        setViewDetailsProductList([newList[0].index]);
+        setReorderItemsList(newList);
 
     }
 
@@ -438,22 +438,25 @@ const DBFReaderComponent = () => {
     };
 
 
+    useEffect(() => {
+        readFile(); // Call the function only once
+    }, []); // Empty dependency array ensures this runs only once
 
 
-    if (!suppressOutput) {
-        console.log(`data is a length ${data.length} array`);
+    // if (!suppressOutput) {
+    //     console.log(`data is a length ${data.length} array`);
 
-        printArrayToString("SelectedProductsList ", selectedProductsList);
-        printArrayToString("Details Panel List", viewDetailsProductList);
-        printArrayToString("Assortment Items in Assortment Display", assortmentAnalyzerProductList);
+    //     printArrayToString("SelectedProductsList ", selectedProductsList);
+    //     printArrayToString("Details Panel List", viewDetailsProductList);
+    //     printArrayToString("Assortment Items in Assortment Display", assortmentAnalyzerProductList);
 
-        printArrayToString('reorderItemsList', reorderItemsList)
-        printArrayToString('Order List', orderList);
-        printArrayToString('outOfStockList List', outOfStockList);
-        printArrayToString('discontinuedList', discontinuedList);
-        printArrayToString('alreadyOrderedList List', alreadyOrderedList);
-        printArrayToString('assortmentAnalyzerProductList ', assortmentAnalyzerProductList);
-    }
+    //     printArrayToString('reorderItemsList', reorderItemsList)
+    //     printArrayToString('Order List', orderList);
+    //     printArrayToString('outOfStockList List', outOfStockList);
+    //     printArrayToString('discontinuedList', discontinuedList);
+    //     printArrayToString('alreadyOrderedList List', alreadyOrderedList);
+    //     printArrayToString('assortmentAnalyzerProductList ', assortmentAnalyzerProductList);
+    // }
 
     return (
         <>
@@ -470,7 +473,7 @@ const DBFReaderComponent = () => {
                     id="file-upload"
                     type="file"
                     accept=".dbf"
-                    onChange={handleFileChange}
+                    
                 />
 
                 {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -487,9 +490,35 @@ const DBFReaderComponent = () => {
 
             <div className='main-display'>
 
-                {(webpageSelection === webpageSelectionEnums.home) && <div className="search-select-window">
-                    {searchResult != null &&
-                        <SearchWindow
+                {(webpageSelection === webpageSelectionEnums.home) &&
+                    <SearchWindow
+                        data={data}
+                        changeSearchHandler={changeSearchHandler}
+                        searchDisplayItemsArray={searchResult}
+                        selectedItemsIndicesArray={selectedProductsList}
+                        handleCheckBoxClick={handleCheckBoxClick}
+                        showDetailsHandler={showProductDetailsHandler}
+
+                        searchPageNumber={searchPageNumber}
+                        setSearchPageNumber={setSearchPageNumber}
+                        handleUncheckAllClick={handleUncheckAllClick}
+                        addToOrderListHandler={handleAddToOrderListClick}
+                        addToOutOfStockHandler={handleAddToOutOfStockListClick}
+                        addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
+                        markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick} />
+                }
+
+                {webpageSelection === webpageSelectionEnums.assortmentTool &&
+                    <>
+                        <AssortmentAnalyzerWindow
+                            data={data}
+                            productIndicesToAnalyze={assortmentAnalyzerProductList}
+                            importSelectionToAssortmentAnalyzerHandler={importSelectionToAssortmentAnalyzer}
+                            handleRemoveAssortmentItem={handleRemoveAssortmentItem}
+                            showDetailsHandler={showProductDetailsHandler}
+                            removeAllAssortedItemsHandler={removeAllAssortedItemsHandler}
+                        />
+                        <SmallSearchWindow
                             data={data}
                             changeSearchHandler={changeSearchHandler}
                             searchDisplayItemsArray={searchResult}
@@ -504,27 +533,7 @@ const DBFReaderComponent = () => {
                             addToOutOfStockHandler={handleAddToOutOfStockListClick}
                             addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
                             markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick} />
-                    }
-                    {searchResult == null &&
-                        <div className="search-result-window">{"Didn't find that."}</div>
-                    }
-                    {/* <CurrentSelection
-                        data={data}
-                        selectedProductsList={selectedProductsList}
-                        onRemove={handleRemoveFromSelection}
-                        clickCurrentSelectionItemHandler={showProductDetailsHandler} /> */}
-
-                </div>}
-
-                {webpageSelection === webpageSelectionEnums.assortmentTool &&
-                    <AssortmentAnalyzerWindow
-                        data={data}
-                        productIndicesToAnalyze={assortmentAnalyzerProductList}
-                        importSelectionToAssortmentAnalyzerHandler={importSelectionToAssortmentAnalyzer}
-                        handleRemoveAssortmentItem={handleRemoveAssortmentItem}
-                        showDetailsHandler={showProductDetailsHandler}
-                        removeAllAssortedItemsHandler={removeAllAssortedItemsHandler}
-                    />
+                    </>
                 }
 
                 {webpageSelection === webpageSelectionEnums.orderingTool &&
@@ -563,14 +572,14 @@ const DBFReaderComponent = () => {
                     clickItemHandler={showProductDetailsHandler}
                     selectedProductsList={selectedProductsList}
                     setSelectedProductsList={setSelectedProductsList}
-                    
+
                     outOfStockList={orderList}
                     setOutOfStockList={setOrderList}
                     discontinuedList={orderList}
                     setDiscontinuedList={setOrderList}
                     alreadyOrderedList={orderList}
                     setAlreadyOrderedList={setOrderList}
-                     />
+                />
 
 
 

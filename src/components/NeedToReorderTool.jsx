@@ -4,7 +4,8 @@
 import { calculateReorderPointFromQuantity } from '../helper-fns/helperFunctions';
 import { ReorderListDisplayItem } from './ReorderListDisplayItem';
 import { ReorderListHeader } from './ReorderListHeader'
-import { printArrayToString } from '../helper-fns/helperFunctions'
+import { printArrayToString } from '../helper-fns/helperFunctions';
+import { useRef } from "react"; // Import useRef
 
 export function NeedToReorderTool({
     data,
@@ -23,9 +24,11 @@ export function NeedToReorderTool({
 
     const suppressOutput = false;
 
+    const firstItemButtonRef = useRef(null);
 
 
     const itemsPerPage = 7;
+
 
     const lastPage = reorderItemsList.length > 0 ? Math.ceil(reorderItemsList.length / itemsPerPage) : 1;
 
@@ -48,6 +51,7 @@ export function NeedToReorderTool({
 
         removeFromReorderItemsListHandler(event, productIndex);
         addToOrderListHandler(event, productIndex);
+   
 
     }
 
@@ -55,6 +59,7 @@ export function NeedToReorderTool({
 
         removeFromReorderItemsListHandler(event, productIndex);
         addToOutOfStockHandler(event, productIndex);
+        
     }
 
     const addToDiscontinuedHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
@@ -128,6 +133,9 @@ export function NeedToReorderTool({
         }
 
         setReorderItemsList(finalFilteredData);
+        if (firstItemButtonRef.current){
+            firstItemButtonRef.current.click();
+        }
 
     }
 
@@ -166,9 +174,11 @@ export function NeedToReorderTool({
                         <ReorderListHeader />
                         {thisPageResult.map((item, index) => {
                             const product = data[item.index];
+                            const refInput = null;
                             return (
                                 <ReorderListDisplayItem
                                     key={index}
+                                    refInput={refInput}
                                     product={product}
                                     reorderDate={item.reorderDate}
                                     reorderTime={item.reorderTimeWeeks}
