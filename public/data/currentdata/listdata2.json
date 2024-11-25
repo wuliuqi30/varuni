@@ -15,7 +15,16 @@
     6629,
     175
   ],
-  "discontinuedList": [],
+  "discontinuedList": [
+    175,
+    221,
+    252,
+    412,
+    594,
+    679,
+    795,
+    949
+  ],
   "alreadyOrderedList": [
     1557,
     1606,

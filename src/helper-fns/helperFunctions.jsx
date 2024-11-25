@@ -5,6 +5,10 @@ import {
 } from '../data/constants';
 import { differenceInWeeks, getWeeksInMonth, addWeeks } from 'date-fns';
 
+function removeTrailingSlash(str){
+    return str.replace(/[\\/]+$/, "");
+  };
+
 
 function printArrayToString(titleString, array, unit) {
 
@@ -133,5 +137,6 @@ export {
     calculateReorderPointFromQuantity,
     getLastTwelveMonthSales,
     extrapolateMonthlySales,
-    extrapolateWeeklySales
+    extrapolateWeeklySales,
+    removeTrailingSlash
 }

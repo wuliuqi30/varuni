@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import trie from 'trie-prefix-tree';
 import { SmallSearchWindow } from './SmallSearchWindow';
 import { SearchWindow } from './SearchWindow'
@@ -10,21 +10,34 @@ import { ListDisplays } from './ListDisplays'
 import { AssortmentAnalyzerWindow } from './AssortmentAnalyzerWindow';
 import { webpageSelectionEnums } from '../data/constants';
 import { NeedToReorderTool } from './NeedToReorderTool';
-import { printArrayToString } from '../helper-fns/helperFunctions'
-
+import { printArrayToString, removeTrailingSlash } from '../helper-fns/helperFunctions'
+import { TextInputModal } from './TextInputModal'
 
 const DBFReaderComponent = () => {
 
     const suppressOutput = false;
     if (!suppressOutput) {
         console.log("Entering DBF Reader Component");
+        console.log(process.env.NODE_ENV);
     }
 
     // -----------------State Information -----------------------
 
+    // Initial Page Load
+    const [initialPageLoadComplete, setInitialPageLoadComplete] = useState(false);
+
     // Data: 
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
+
+    const [dataFolder, setDataFolder] = useState("");
+    const [showSelectDataDialog, setShowSelectDataDialog] = useState(false);
+
+    const listFileInputRef = useRef(null);
+    const [listDataMessage, setListDataMessage] = useState("");
+
+
+
 
     // Page View: 
     const [webpageSelection, setWebpageSelection] = useState(webpageSelectionEnums.home);
@@ -50,8 +63,8 @@ const DBFReaderComponent = () => {
     const [reorderToolPageNumber, setReorderToolPageNumber] = useState(1); // 1 indexed
 
     const [orderList, setOrderList] = useState([]);
+    const orderListScrollRef = useRef(null);
 
-    const [orderListFileContent, setOrderListFileContent] = useState('');
     const [outOfStockList, setOutOfStockList] = useState([]);
     const [discontinuedList, setDiscontinuedList] = useState([]);
     const [alreadyOrderedList, setAlreadyOrderedList] = useState([]);
@@ -61,24 +74,27 @@ const DBFReaderComponent = () => {
 
 
     // ----------------- Loading and Reading DBF file -----------------------
-    const readFile = async () => {
+    const readFileFromHardCodedFileLocation = async () => {
         try {
 
-            const filePath = '/data/currentdata/data.dbf';
-            console.log("filePath", filePath);
+            // console.log(`Entered readFileFromUserProvidedFileLocation and using ${folderPath} as folder path.`);
+            // const cleanedPath = removeTrailingSlash(folderPath);
+            // console.log(`After removing possible trailing slashes: ${cleanedPath}`)
+            // const filePath = cleanedPath + '/data.dbf';
+
+            const filePath = 'data/currentdata/data.dbf';
+            console.log("Reading data at filePath:", filePath);
             // Fetch the file from the path
             const response = await fetch(filePath);
             if (!response.ok) {
                 throw new Error(`Failed to fetch file: ${response.statusText}`);
             }
             const buffer = await response.arrayBuffer();
-            console.log("Fetched file as ArrayBuffer:", buffer);
 
-            console.log("found buffer");
+
             console.log(buffer);
             const view = new DataView(buffer);
 
-            console.log("About to get data from \"view\"");
 
             const headerHeaderLength = 32;
             const fieldDescriptorSize = 32;
@@ -106,7 +122,7 @@ const DBFReaderComponent = () => {
                 currentOffset += fieldLength;
             }
 
-            console.log("fields: ");
+            console.log("Fields: ");
             console.log(fields);
 
             // Read records
@@ -120,7 +136,7 @@ const DBFReaderComponent = () => {
                 for (const field of fields) {
                     //console.log('field:');
                     //console.log(field);
-                    const fieldValue = readFieldValue(view, i, field);
+                    const fieldValue = readFieldValue(view, i, field, count);
                     //console.log(`fieldValue is ${fieldValue} field.name is ${field.name}`);
                     record[field.name] = fieldValue;
                 }
@@ -135,11 +151,13 @@ const DBFReaderComponent = () => {
             }
             records.pop();
             setData(records);
-            console.log("records: ");
+            console.log("Obtained Records: ");
             console.log(records);
-            console.log("finished console logging records");
+            console.log("-------Finished Reading Data------------");
 
-
+            //console.log("Attempting to save data file to localstorage");
+            //localStorage.setItem('torchwoodAllData', JSON.stringify(records));
+            //console.log("Finished saving data file to localstorage");
 
         } catch (err) {
             console.error("Error reading file:", err.message);
@@ -147,14 +165,16 @@ const DBFReaderComponent = () => {
         }
     }
 
-    const readFieldValue = (view, offset, field) => {
+
+
+    const readFieldValue = (view, offset, field, count) => {
 
         const fieldOffset = offset + field.offset; // Calculate field's offset in the record
         const fieldOffsetModified = offset + field.offset + 1; // Calculate field's offset in the record
         //console.log(`in readFieldValue, view ${view} offset ${offset} and field ${field} fieldOffset ${fieldOffset}`);
         //const length = field.length;
         if (fieldOffset + field.length > view.byteLength) {
-            console.warn(`Skipping field ${field.name} as it exceeds buffer bounds with offset ${fieldOffset} and length ${field.length}`);
+            //console.warn(`Skipping field ${field.name} at count: ${count} as it exceeds buffer bounds with offset ${fieldOffset} and length ${field.length}`);
             return null; // Skip reading this field
         }
 
@@ -174,39 +194,122 @@ const DBFReaderComponent = () => {
 
     };
 
+
+    const readFileFromUserInput = () => {
+
+    }
+
+
     // ----------------- Loading and Reading OrderList File-----------------------
 
-    const readListDataFile = async () => {
-        try {
 
-            const filePath = '/data/currentdata/listdata.json';
-            console.log("filePath", filePath);
-            // Fetch the file from the path
-            const response = await fetch(filePath);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch file: ${response.statusText}`);
-            }
-            const listData = await response.json();
-            
-            console.log("List data:", listData);
-            setOrderList(listData.orderlist);
-            setOutOfStockList(listData.outOfStockList);
-            setDiscontinuedList(listData.discontinuedList);
-            setAlreadyOrderedList(listData.alreadyOrderedList);
+    const clickListFileInputHandler = () => {
+        document.getElementById("list-file-upload").click();
+    }
 
+    const readListDataFromLocalStorageFileHandler = () => {
 
-        } catch (err) {
-            console.error("Error reading order list file:", err.message);
+        const listData = localStorage.getItem('torchwoodListData');
 
+        if (listData !== null) {
+            const jsonObject = JSON.parse(listData);
+
+            console.log("Got List Data jsonObject From Local Storage:", jsonObject);
+            setOrderList(jsonObject.orderlist);
+            setOutOfStockList(jsonObject.outOfStockList);
+            setDiscontinuedList(jsonObject.discontinuedList);
+            setAlreadyOrderedList(jsonObject.alreadyOrderedList);
+            console.log("-------Finished Reading List Data File------------");
+            setListDataMessage("Read List Data from Local Storage");
+
+        } else {
+            setListDataMessage("No List Data File Found, please click 'Choose List File' button");
         }
     }
 
-    const saveArraysToFileHandler = () => {
+    const readListDataFileFromUserSelection = async () => {
+
+        if (listFileInputRef.current) {
+            listFileInputRef.current.click(); // Programmatically trigger the file input
+        }
+
+
+    }
+
+    const handleListFileChange = async (event) => {
+
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                try {
+                    const targetResult = e.target.result;
+                    const listData = JSON.parse(targetResult);
+
+                    console.log("Got List Data:", listData);
+                    if (listData.orderlist) {
+                        setOrderList(listData.orderlist);
+                    } else {
+                        console.log("No order list data in file");
+                    }
+                    if (listData.outOfStockList) {
+                        setOutOfStockList(listData.outOfStockList);
+                    } else {
+                        console.log("NooutOfStockList data in file");
+                    }
+                    if (listData.discontinuedList) {
+                        setDiscontinuedList(listData.discontinuedList);
+                    } else {
+                        console.log("No discontinuedListdata in file");
+                    }
+                    if (listData.alreadyOrderedList) {
+                        setAlreadyOrderedList(listData.alreadyOrderedList);
+                    } else {
+                        console.log("No alreadyOrderedList data in file");
+                    }
+
+
+
+                    console.log("-------Finished Reading List Data File------------");
+                } catch (err) {
+                    console.error("Error parsing JSON:", err.message);
+                }
+            }
+
+            // Read the file as text
+            reader.readAsText(file);
+
+        } catch (err) {
+            console.error("Error Reading order list file:", err.message);
+
+        }
+
+
+
+    }
+
+    const saveArraysToLocalStorage = () => {
 
         const listsSaveJSON = {
-            orderlist:orderList,
+            orderlist: orderList,
             outOfStockList: outOfStockList,
-            discontinuedList: discontinuedList, 
+            discontinuedList: discontinuedList,
+            alreadyOrderedList: alreadyOrderedList
+        }
+        localStorage.setItem('torchwoodListData', JSON.stringify(listsSaveJSON));
+
+    }
+
+    const saveListDataToFileHandler = () => {
+
+        const listsSaveJSON = {
+            orderlist: orderList,
+            outOfStockList: outOfStockList,
+            discontinuedList: discontinuedList,
             alreadyOrderedList: alreadyOrderedList
         }
         const blob = new Blob([JSON.stringify(listsSaveJSON, null, 2)], { type: 'application/json' });
@@ -216,6 +319,9 @@ const DBFReaderComponent = () => {
         link.download = 'listdata.json';
         link.click();
         URL.revokeObjectURL(url);
+
+        // After saving to a data file, also save to local storage
+        saveArraysToLocalStorage();
     }
 
     // --------------------------Create Hashmaps: -----------------------
@@ -337,22 +443,6 @@ const DBFReaderComponent = () => {
     }
 
 
-    // -----------------Selection Window  -----------------------
-    const handleRemoveFromSelection = (e) => {
-
-
-        if (selectedProductsList === null) {
-            return;
-        }
-        const parent = e.target.closest('li');
-
-        const idstring = "selection-";
-        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
-
-
-        setSelectedProductsList((prevList) => { return prevList.filter(item => item !== productIndex) });
-
-    }
 
 
 
@@ -433,6 +523,9 @@ const DBFReaderComponent = () => {
 
         if (!orderList.includes(productIndex)) {
             setOrderList((prevArray) => [...prevArray, productIndex]);
+            if (orderListScrollRef.current) {
+                orderListScrollRef.current.scrollTop = orderListScrollRef.current.scrollHeight;
+            }
         }
 
     };
@@ -463,14 +556,49 @@ const DBFReaderComponent = () => {
 
 
 
+    // Production Stuff
+
+    // useEffect(() => {
+    //     const dataFileLocationFromLocalStorage = localStorage.getItem('torchwoodDataLocation');
+
+    //     if (dataFileLocationFromLocalStorage === null) {
+    //         console.log("No Data File Location Found in Local Storage");
+    //         setShowSelectDataDialog(true);
+
+    //     }
+    // }, []); 
+
+
+    // Development Stuff
 
     useEffect(() => {
-        readFile(); // Call the function only once
-        readListDataFile();
-    }, []); // Empty dependency array ensures this runs only once
+        if (process.env.NODE_ENV === 'development') {
+            console.log('in development mode')
+            readFileFromHardCodedFileLocation().catch((error) => {
+                console.error("error reading files", error);
+            }); // Call the function only once
+        } else {
+            console.log('process.env.NODE_ENV Not in development mode')
+        }
+    }, []);
 
-   
 
+
+    // Autoloading any possible local storage state: 
+
+    useEffect(() => {
+        readListDataFromLocalStorageFileHandler();
+        setInitialPageLoadComplete(true);
+    }, []);
+
+    // Autosaving list variables to local storage: 
+
+    useEffect(() => {
+        if (initialPageLoadComplete) {
+            saveArraysToLocalStorage();
+        }
+
+    }, [orderList, outOfStockList, discontinuedList, alreadyOrderedList])
     // if (!suppressOutput) {
     //     console.log(`data is a length ${data.length} array`);
 
@@ -486,6 +614,8 @@ const DBFReaderComponent = () => {
     //     printArrayToString('assortmentAnalyzerProductList ', assortmentAnalyzerProductList);
     // }
 
+
+
     return (
         <>
 
@@ -499,9 +629,29 @@ const DBFReaderComponent = () => {
                     <button className="nav-bar-button" onClick={selectMainDisplayHandler}>Search</button>
                     <button className="nav-bar-button" onClick={selectAssortmentDisplayHandler}>Assortment Tool</button>
                     <button className="nav-bar-button" onClick={selectOrderingToolDisplayHandler}>Reorder Tool</button>
-                    <button className="nav-bar-button" onClick={saveArraysToFileHandler}>Save Data</button>
-                    <button className="nav-bar-button" onClick={readListDataFile}>Read Data</button>
+
+                    {/* <button className="nav-bar-button" onClick={readListDataFromLocalStorageFileHandler}>Read List Data</button> */}
+                    <button onClick={clickListFileInputHandler} className="nav-bar-button">
+                        Load List File
+                    </button>
+                    <button className="nav-bar-button" onClick={saveListDataToFileHandler}>Save List Data</button>
+                    <input
+                        className="choose-file-input"
+                        ref={listFileInputRef}
+                        id="list-file-upload"
+                        type="file"
+                        accept=".json"
+                        onChange={handleListFileChange}
+                        style={{ display: "none" }}
+                    />
+                    {/* <TextInputModal 
+                    showModal = {showSelectDataDialog}
+                    setShowModal = {setShowSelectDataDialog}
+                    dataFolder={dataFolder} 
+                    setDataFolder ={setDataFolder}
+                    submitDataHandler={submitDataFolderPathHandler} /> */}
                 </div>
+                {listDataMessage && <p>{listDataMessage}</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 {data.length > 0 && (
                     <p>Data Loaded!</p>
@@ -583,7 +733,9 @@ const DBFReaderComponent = () => {
                     data={data}
                     clickItemHandler={showProductDetailsHandler}
                     orderList={orderList}
-                    setOrderList={setOrderList} />
+                    setOrderList={setOrderList}
+                    orderListScrollRef={orderListScrollRef}
+                />
 
                 <ListDisplays
                     data={data}

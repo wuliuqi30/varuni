@@ -103,12 +103,10 @@ const webpageSelectionEnums = {
 
 const listSelectionsEnums = {
    
-   
+    reorderedAlreadyList: { name: "already-ordered-list", displayName: "Already Ordered" },
     selectionList: { name: "selection-list", displayName: "Selected Items" },
-    reorderedAlreadyList: { name: "already-ordered-list", displayName: "Already Ordered This Week" },
-    outOfStockList: { name: "out-of-stock-list", displayName: "Out Of Stock Items" },
-    discontinuedList: { name: "discontinued-list", displayName: "Discontinued Items" }
-
+    outOfStockList: { name: "out-of-stock-list", displayName: "Out Of Stock" },
+    discontinuedList: { name: "discontinued-list", displayName: "Discontinued" }
 }
 
 const actionSelectionsEnums = {

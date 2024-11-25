@@ -19,7 +19,7 @@ export function ListDisplays({
 
     const suppressOutput = true;
 
-    const [selectedOption, setSelectedOption] = useState(listSelectionsEnums.selectionList.name);
+    const [selectedOption, setSelectedOption] = useState(listSelectionsEnums.reorderedAlreadyList.name);
 
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -36,7 +36,7 @@ export function ListDisplays({
             currentlyDisplayedList = selectedProductsList;
             currentListSetterCallback = setSelectedProductsList;
             break;
-        
+
 
         case 'out-of-stock-list':
             currentlyDisplayedList = outOfStockList;
@@ -61,6 +61,13 @@ export function ListDisplays({
 
     }
 
+    const clickClearListHandler = () => {
+        const isConfirmed = window.confirm("Are you sure you want to delete everything in the order list? This cannot be undone.");
+        if (isConfirmed){
+            currentListSetterCallback([]);
+        }
+    }
+
     if (!suppressOutput) {
         if (currentlyDisplayedList) {
             printArrayToString("CurrentlyDisplayedList:", currentlyDisplayedList);
@@ -69,11 +76,12 @@ export function ListDisplays({
         console.log(currentListSetterCallback);
 
     }
+
+
     return (
         <div className='list-display-window'>
-            <div className="list-header">
-                <label htmlFor="list-dropdown">
-                </label>
+            <div className="list-display-header">
+               
                 <select
                     id="list-dropdown"
                     className="list-dropdown-styles"
@@ -84,11 +92,10 @@ export function ListDisplays({
                             <option key={listObject.name} value={listObject.name}> {listObject.displayName}</option>
                         )
                     })}
-
-
                 </select>
+                <button className="order-list-clear-btn" onClick={clickClearListHandler}>Clear List?</button>
             </div>
-            {currentlyDisplayedList.length > 0 &&
+            {((currentlyDisplayedList.length > 0) && (data.length > 0)) &&
                 <ul className="current-selection-window-list">
                     {currentlyDisplayedList.map((index) => {
                         const thisProduct = data[index];
@@ -97,13 +104,13 @@ export function ListDisplays({
                                 key={thisProduct.CODE_NUM}
                                 id={`selection-${thisProduct.INDEX}`}
                                 className='list-result-li'>
-                               
+
 
                                 <button
                                     className="list-display-info"
                                     onClick={(event) => clickItemHandler(event, thisProduct.INDEX)}>
                                     <p>{thisProduct["BRAND"]} {thisProduct["DESCRIP"]} {thisProduct["SIZE"]}</p>
-                                 
+
                                 </button>
                                 <button className="list-delete-button" onClick={(event) => deleteFunction(event, thisProduct.INDEX)}>X</button>
                             </li>
