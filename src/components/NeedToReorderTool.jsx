@@ -240,7 +240,11 @@ export function NeedToReorderTool({
 
                     }
                 </tbody>
+                
             </table>
+            {(data.length < 1) && <p> No Data </p>
+                
+            }
 
 
 

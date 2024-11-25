@@ -12,6 +12,7 @@ import { webpageSelectionEnums } from '../data/constants';
 import { NeedToReorderTool } from './NeedToReorderTool';
 import { printArrayToString, removeTrailingSlash } from '../helper-fns/helperFunctions'
 import { TextInputModal } from './TextInputModal'
+import { readDbfFile } from './readDbfFile'
 
 const DBFReaderComponent = () => {
 
@@ -29,14 +30,9 @@ const DBFReaderComponent = () => {
     // Data: 
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
-
-    const [dataFolder, setDataFolder] = useState("");
-    const [showSelectDataDialog, setShowSelectDataDialog] = useState(false);
-
-    const listFileInputRef = useRef(null);
+ 
+    // List Data
     const [listDataMessage, setListDataMessage] = useState("");
-
-
 
 
     // Page View: 
@@ -92,72 +88,72 @@ const DBFReaderComponent = () => {
             const buffer = await response.arrayBuffer();
 
 
-            console.log(buffer);
-            const view = new DataView(buffer);
+            const dataRecords = readDbfFile(buffer);
 
 
-            const headerHeaderLength = 32;
-            const fieldDescriptorSize = 32;
-            const year = view.getUint8(1) + 2000; // Add 1900 to the YY value
-            const month = view.getUint8(2);        // Get the MM value
-            const day = view.getUint8(3);          // Get the DD value
-
-            const numRecords = view.getInt32(4, true);
-            const headerSize = view.getInt16(8, true); // Header size
-            const recordLength = view.getInt16(10, true); // Record length
-            const shouldBeZero = view.getInt16(12, true); // Record length
+            // const view = new DataView(buffer);
 
 
-            const fields = [];
-            let currentOffset = 0
-            for (let i = headerHeaderLength; i < headerSize; i += fieldDescriptorSize) {
+            // const headerHeaderLength = 32;
+            // const fieldDescriptorSize = 32;
+            // const year = view.getUint8(1) + 2000; // Add 1900 to the YY value
+            // const month = view.getUint8(2);        // Get the MM value
+            // const day = view.getUint8(3);          // Get the DD value
 
-                const fieldName = String.fromCharCode.apply(null, new Uint8Array(buffer, i, 11)).replace(/[\u0000\u0001\u00FF]/g, '');
-                const fieldType = String.fromCharCode(view.getUint8(i + 11));
-                const fieldLength = view.getUint8(i + 16); //
-                //console.log(`i is ${i}, fieldName ${fieldName}, fieldType ${fieldType} fieldLength: ${fieldLength}`);
-                if (fieldName === '') break; // End of fields
-                if (fieldType == '5') break;
-                fields.push({ name: fieldName, type: fieldType, length: fieldLength, offset: currentOffset });
-                currentOffset += fieldLength;
-            }
+            // const numRecords = view.getInt32(4, true);
+            // const headerSize = view.getInt16(8, true); // Header size
+            // const recordLength = view.getInt16(10, true); // Record length
+            // const shouldBeZero = view.getInt16(12, true); // Record length
 
-            console.log("Fields: ");
-            console.log(fields);
 
-            // Read records
-            const records = [];
-            //console.log(`headerSize ${headerSize}, buffer.byteLength ${buffer.byteLength} and recordLength ${recordLength}`);
-            let count = 0;
-            for (let i = headerSize; i < buffer.byteLength; i += recordLength) {
-                //console.log(`in for loop for records, i: ${i})`);
+            // const fields = [];
+            // let currentOffset = 0
+            // for (let i = headerHeaderLength; i < headerSize; i += fieldDescriptorSize) {
 
-                const record = {};
-                for (const field of fields) {
-                    //console.log('field:');
-                    //console.log(field);
-                    const fieldValue = readFieldValue(view, i, field, count);
-                    //console.log(`fieldValue is ${fieldValue} field.name is ${field.name}`);
-                    record[field.name] = fieldValue;
-                }
+            //     const fieldName = String.fromCharCode.apply(null, new Uint8Array(buffer, i, 11)).replace(/[\u0000\u0001\u00FF]/g, '');
+            //     const fieldType = String.fromCharCode(view.getUint8(i + 11));
+            //     const fieldLength = view.getUint8(i + 16); //
+            //     //console.log(`i is ${i}, fieldName ${fieldName}, fieldType ${fieldType} fieldLength: ${fieldLength}`);
+            //     if (fieldName === '') break; // End of fields
+            //     if (fieldType == '5') break;
+            //     fields.push({ name: fieldName, type: fieldType, length: fieldLength, offset: currentOffset });
+            //     currentOffset += fieldLength;
+            // }
 
-                records.push(record);
-                record["INDEX"] = count;
-                // if (count > 400) {
-                //     break;
-                // }
-                count++;
+            // console.log("Fields: ");
+            // console.log(fields);
 
-            }
-            records.pop();
-            setData(records);
-            console.log("Obtained Records: ");
-            console.log(records);
+            // // Read records
+            // const records = [];
+            // //console.log(`headerSize ${headerSize}, buffer.byteLength ${buffer.byteLength} and recordLength ${recordLength}`);
+            // let count = 0;
+            // for (let i = headerSize; i < buffer.byteLength; i += recordLength) {
+            //     //console.log(`in for loop for records, i: ${i})`);
+
+            //     const record = {};
+            //     for (const field of fields) {
+            //         //console.log('field:');
+            //         //console.log(field);
+            //         const fieldValue = readFieldValue(view, i, field, count);
+            //         //console.log(`fieldValue is ${fieldValue} field.name is ${field.name}`);
+            //         record[field.name] = fieldValue;
+            //     }
+
+            //     records.push(record);
+            //     record["INDEX"] = count;
+            //     // if (count > 400) {
+            //     //     break;
+            //     // }
+            //     count++;
+
+            // }
+            // records.pop();
+            // setData(records);
+            // console.log("Obtained Records: ");
+            // console.log(records);
+            setData(dataRecords);
             console.log("-------Finished Reading Data------------");
 
-            //console.log("Attempting to save data file to localstorage");
-            //localStorage.setItem('torchwoodAllData', JSON.stringify(records));
-            //console.log("Finished saving data file to localstorage");
 
         } catch (err) {
             console.error("Error reading file:", err.message);
@@ -165,39 +161,37 @@ const DBFReaderComponent = () => {
         }
     }
 
-
-
-    const readFieldValue = (view, offset, field, count) => {
-
-        const fieldOffset = offset + field.offset; // Calculate field's offset in the record
-        const fieldOffsetModified = offset + field.offset + 1; // Calculate field's offset in the record
-        //console.log(`in readFieldValue, view ${view} offset ${offset} and field ${field} fieldOffset ${fieldOffset}`);
-        //const length = field.length;
-        if (fieldOffset + field.length > view.byteLength) {
-            //console.warn(`Skipping field ${field.name} at count: ${count} as it exceeds buffer bounds with offset ${fieldOffset} and length ${field.length}`);
-            return null; // Skip reading this field
-        }
-
-        let readField = String.fromCharCode.apply(null, new Uint8Array(view.buffer, fieldOffsetModified, field.length)).trim();
-        if (field.type === 'C') { // Character
-            return readField;
-        } else if (field.type === 'N') { // Numeric
-            return Number(readField);
-
-        } else if (field.type == 'D') {
-            if (readField === "") {
-                return null;
-            }
-            return new Date(Number(readField.substring(0, 4)), Number(readField.substring(4, 6)) - 1, Number(readField.substring(6, 8)));
-        }
-
-
-    };
-
-
-    const readFileFromUserInput = () => {
-
+    const clickDataFileInputHandler = () => {
+        document.getElementById("data-file-upload").click();
     }
+
+    const readFileFromSelectedFileLocation = async (event) => {
+
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            try {
+
+                const buffer = e.target.result;   
+                const dataRecords = readDbfFile(buffer);
+
+
+                setData(dataRecords);
+                console.log("-------Finished Reading Data------------");
+
+
+            } catch (err) {
+                console.error("Error reading file:", err.message);
+                setError('Error reading DBF file: ' + err.message);
+            }
+        }
+
+        console.log("About to call reader.readAsArrayBuffer(file);");
+        reader.readAsArrayBuffer(file); // Read the file as an ArrayBuffer
+    }
+
 
 
     // ----------------- Loading and Reading OrderList File-----------------------
@@ -225,15 +219,6 @@ const DBFReaderComponent = () => {
         } else {
             setListDataMessage("No List Data File Found, please click 'Choose List File' button");
         }
-    }
-
-    const readListDataFileFromUserSelection = async () => {
-
-        if (listFileInputRef.current) {
-            listFileInputRef.current.click(); // Programmatically trigger the file input
-        }
-
-
     }
 
     const handleListFileChange = async (event) => {
@@ -367,6 +352,11 @@ const DBFReaderComponent = () => {
 
         return { productsByCodeNum: byCodeNum, productsByBrand, productsByDescription: byDescription };
     }, [alphabetTrie, data]);
+
+    // Automatically show some data
+    useEffect(() => {
+        searchForProductByBrandHandler('A');
+    }, [productsByCodeNum])
 
     // Now you can use these maps for lookups within the component
     const getProductIndicesByCode = (code) => productsByCodeNum.get(code);
@@ -569,17 +559,20 @@ const DBFReaderComponent = () => {
     // }, []); 
 
 
-    // Development Stuff
+    // On Page Load
 
     useEffect(() => {
         if (process.env.NODE_ENV === 'development') {
-            console.log('in development mode')
+
             readFileFromHardCodedFileLocation().catch((error) => {
                 console.error("error reading files", error);
             }); // Call the function only once
+        } else if (process.env.NODE_ENV === 'production') {
+            console.log('process.env.NODE_ENV in production mode, not automatically loading data file')
         } else {
-            console.log('process.env.NODE_ENV Not in development mode')
+            console.log("Not in development or production");
         }
+
     }, []);
 
 
@@ -591,11 +584,13 @@ const DBFReaderComponent = () => {
         setInitialPageLoadComplete(true);
     }, []);
 
-    // Autosaving list variables to local storage: 
 
+    // Things to do after the initial render.
     useEffect(() => {
         if (initialPageLoadComplete) {
+            // Autosaving list variables to local storage: 
             saveArraysToLocalStorage();
+
         }
 
     }, [orderList, outOfStockList, discontinuedList, alreadyOrderedList])
@@ -631,19 +626,34 @@ const DBFReaderComponent = () => {
                     <button className="nav-bar-button" onClick={selectOrderingToolDisplayHandler}>Reorder Tool</button>
 
                     {/* <button className="nav-bar-button" onClick={readListDataFromLocalStorageFileHandler}>Read List Data</button> */}
+
+                    <button onClick={clickDataFileInputHandler} className="nav-bar-button">
+                        Select Data
+                    </button>
+                    <input
+                        className="choose-file-input"
+
+                        id="data-file-upload"
+                        type="file"
+                        accept=".dbf"
+                        onChange={readFileFromSelectedFileLocation}
+                       
+                    />
+
                     <button onClick={clickListFileInputHandler} className="nav-bar-button">
                         Load List File
                     </button>
-                    <button className="nav-bar-button" onClick={saveListDataToFileHandler}>Save List Data</button>
                     <input
                         className="choose-file-input"
-                        ref={listFileInputRef}
+                       
                         id="list-file-upload"
                         type="file"
                         accept=".json"
                         onChange={handleListFileChange}
                         style={{ display: "none" }}
                     />
+                    <button className="nav-bar-button" onClick={saveListDataToFileHandler}>Save List Data</button>
+
                     {/* <TextInputModal 
                     showModal = {showSelectDataDialog}
                     setShowModal = {setShowSelectDataDialog}

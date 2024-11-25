@@ -63,7 +63,7 @@ export function ListDisplays({
 
     const clickClearListHandler = () => {
         const isConfirmed = window.confirm("Are you sure you want to delete everything in the order list? This cannot be undone.");
-        if (isConfirmed){
+        if (isConfirmed) {
             currentListSetterCallback([]);
         }
     }
@@ -81,7 +81,7 @@ export function ListDisplays({
     return (
         <div className='list-display-window'>
             <div className="list-display-header">
-               
+
                 <select
                     id="list-dropdown"
                     className="list-dropdown-styles"
@@ -119,7 +119,11 @@ export function ListDisplays({
                         )
                     })
                     }
-                </ul>}
+                </ul>
+            }
+            {(data.length < 1) && <p> No Data </p>
+
+            }
 
         </div>
     )

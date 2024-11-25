@@ -277,6 +277,20 @@ h2 {
   flex: 0 0 auto;
 }
 
+.search-page-turn-div {
+
+
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  justify-self: flex-end;
+  margin-top: auto;
+}
+
+
+
 .page-turn-div {
 
 

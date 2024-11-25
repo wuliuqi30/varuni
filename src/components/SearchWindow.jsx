@@ -75,7 +75,7 @@ export function SearchWindow({
 
                     <button onClick={prevPageHandler}> {'<'} </button>
                     <button onClick={nextPageHandler}> {'>'} </button>
-                    <p>{`Page ${searchPageNumber}/${lastPage}`}</p>
+                    <p>{`Page ${lastPage === 0 ? 0 : searchPageNumber}/${lastPage}`}</p>
 
                 </div>
                 <button className="search-results-clear-all-button" onClick={handleUncheckAllClick}> Uncheck All</button>
@@ -139,13 +139,15 @@ export function SearchWindow({
                     })}
                 </tbody>
             </table>
+            {(data.length < 1) && <p> No Data </p>
+                
+            }
 
-
-            <div className="page-turn-div">
+            <div className="search-page-turn-div">
 
                 <button onClick={prevPageHandler}> Previous Page </button>
                 <button onClick={nextPageHandler}> Next Page </button>
-                <p>{`Page ${searchPageNumber}/${lastPage}`}</p>
+                <p>{`Page ${lastPage === 0 ? 0 : searchPageNumber}/${lastPage}`}</p>
 
             </div>
 
