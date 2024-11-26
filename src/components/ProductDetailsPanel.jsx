@@ -1,6 +1,6 @@
 import { Chart } from "react-google-charts";
 import { barChartOptions } from "../data/constants";
-
+import { format } from "date-fns"
 
 
 export function ProductDetailsPanel({
@@ -39,8 +39,8 @@ export function ProductDetailsPanel({
                     </div>
                 } */}
                 {productDataArray.map((productData) => {
-                    const productTitle = `${productData.BRAND} ${productData.DESCRIP} ${productData.SIZE}, On Hand: ${productData.QTY_ON_HND}`;
-
+                    const productTitle = `${productData.BRAND} ${productData.DESCRIP} ${productData.SIZE}`;
+                    const productExtraInfo = `On Hand: ${productData.QTY_ON_HND}, Last Edit Date: ${format(productData.LAST_EDIT,'M/d/yy')}`;
                     const data = [
                         ["Element", "Number of Sales", { role: "style" }, { type: 'number', role: 'annotation' }]
                     ]
@@ -80,7 +80,10 @@ export function ProductDetailsPanel({
                             className="product-details-item"
                             id={`product-details-item-${productData.INDEX}`}>
                             <div className="product-details-item-header">
-                                <div className="product-details-chart-title">{productTitle}</div>
+                                <div className="product-details-chart-title">
+                                    <p style={{textAlign:'left', color: 'red'}}>{productTitle}</p>
+                                    <p style={{textAlign:'left', color:'black'}}>{productExtraInfo}</p>
+                                </div>
                                 <button className="remove-product-details-button" onClick={removeProductDetailsHandler}>Remove</button>
                             </div>
                             <Chart chartType="ColumnChart" data={data} options={options} />

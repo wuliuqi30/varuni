@@ -6,20 +6,13 @@ import { useState } from 'react';
 export function ListDisplays({
     data,
     clickItemHandler,
-    selectedProductsList,
-    setSelectedProductsList,
-    outOfStockList,
-    setOutOfStockList,
-    discontinuedList,
-    setDiscontinuedList,
-    alreadyOrderedList,
-    setAlreadyOrderedList
-
+    allLists,
+    allListSetterCallbacks
 }) {
 
     const suppressOutput = true;
 
-    const [selectedOption, setSelectedOption] = useState(listSelectionsEnums.reorderedAlreadyList.name);
+    const [selectedOption, setSelectedOption] = useState(Object.keys(listSelectionsEnums)[0]);
 
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -31,29 +24,9 @@ export function ListDisplays({
         console.log('No List Selected');
     };
 
-    switch (selectedOption) {
-        case 'selection-list':
-            currentlyDisplayedList = selectedProductsList;
-            currentListSetterCallback = setSelectedProductsList;
-            break;
-
-
-        case 'out-of-stock-list':
-            currentlyDisplayedList = outOfStockList;
-            currentListSetterCallback = setOutOfStockList;
-            break;
-        case 'discontinued-list':
-            currentlyDisplayedList = discontinuedList;
-            currentListSetterCallback = setDiscontinuedList;
-            break;
-        case 'already-ordered-list':
-            currentlyDisplayedList = alreadyOrderedList;
-            currentListSetterCallback = setAlreadyOrderedList;
-            break;
-        default:
-            console.log('No List Selected');
-
-    }
+    currentlyDisplayedList = allLists[selectedOption];
+    currentListSetterCallback = allListSetterCallbacks[selectedOption];
+    
 
     const deleteFunction = (event, productIndex) => {
 
@@ -87,9 +60,9 @@ export function ListDisplays({
                     className="list-dropdown-styles"
                     value={selectedOption}
                     onChange={handleChange}>
-                    {Object.values(listSelectionsEnums).map((listObject) => {
+                    {Object.keys(listSelectionsEnums).map((objectKey) => {
                         return (
-                            <option key={listObject.name} value={listObject.name}> {listObject.displayName}</option>
+                            <option key={objectKey} value={objectKey}> {listSelectionsEnums[objectKey].displayName}</option>
                         )
                     })}
                 </select>

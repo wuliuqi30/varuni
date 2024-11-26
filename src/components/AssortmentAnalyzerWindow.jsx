@@ -455,6 +455,13 @@ export function AssortmentAnalyzerWindow({
 
     let totalThings = sumOfItems(productDataArray, productThingReorderAmounts);
 
+
+    const removeAllAssortedItemsClickHandler = () => {
+        const isConfirmed = window.confirm("Are you sure you want to delete everything in the order list? This cannot be undone.");
+        if (isConfirmed) {
+            removeAllAssortedItemsHandler([]);
+        }
+    }
     // if (!suppressOutput) {
     //     console.log("Rerendering The Analyzer Window");
     //     console.log("Case Order Number Array (productCaseAmounts) is: ");
@@ -467,18 +474,7 @@ export function AssortmentAnalyzerWindow({
     return (
         <div className='assortment-analyzer-main-window'>
             <h2>Assorted Ordering Tool</h2>
-            <p>Instructions: Find products using the search window and click the check box to &quot;select&quot; them. Once you have selected all the products you want </p>
-            <div className="assortment-analyzer-button-bar">
-                <button
-                    className="assortment-analyzer-button"
-                    onClick={importSelectionToAssortmentAnalyzerHandler}
-                >Import Selection!
-                </button>
-                <button onClick={removeAllAssortedItemsHandler}>
-                    Remove All Items
-                </button>
-
-            </div>
+            
 
 
 
@@ -516,13 +512,18 @@ export function AssortmentAnalyzerWindow({
                     onChange={changeLastTillDateHandler}
                 /> */}
             </div>
-            <div className="calculate-bar">
+
+            <div className="assortment-analyzer-button-bar">
+                <button className="do-something-button" onClick={removeAllAssortedItemsClickHandler}>
+                    Remove All Items
+                </button>
                 <button
-                    className="assortment-analyzer-calculate-button"
+                    className="do-something-button"
                     onClick={getOrderQuantitiesMethod2}
                 > Calculate!</button>
                 <div className="calculation-info-message">{calculationInfoMessage}</div>
             </div>
+           
             {/* {analysisState &&
                 <button onClick={handleEndAnalysisClick}>Close Assortment Analysis</button>} */}
 
@@ -539,7 +540,7 @@ export function AssortmentAnalyzerWindow({
                                     <button
                                         className="assortment-list-info"
                                         onClick={(event) => showDetailsHandler(event, product.INDEX)}>
-                                        {product["SIZE"]} {product["DESCRIP"]}
+                                        {product["SIZE"]} {product["DESCRIP"]}, {product["QTY_CASE"]}/Case
 
                                     </button>
                                     <input
@@ -553,7 +554,7 @@ export function AssortmentAnalyzerWindow({
                                     />
                                     {/* <div>{runoutTimeLabelArray[index]}</div> */}
                                     <div>{runoutTimeLabelArray[index]}</div>
-                                    <button onClick={handleRemoveAssortmentItem} className="assortment-analyzer-list-delete">X</button>
+                                    <button onClick={handleRemoveAssortmentItem} className="assortment-analyzer-list-delete">Remove</button>
                                 </li>
                             )
                         })}

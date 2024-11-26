@@ -8,7 +8,8 @@ export function OrderListDisplay({
     clickItemHandler,
     orderList,
     setOrderList,
-    orderListScrollRef
+    orderListScrollRef,
+    addToAlreadyOrderedListHandler
 
 }) {
 
@@ -19,6 +20,11 @@ export function OrderListDisplay({
 
         setOrderList((prevList) => { return prevList.filter(item => item !== productIndex) });
 
+    }
+
+    const addToOrderListHandler =(event, productIndex) => {
+        deleteFunction(event, productIndex);
+        addToAlreadyOrderedListHandler(event, productIndex);
     }
 
     const clickClearListHandler = () => {
@@ -52,7 +58,16 @@ export function OrderListDisplay({
                                     <p>{thisProduct["BRAND"]} {thisProduct["DESCRIP"]} {thisProduct["SIZE"]}</p>
 
                                 </button>
-                                <button className="list-delete-button" onClick={(event) => deleteFunction(event, thisProduct.INDEX)}>X</button>
+                                <button
+                                    className="add-to-order-list-button"
+                                    onClick={(event) => addToOrderListHandler(event, thisProduct.INDEX)}>
+                                    Ordered?
+                                </button>
+                                <button
+                                    className="list-delete-button"
+                                    onClick={(event) => deleteFunction(event, thisProduct.INDEX)}>
+                                    X
+                                </button>
                             </li>
 
 
@@ -62,9 +77,9 @@ export function OrderListDisplay({
                 </ul>
             }
             {(data.length < 1) && <p> No Data </p>
-                
+
             }
-            
+
 
         </div>
     )

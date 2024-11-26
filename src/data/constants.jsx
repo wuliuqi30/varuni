@@ -102,26 +102,36 @@ const webpageSelectionEnums = {
 }
 
 const listSelectionsEnums = {
-   
-    reorderedAlreadyList: { name: "already-ordered-list", displayName: "Already Ordered" },
+
+    alreadyOrderedList: { name: "already-ordered-list", displayName: "Already Ordered" },
     selectionList: { name: "selection-list", displayName: "Selected Items" },
     outOfStockList: { name: "out-of-stock-list", displayName: "Out Of Stock" },
-    discontinuedList: { name: "discontinued-list", displayName: "Discontinued" }
+    discontinuedList: { name: "discontinued-list", displayName: "Discontinued" },
+    recountInventoryList: { name: "recount-list", displayName: "Recount List" },
+    labelList: { name: "label-list", displayName: "Label List" },
+    watchList: { name: "watch-list", displayName: "Watch List" }
+
 }
 
 const actionSelectionsEnums = {
-    
-    orderList: { name: "order-list", displayName: "Add to Order List" },
-    reorderedAlreadyList: { name: "already-ordered-list", displayName: "Mark Already Ordered" },
-    outOfStockList: { name: "out-of-stock-list", displayName: "Mark Out of Stock" },
-    discontinuedList: { name: "discontinued-list", displayName: "Mark Discontinued" }
 
+    orderList: { name: "order-list", displayName: "Add to Order List" },
+    alreadyOrderedList: { name: "already-ordered-list", displayName: "Mark Already Ordered" },
+    outOfStockList: { name: "out-of-stock-list", displayName: "Mark Out of Stock" },
+    discontinuedList: { name: "discontinued-list", displayName: "Mark Discontinued" },
+    recountInventoryList: { name: "recount-list", displayName: "Needs Recount" },
+    labelList: { name: "label-list", displayName: "Add to Label List" },
+    watchList: { name: "watch-list", displayName: "Add to Watch List" }
 }
 
-export { barChartOptions, 
-    monthsFromNowToDBFFileMonthName, 
-    webpageSelectionEnums, 
-    weeksFromNowToDBFFileMonthName, 
+
+
+export {
+    barChartOptions,
+    monthsFromNowToDBFFileMonthName,
+    webpageSelectionEnums,
+    weeksFromNowToDBFFileMonthName,
     dateFromNowFromWeeks,
     listSelectionsEnums,
-    actionSelectionsEnums };
+    actionSelectionsEnums
+};

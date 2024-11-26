@@ -65,6 +65,10 @@ const extrapolateMonthlySales = (product, m, analysisMethod) => {
 
 }
 
+const calculateAverageMonthlySales = (product) => {
+    return product.PRIORY / 12;
+}
+
 
 const extrapolateWeeklySales = (product, week, analysisMethod) => {
 
@@ -138,5 +142,6 @@ export {
     getLastTwelveMonthSales,
     extrapolateMonthlySales,
     extrapolateWeeklySales,
+    calculateAverageMonthlySales,
     removeTrailingSlash
 }

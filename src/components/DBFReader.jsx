@@ -30,20 +30,26 @@ const DBFReaderComponent = () => {
     // Data: 
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
- 
+
     // List Data
     const [listDataMessage, setListDataMessage] = useState("");
 
 
     // Page View: 
     const [webpageSelection, setWebpageSelection] = useState(webpageSelectionEnums.home);
-
+    2
     // Search: 
     const [searchBarValue, setSearchBarValue] = useState(null);
     const [searchResult, setSearchResult] = useState([]);
     const [alphabetTrie, setAlphabetTree] = useState(trie([]));
     const [searchPageNumber, setSearchPageNumber] = useState(1); // 1 indexed.
 
+    // Small Search Window (in assortment list now)
+
+    const [smallSearchBarValue, setSmallSearchBarValue] = useState(null);
+    const [smallSearchResult, setSmallSearchResult] = useState([]);
+
+    const [smallSearchPageNumber, setSmallSearchPageNumber] = useState(1); // 1 indexed.
 
     // Selected Products From Search: Stores the product.INDEX of the selected products
     const [selectedProductsList, setSelectedProductsList] = useState([]);
@@ -64,9 +70,9 @@ const DBFReaderComponent = () => {
     const [outOfStockList, setOutOfStockList] = useState([]);
     const [discontinuedList, setDiscontinuedList] = useState([]);
     const [alreadyOrderedList, setAlreadyOrderedList] = useState([]);
-
-
-
+    const [recountInventoryList, setRecountInventoryList] = useState([]);
+    const [labelList, setLabelList] = useState([]);
+    const [watchList, setWatchList] = useState([]);
 
 
     // ----------------- Loading and Reading DBF file -----------------------
@@ -86,71 +92,8 @@ const DBFReaderComponent = () => {
                 throw new Error(`Failed to fetch file: ${response.statusText}`);
             }
             const buffer = await response.arrayBuffer();
-
-
             const dataRecords = readDbfFile(buffer);
 
-
-            // const view = new DataView(buffer);
-
-
-            // const headerHeaderLength = 32;
-            // const fieldDescriptorSize = 32;
-            // const year = view.getUint8(1) + 2000; // Add 1900 to the YY value
-            // const month = view.getUint8(2);        // Get the MM value
-            // const day = view.getUint8(3);          // Get the DD value
-
-            // const numRecords = view.getInt32(4, true);
-            // const headerSize = view.getInt16(8, true); // Header size
-            // const recordLength = view.getInt16(10, true); // Record length
-            // const shouldBeZero = view.getInt16(12, true); // Record length
-
-
-            // const fields = [];
-            // let currentOffset = 0
-            // for (let i = headerHeaderLength; i < headerSize; i += fieldDescriptorSize) {
-
-            //     const fieldName = String.fromCharCode.apply(null, new Uint8Array(buffer, i, 11)).replace(/[\u0000\u0001\u00FF]/g, '');
-            //     const fieldType = String.fromCharCode(view.getUint8(i + 11));
-            //     const fieldLength = view.getUint8(i + 16); //
-            //     //console.log(`i is ${i}, fieldName ${fieldName}, fieldType ${fieldType} fieldLength: ${fieldLength}`);
-            //     if (fieldName === '') break; // End of fields
-            //     if (fieldType == '5') break;
-            //     fields.push({ name: fieldName, type: fieldType, length: fieldLength, offset: currentOffset });
-            //     currentOffset += fieldLength;
-            // }
-
-            // console.log("Fields: ");
-            // console.log(fields);
-
-            // // Read records
-            // const records = [];
-            // //console.log(`headerSize ${headerSize}, buffer.byteLength ${buffer.byteLength} and recordLength ${recordLength}`);
-            // let count = 0;
-            // for (let i = headerSize; i < buffer.byteLength; i += recordLength) {
-            //     //console.log(`in for loop for records, i: ${i})`);
-
-            //     const record = {};
-            //     for (const field of fields) {
-            //         //console.log('field:');
-            //         //console.log(field);
-            //         const fieldValue = readFieldValue(view, i, field, count);
-            //         //console.log(`fieldValue is ${fieldValue} field.name is ${field.name}`);
-            //         record[field.name] = fieldValue;
-            //     }
-
-            //     records.push(record);
-            //     record["INDEX"] = count;
-            //     // if (count > 400) {
-            //     //     break;
-            //     // }
-            //     count++;
-
-            // }
-            // records.pop();
-            // setData(records);
-            // console.log("Obtained Records: ");
-            // console.log(records);
             setData(dataRecords);
             console.log("-------Finished Reading Data------------");
 
@@ -170,11 +113,11 @@ const DBFReaderComponent = () => {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        
+
         reader.onload = (e) => {
             try {
 
-                const buffer = e.target.result;   
+                const buffer = e.target.result;
                 const dataRecords = readDbfFile(buffer);
 
 
@@ -213,6 +156,9 @@ const DBFReaderComponent = () => {
             setOutOfStockList(jsonObject.outOfStockList);
             setDiscontinuedList(jsonObject.discontinuedList);
             setAlreadyOrderedList(jsonObject.alreadyOrderedList);
+            setRecountInventoryList(jsonObject.recountInventoryList);
+            setLabelList(jsonObject.labelList);
+            setWatchList(jsonObject.watchList);
             console.log("-------Finished Reading List Data File------------");
             setListDataMessage("Read List Data from Local Storage");
 
@@ -256,6 +202,24 @@ const DBFReaderComponent = () => {
                     } else {
                         console.log("No alreadyOrderedList data in file");
                     }
+                    
+                    if (listData.recountInventoryList) {
+                        setRecountInventoryList(listData.recountInventoryList);
+                    } else {
+                        console.log("No recountInventoryList data in file");
+                    }
+
+                    if (listData.labelList) {
+                        setLabelList(listData.labelList);
+                    } else {
+                        console.log("No labelList data in file");
+                    }
+
+                    if (listData.watchList) {
+                        setWatchList(listData.watchList);
+                    } else {
+                        console.log("No watchList data in file");
+                    }
 
 
 
@@ -283,7 +247,10 @@ const DBFReaderComponent = () => {
             orderlist: orderList,
             outOfStockList: outOfStockList,
             discontinuedList: discontinuedList,
-            alreadyOrderedList: alreadyOrderedList
+            alreadyOrderedList: alreadyOrderedList,
+            recountInventoryList: recountInventoryList,
+            labelList: labelList,
+            watchList: watchList
         }
         localStorage.setItem('torchwoodListData', JSON.stringify(listsSaveJSON));
 
@@ -382,9 +349,22 @@ const DBFReaderComponent = () => {
 
     const changeSearchHandler = (e) => {
         const upperCaseVal = e.target.value.toUpperCase();
-        searchForProductByBrandHandler(upperCaseVal);
+        const returnval = searchForProductByBrandHandler(upperCaseVal);
+        if (returnval) {
+            setSearchResult(returnval);
+        }
         //console.log("Setting Search Bar Value");
         setSearchBarValue(upperCaseVal);
+    }
+
+    const changeSmallSearchHandler = (e) => {
+        const upperCaseVal = e.target.value.toUpperCase();
+        const returnval = searchForProductByBrandHandler(upperCaseVal);
+        if (returnval) {
+            setSmallSearchResult(returnval);
+        }
+        //console.log("Setting Search Bar Value");
+        setSmallSearchBarValue(upperCaseVal);
     }
 
 
@@ -405,8 +385,8 @@ const DBFReaderComponent = () => {
 
             newSearchResultArray.push(...allProductsForThisBrand);
         }
+        return newSearchResultArray;
 
-        setSearchResult(newSearchResultArray);
 
     };
 
@@ -481,6 +461,12 @@ const DBFReaderComponent = () => {
         setAssortmentAnalyzerProductList((prevArray) => [...prevArray, ...itemsToAdd]);
     }
 
+    const addItemToAssortmentListHandler = (e, productIndex) => {
+        if (!assortmentAnalyzerProductList.includes(productIndex)) {
+            setAssortmentAnalyzerProductList((prevArray) => [...prevArray, productIndex]);
+        }
+    }
+
     const handleRemoveAssortmentItem = (e) => {
         e.stopPropagation();
 
@@ -499,6 +485,8 @@ const DBFReaderComponent = () => {
 
 
     //----------------------------- Reorder Tool ----------------------
+
+
 
     const removeFromReorderItemsListHandler = (e, productIndex) => {
         console.log(`removing product: ${productIndex}`);
@@ -519,6 +507,8 @@ const DBFReaderComponent = () => {
         }
 
     };
+
+ 
 
     const handleAddToOutOfStockListClick = (e, productIndex) => {
 
@@ -543,6 +533,32 @@ const DBFReaderComponent = () => {
         }
 
     };
+
+    const handleAddToRecountInventoryListClick = (e, productIndex) => {
+
+        if (!recountInventoryList.includes(productIndex)) {
+            setRecountInventoryList((prevArray) => [...prevArray, productIndex]);
+        }
+
+    };
+
+    const handleAddToLabelListClick = (e, productIndex) => {
+
+        if (!labelList.includes(productIndex)) {
+            setLabelList((prevArray) => [...prevArray, productIndex]);
+        }
+
+    };
+
+    const handleAddToWatchListClick = (e, productIndex) => {
+
+        if (!watchList.includes(productIndex)) {
+            setWatchList((prevArray) => [...prevArray, productIndex]);
+        }
+
+    };
+
+
 
 
 
@@ -593,7 +609,52 @@ const DBFReaderComponent = () => {
 
         }
 
-    }, [orderList, outOfStockList, discontinuedList, alreadyOrderedList])
+    }, [orderList, 
+        outOfStockList, 
+        discontinuedList, 
+        alreadyOrderedList,
+        recountInventoryList,
+        labelList,
+        watchList])
+
+
+
+
+    const allLists = {
+        orderList: orderList,
+        selectionList: selectedProductsList,
+        alreadyOrderedList: alreadyOrderedList,
+        outOfStockList:outOfStockList,
+        discontinuedList:discontinuedList,
+        recountInventoryList:recountInventoryList,
+        labelList:labelList,
+        watchList:watchList
+    }
+
+
+    const allAddToListCallbacks = {
+        orderList: handleAddToOrderListClick,
+        alreadyOrderedList: handleAddToAlreadyOrderedListClick,
+        outOfStockList:handleAddToOutOfStockListClick,
+        discontinuedList:handleAddToDiscontinuedListClick,
+        recountInventoryList:handleAddToRecountInventoryListClick,
+        labelList:handleAddToLabelListClick,
+        watchList:handleAddToWatchListClick
+
+    }
+
+    const allListSetterCallbacks = {
+        orderList: setOrderList,
+        alreadyOrderedList: setAlreadyOrderedList,
+        outOfStockList: setOutOfStockList,
+        discontinuedList: setDiscontinuedList,
+        recountInventoryList:setRecountInventoryList,
+        labelList:setLabelList,
+        watchList:setWatchList
+
+    }
+
+    
     // if (!suppressOutput) {
     //     console.log(`data is a length ${data.length} array`);
 
@@ -608,7 +669,6 @@ const DBFReaderComponent = () => {
     //     printArrayToString('alreadyOrderedList List', alreadyOrderedList);
     //     printArrayToString('assortmentAnalyzerProductList ', assortmentAnalyzerProductList);
     // }
-
 
 
     return (
@@ -637,7 +697,7 @@ const DBFReaderComponent = () => {
                         type="file"
                         accept=".dbf"
                         onChange={readFileFromSelectedFileLocation}
-                       
+
                     />
 
                     <button onClick={clickListFileInputHandler} className="nav-bar-button">
@@ -645,7 +705,7 @@ const DBFReaderComponent = () => {
                     </button>
                     <input
                         className="choose-file-input"
-                       
+
                         id="list-file-upload"
                         type="file"
                         accept=".json"
@@ -654,12 +714,6 @@ const DBFReaderComponent = () => {
                     />
                     <button className="nav-bar-button" onClick={saveListDataToFileHandler}>Save List Data</button>
 
-                    {/* <TextInputModal 
-                    showModal = {showSelectDataDialog}
-                    setShowModal = {setShowSelectDataDialog}
-                    dataFolder={dataFolder} 
-                    setDataFolder ={setDataFolder}
-                    submitDataHandler={submitDataFolderPathHandler} /> */}
                 </div>
                 {listDataMessage && <p>{listDataMessage}</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -681,11 +735,8 @@ const DBFReaderComponent = () => {
 
                         searchPageNumber={searchPageNumber}
                         setSearchPageNumber={setSearchPageNumber}
-                        handleUncheckAllClick={handleUncheckAllClick}
-                        addToOrderListHandler={handleAddToOrderListClick}
-                        addToOutOfStockHandler={handleAddToOutOfStockListClick}
-                        addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
-                        markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick} />
+                        handleUncheckAllClick={handleUncheckAllClick}                        
+                        allAddToListHandlers={allAddToListCallbacks} />
                 }
 
                 {webpageSelection === webpageSelectionEnums.assortmentTool &&
@@ -700,19 +751,15 @@ const DBFReaderComponent = () => {
                         />
                         <SmallSearchWindow
                             data={data}
-                            changeSearchHandler={changeSearchHandler}
-                            searchDisplayItemsArray={searchResult}
-                            selectedItemsIndicesArray={selectedProductsList}
-                            handleCheckBoxClick={handleCheckBoxClick}
+                            changeSearchHandler={changeSmallSearchHandler}
+                            searchDisplayItemsArray={smallSearchResult}
+
                             showDetailsHandler={showProductDetailsHandler}
 
-                            searchPageNumber={searchPageNumber}
-                            setSearchPageNumber={setSearchPageNumber}
-                            handleUncheckAllClick={handleUncheckAllClick}
-                            addToOrderListHandler={handleAddToOrderListClick}
-                            addToOutOfStockHandler={handleAddToOutOfStockListClick}
-                            addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
-                            markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick} />
+                            searchPageNumber={smallSearchPageNumber}
+                            setSearchPageNumber={setSmallSearchPageNumber}
+                            addToAssorterHandler={addItemToAssortmentListHandler}
+                        />
                     </>
                 }
 
@@ -724,10 +771,8 @@ const DBFReaderComponent = () => {
                         removeFromReorderItemsListHandler={removeFromReorderItemsListHandler}
                         reorderToolPageNumber={reorderToolPageNumber}
                         setReorderToolPageNumber={setReorderToolPageNumber}
-                        addToOrderListHandler={handleAddToOrderListClick}
-                        addToOutOfStockHandler={handleAddToOutOfStockListClick}
-                        addToDiscontinuedHandler={handleAddToDiscontinuedListClick}
-                        markAlreadyOrderedHandler={handleAddToAlreadyOrderedListClick}
+                        addToListHandlers= {allAddToListCallbacks}
+                        listStates ={allLists}
                         showProductDetailsHandler={showProductDetailsHandler} />
                 }
 
@@ -745,20 +790,14 @@ const DBFReaderComponent = () => {
                     orderList={orderList}
                     setOrderList={setOrderList}
                     orderListScrollRef={orderListScrollRef}
+                    addToAlreadyOrderedListHandler={handleAddToAlreadyOrderedListClick}
                 />
 
                 <ListDisplays
                     data={data}
                     clickItemHandler={showProductDetailsHandler}
-                    selectedProductsList={selectedProductsList}
-                    setSelectedProductsList={setSelectedProductsList}
-
-                    outOfStockList={outOfStockList}
-                    setOutOfStockList={setOutOfStockList}
-                    discontinuedList={discontinuedList}
-                    setDiscontinuedList={setDiscontinuedList}
-                    alreadyOrderedList={alreadyOrderedList}
-                    setAlreadyOrderedList={setAlreadyOrderedList}
+                    allLists={allLists}
+                    allListSetterCallbacks = {allListSetterCallbacks}                   
                 />
 
 

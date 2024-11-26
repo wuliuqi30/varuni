@@ -1,7 +1,7 @@
 
 
 
-import { calculateReorderPointFromQuantity } from '../helper-fns/helperFunctions';
+import { calculateReorderPointFromQuantity, calculateAverageMonthlySales } from '../helper-fns/helperFunctions';
 import { ReorderListDisplayItem } from './ReorderListDisplayItem';
 import { ReorderListHeader } from './ReorderListHeader'
 import { printArrayToString } from '../helper-fns/helperFunctions';
@@ -15,15 +15,13 @@ export function NeedToReorderTool({
     removeFromReorderItemsListHandler,
     reorderToolPageNumber,
     setReorderToolPageNumber,
-    addToOrderListHandler,
-    addToOutOfStockHandler,
-    addToDiscontinuedHandler,
-    markAlreadyOrderedHandler,
+    addToListHandlers,
+    listStates,
     showProductDetailsHandler
 
 }) {
 
-    const suppressOutput = false;
+    const suppressOutput = true;
 
     const listOfRefs = useRef([]);
     const [focusedIndex, setFocusedIndex] = useState(0);
@@ -54,10 +52,10 @@ export function NeedToReorderTool({
         if (listOfRefs.current[focusedIndex]) {
             listOfRefs.current[focusedIndex].focus();
         }
-      }, [focusedIndex]);
+    }, [focusedIndex]);
 
-      
-    const itemsPerPage = 7;
+
+    const itemsPerPage = 4;
 
 
     const lastPage = reorderItemsList.length > 0 ? Math.ceil(reorderItemsList.length / itemsPerPage) : 1;
@@ -70,64 +68,105 @@ export function NeedToReorderTool({
     }
 
 
+    // Add to Lists
     const addToOrderListHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
         removeFromReorderItemsListHandler(event, productIndex);
-        addToOrderListHandler(event, productIndex);
+        addToListHandlers.orderList(event, productIndex);
 
     }
     const addToOutOfStockHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
         removeFromReorderItemsListHandler(event, productIndex);
-        addToOutOfStockHandler(event, productIndex);
+        addToListHandlers.outOfStockList(event, productIndex);
     }
     const addToDiscontinuedHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
         removeFromReorderItemsListHandler(event, productIndex);
-        addToDiscontinuedHandler(event, productIndex);
+        addToListHandlers.discontinuedList(event, productIndex);
     }
     const markAlreadyOrderedHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
         removeFromReorderItemsListHandler(event, productIndex);
-        markAlreadyOrderedHandler(event, productIndex);
+        addToListHandlers.alreadyOrderedList(event, productIndex);
     }
+
+    const addToLabelListHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
+        removeFromReorderItemsListHandler(event, productIndex);
+        addToListHandlers.labelList(event, productIndex);
+    }
+    const addToWatchListHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
+        removeFromReorderItemsListHandler(event, productIndex);
+        addToListHandlers.watchList(event, productIndex);
+    }
+    const addToRecountListHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
+        removeFromReorderItemsListHandler(event, productIndex);
+        addToListHandlers.recountInventoryList(event, productIndex);
+    }
+
+
 
     const getReorderListHandler = () => {
 
 
         // 1: Filter the data to just get products that have a YTD > 0
+        if (!suppressOutput) {
+            console.log("Filtering by YTD and by MTD");
+        }
 
-        console.log("Filtering by YTD and by MTD");
-        const filteredData = data.filter(element => element.YTD > 0).filter(element => element.MTD > 0);
-        console.log("filteredData is: ");
-        console.log(filteredData);
+        // Filter Out What is Already On Certain Lists: c
+        const allExcludedLists = [...new Set([...listStates.orderList, 
+            ...listStates.alreadyOrderedList, 
+            ...listStates.discontinuedList, 
+            ...listStates.outOfStockList, 
+            ...listStates.watchList])];
 
+        const filteredOutListsData = data.filter(element => !allExcludedLists.includes(element.INDEX));
+            // filter(element => !listStates.discontinuedList.includes(element.INDEX)).
+            // filter(element => !listStates.alreadyOrderedList.includes(element.INDEX));
+
+        const filteredData = filteredOutListsData.filter(element => (element.YTD > 0) && (element.MTD > 0));
+
+
+        if (!suppressOutput) {
+            console.log("filteredData is: ");
+            console.log(filteredData);
+        }
         // 2: Make an array of the product INDEX and runout dates objects
         const itemArray = new Array(filteredData.length);
 
-
-        console.log("Starting Calculation of all reorder dates");
+        if (!suppressOutput) {
+            console.log("Starting Calculation of all reorder dates");
+        }
         for (let i = 0; i < itemArray.length; i++) {
             //console.log(`Calculating Item ${i}`);
             //console.log(filteredData[i]);
-            const reorderResult = calculateReorderPointFromQuantity(filteredData[i],
-                filteredData[i].QTY_ON_HND, 'previous-year');
+            const prod = filteredData[i];
+            const reorderResult = calculateReorderPointFromQuantity(prod,
+                prod.QTY_ON_HND, 'previous-year');
+            const averageMonthlySales = calculateAverageMonthlySales(prod);
             if (typeof reorderResult !== 'string') {
-                itemArray[i] = { index: filteredData[i].INDEX, reorderDate: reorderResult[0], reorderTimeWeeks: reorderResult[1] };
+                itemArray[i] = { index: prod.INDEX, reorderDate: reorderResult[0], reorderTimeWeeks: reorderResult[1], averageMonthlySales: averageMonthlySales };
             } else {
-                itemArray[i] = { index: filteredData[i].INDEX, reorderDate: null, reorderTimeWeeks: null };
+                itemArray[i] = { index: prod.INDEX, reorderDate: null, reorderTimeWeeks: null, averageMonthlySales: null };
             }
 
             if (i % 50 === 0) {
-                console.log(`Calculated Item ${i}`);
+                if (!suppressOutput) {
+                    console.log(`Calculated Item ${i}`);
+                }
             }
         }
-        console.log("Finished calculating all reorder dates");
-        console.log("itemArray is: ");
-        console.log(itemArray);
+        if (!suppressOutput) {
+            console.log("Finished calculating all reorder dates");
+            console.log("itemArray is: ");
+            console.log(itemArray);
+        }
+        // Order The List
+        itemArray.sort((a, b) => a.reorderTimeWeeks === b.reorderTimeWeeks ? b.averageMonthlySales - a.averageMonthlySales : a.reorderTimeWeeks - b.reorderTimeWeeks);
 
-        itemArray.sort((a, b) => a.reorderTimeWeeks - b.reorderTimeWeeks);
-        console.log("Finished sorting by reorder dates");
+        if (!suppressOutput) {
+            console.log("Finished sorting by reorder dates");
 
-        console.log("Resultant array (reorderResult):");
-        console.log(itemArray);
-
+            console.log("Resultant array (reorderResult):");
+            console.log(itemArray);
+        }
         // 4. sort the array of objects by reorder dates
 
         // 5. Display the first N number of objects in the window with a page change button, 
@@ -137,28 +176,33 @@ export function NeedToReorderTool({
 
         const numWeeksReorderFilter = 6;
         const finalFilteredData = itemArray.filter(element => element.reorderTimeWeeks < numWeeksReorderFilter);
-        console.log("finalFilteredData:");
-        console.log(finalFilteredData);
-
-        console.log("About to print product data:");
-        for (let i = finalFilteredData.length - 1; i > -1; i--) {
-            const product = data[finalFilteredData[i].index];
-            console.log(`${i}: ${product.BRAND} ${product.DESCRIP} ${product.SIZE} QTY: ${product.QTY_ON_HND} lasts ${finalFilteredData[i].reorderTimeWeeks}`)
+        if (!suppressOutput) {
+            console.log("finalFilteredData:");
+            console.log(finalFilteredData);
+            console.log("About to print product data:");
         }
 
+        if (!suppressOutput) {
+            for (let i = finalFilteredData.length - 1; i > -1; i--) {
+                const product = data[finalFilteredData[i].index];
+
+                console.log(`${i}: ${product.BRAND} ${product.DESCRIP} ${product.SIZE} QTY: ${product.QTY_ON_HND} lasts ${finalFilteredData[i].reorderTimeWeeks}`)
+
+            }
+        }
         setReorderItemsList(finalFilteredData);
 
 
     }
 
 
-    const handleFocus = (event, productIndex,listIndex) => {
-        console.log(`Product of Index ${productIndex} is focused!`);
+    const handleFocus = (event, productIndex, listIndex) => {
+        //console.log(`Product of Index ${productIndex} is focused!`);
         setFocusedIndex(listIndex);
         showProductDetailsHandler(event, productIndex);
     }
 
-    useEffect(() => {  
+    useEffect(() => {
         // Automatically focus the component when it mounts
         if (listOfRefs.current.length > 0) {
             listOfRefs.current[0].focus();
@@ -183,9 +227,9 @@ export function NeedToReorderTool({
 
             <div className="need-to-reorder-button-bar">
                 <h2>Ordering Tool</h2>
-                <button 
-                onClick={getReorderListHandler}
-                className ="calculate-reorder-items-button">Get Top Reorder Items</button>
+                <button
+                    onClick={getReorderListHandler}
+                    className="calculate-reorder-items-button">Get Top Reorder Items</button>
                 {(reorderItemsList !== null) &&
                     <div className="page-turn-div">
 
@@ -195,7 +239,7 @@ export function NeedToReorderTool({
 
                     </div>}
             </div>
-            <table>
+            <table className="large-table-style">
                 <thead>
                     <tr tabIndex="0">
 
@@ -232,7 +276,11 @@ export function NeedToReorderTool({
                                         addToOutOfStockHandler={addToOutOfStockHandlerAndRemoveFromReorderListHandler}
                                         addToDiscontinuedHandler={addToDiscontinuedHandlerAndRemoveFromReorderListHandler}
                                         markAlreadyOrderedHandler={markAlreadyOrderedHandlerAndRemoveFromReorderListHandler}
-                                        showProductDetailsHandler={showProductDetailsHandler}
+                                        addToLabelListHandler={addToLabelListHandlerAndRemoveFromReorderListHandler}
+                                        addToWatchListHandler={addToWatchListHandlerAndRemoveFromReorderListHandler}
+                                        addToRecountListHandler={addToRecountListHandlerAndRemoveFromReorderListHandler}
+
+
                                     />
                                 )
                             })}
@@ -240,10 +288,10 @@ export function NeedToReorderTool({
 
                     }
                 </tbody>
-                
+
             </table>
             {(data.length < 1) && <p> No Data </p>
-                
+
             }
 
 

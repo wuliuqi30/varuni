@@ -1,8 +1,10 @@
 
 import { Checkbox } from '@mui/material';
 import { TextField } from '@mui/material';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { actionSelectionsEnums } from '../data/constants';
+import { PageTurnDiv } from './PageTurnDiv';
+
 export function SearchWindow({
     data,
     changeSearchHandler,
@@ -13,13 +15,12 @@ export function SearchWindow({
     searchPageNumber,
     setSearchPageNumber,
     handleUncheckAllClick,
-    addToOrderListHandler,
-    addToOutOfStockHandler,
-    addToDiscontinuedHandler,
-    markAlreadyOrderedHandler }) {
+    allAddToListHandlers }) {
 
-    const itemsPerPage = 12;
+    const itemsPerPage = 11;
     const lastPage = Math.ceil(searchDisplayItemsArray.length / itemsPerPage);
+    const [focusedIndex, setFocusedIndex] = useState(0);
+    const listOfRefs = useRef([]);
 
     const nextPageHandler = () => {
         setSearchPageNumber(Math.min(searchPageNumber + 1, lastPage));
@@ -32,7 +33,38 @@ export function SearchWindow({
     const onChangeSearch = (e) => {
         setSearchPageNumber(1);
         changeSearchHandler(e);
+
     }
+
+    // Function to handle keydown event
+    const handleKeyDown = (e) => {
+        if (e.key === "ArrowDown") {
+            // Move focus to the next element
+            setFocusedIndex((prevIndex) => Math.min(prevIndex + 1, listOfRefs.current.length - 1));
+        } else if (e.key === "ArrowUp") {
+            // Move focus to the previous element
+            setFocusedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+        }
+    };
+
+    useEffect(() => {
+        // Add event listener for keydown
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            // Cleanup event listener on unmount
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, []);
+
+    useEffect(() => {
+        // Focus the element at the focused index
+        if (listOfRefs.current[focusedIndex]) {
+            listOfRefs.current[focusedIndex].focus();
+        }
+    }, [focusedIndex]);
+
+
 
     // Action Buttons
     const [selectedOption, setSelectedOption] = useState(actionSelectionsEnums.orderList.name);
@@ -40,25 +72,33 @@ export function SearchWindow({
 
     const handleActionChange = (event, productIndex) => {
         // Add item to appropriate list. Also set the selected option.
-        const actionName = event.target.value;
-        switch (actionName) {
-            case actionSelectionsEnums.orderList.name:
-                addToOrderListHandler(event, productIndex);
-                break;
-            case actionSelectionsEnums.reorderedAlreadyList.name:
-                markAlreadyOrderedHandler(event, productIndex);
-                break;
-            case actionSelectionsEnums.outOfStockList.name:
-                addToOutOfStockHandler(event, productIndex);
-                break;
-            case actionSelectionsEnums.discontinuedList.name:
-                addToDiscontinuedHandler(event, productIndex);
-                break;
-            default: console.log("Selection Invalid");
+        const actionKey = event.target.value;
+        const fcnCallback = allAddToListHandlers[actionKey];
+        fcnCallback(event, productIndex);
+        // switch (actionName) {
+        //     case actionSelectionsEnums.orderList.name:
+        //         experimentalOrderListHandlerList.orderListHandler(event, productIndex);
+        //         break;
+        //     case actionSelectionsEnums.reorderedAlreadyList.name:
+        //         markAlreadyOrderedHandler(event, productIndex);
+        //         break;
+        //     case actionSelectionsEnums.outOfStockList.name:
+        //         addToOutOfStockHandler(event, productIndex);
+        //         break;
+        //     case actionSelectionsEnums.discontinuedList.name:
+        //         addToDiscontinuedHandler(event, productIndex);
+        //         break;
+        //     default: console.log("Selection Invalid");
 
-        }
-        setSelectedOption(actionName);
+        // }
+        setSelectedOption(actionKey);
     };
+
+    const handleFocus = (event, productIndex, listIndex) => {
+        console.log(`Product of Index ${productIndex} is focused!`);
+        setFocusedIndex(listIndex);
+        showDetailsHandler(event, productIndex);
+    }
 
     let thisPageResult = searchDisplayItemsArray.slice((searchPageNumber - 1) * itemsPerPage, (searchPageNumber) * itemsPerPage);
     return (
@@ -71,51 +111,57 @@ export function SearchWindow({
                     id="select-product"
                     label="Search"
                     onChange={onChangeSearch} />
-                <div className="page-turn-div">
-
-                    <button onClick={prevPageHandler}> {'<'} </button>
-                    <button onClick={nextPageHandler}> {'>'} </button>
-                    <p>{`Page ${lastPage === 0 ? 0 : searchPageNumber}/${lastPage}`}</p>
-
-                </div>
+                <PageTurnDiv
+                    prevPageHandler={prevPageHandler}
+                    nextPageHandler={nextPageHandler}
+                    lastPage={lastPage}
+                    searchPageNumber={searchPageNumber}
+                />
                 <button className="search-results-clear-all-button" onClick={handleUncheckAllClick}> Uncheck All</button>
             </div>
-            <table>
+            <table className="large-table-style">
                 <thead>
-                    <tr>
+                    <tr tabIndex="0">
                         <th>Select</th>
                         <th>Brand</th>
                         <th>Description</th>
                         <th>Size</th>
                         <th>Price</th>
                         <th>Cost</th>
-                        <th>Qty Per Case</th>
+                        <th>Qty</th>
+                        <th>Case Qty</th>
                         <th>Action</th>
 
                     </tr>
                 </thead>
                 <tbody>
-                    {thisPageResult.map((searchItemDataIndex) => {
+                    {thisPageResult.map((searchItemDataIndex, index) => {
                         const thisProduct = data[searchItemDataIndex];
                         const thisIsChecked = selectedItemsIndicesArray !== null && selectedItemsIndicesArray.findIndex(item => item === thisProduct.INDEX) > -1;
                         return (
                             <tr
+                                tabIndex="0"
                                 key={thisProduct.CODE_NUM}
                                 onClick={(event) => showDetailsHandler(event, thisProduct.INDEX)}
+                                onFocus={(event) => handleFocus(event, thisProduct.INDEX, index)}
+                                ref={(el) => (listOfRefs.current[index] = el)}
                             >
                                 <td>
                                     <Checkbox
                                         checked={thisIsChecked}
-                                        onChange={(event) => handleCheckBoxClick(event, thisProduct.INDEX) }
+
+                                        onChange={(event) => handleCheckBoxClick(event, thisProduct.INDEX)}
                                         inputProps={{ 'aria-label': 'controlled' }}
+
                                     />
                                 </td>
                                 <td>{thisProduct.BRAND}</td>
-                                <td>{thisProduct.DESCRIP}</td>
-                                <td>{thisProduct.SIZE}</td>
-                                <td>{thisProduct.PRICE}</td>
-                                <td>{thisProduct.COST}</td>
-                                <td>{thisProduct.QTY_CASE}</td>
+                                <td >{thisProduct.DESCRIP}</td>
+                                <td className="large-list-numerical-item">{thisProduct.SIZE}</td>
+                                <td className="large-list-numerical-item">{thisProduct.PRICE.toFixed(2)}</td>
+                                <td className="large-list-numerical-item">{thisProduct.COST.toFixed(2)}</td>
+                                <td className="large-list-numerical-item">{thisProduct.QTY_ON_HND}</td>
+                                <td className="large-list-numerical-item">{thisProduct.QTY_CASE}</td>
                                 <td>
                                     <select
 
@@ -123,9 +169,9 @@ export function SearchWindow({
                                         className="search-result-dropdown"
                                         onChange={(event) => handleActionChange(event, thisProduct.INDEX)}>
                                         <option key={defaultOption} value={defaultOption}> {defaultOption}</option>
-                                        {Object.values(actionSelectionsEnums).map((listObject) => {
+                                        {Object.keys(actionSelectionsEnums).map((objectKey) => {
                                             return (
-                                                <option key={listObject.name} value={listObject.name}> {listObject.displayName}</option>
+                                                <option key={objectKey} value={objectKey}> {actionSelectionsEnums[objectKey].displayName}</option>
                                             )
                                         })}
 
@@ -140,16 +186,14 @@ export function SearchWindow({
                 </tbody>
             </table>
             {(data.length < 1) && <p> No Data </p>
-                
+
             }
-
-            <div className="search-page-turn-div">
-
-                <button onClick={prevPageHandler}> Previous Page </button>
-                <button onClick={nextPageHandler}> Next Page </button>
-                <p>{`Page ${lastPage === 0 ? 0 : searchPageNumber}/${lastPage}`}</p>
-
-            </div>
+            <PageTurnDiv
+                prevPageHandler={prevPageHandler}
+                nextPageHandler={nextPageHandler}
+                lastPage={lastPage}
+                searchPageNumber={searchPageNumber}
+            />
 
         </div>
     )
