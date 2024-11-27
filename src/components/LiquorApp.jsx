@@ -14,15 +14,22 @@ import { printArrayToString, removeTrailingSlash } from '../helper-fns/helperFun
 import { TextInputModal } from './TextInputModal'
 import { readDbfFile } from './readDbfFile'
 
-const DBFReaderComponent = () => {
+import Tab from 'react-bootstrap/Tab';
+import Tabs from 'react-bootstrap/Tabs';
 
-    const suppressOutput = false;
+const LiquorApp = () => {
+
+    const suppressOutput = true;
     if (!suppressOutput) {
-        console.log("Entering DBF Reader Component");
+        console.log("Entered LiquorApp Component");
         console.log(process.env.NODE_ENV);
     }
 
     // -----------------State Information -----------------------
+
+
+    // Tabs: 
+    const [tabKey, setTabKey] = useState('search');
 
     // Initial Page Load
     const [initialPageLoadComplete, setInitialPageLoadComplete] = useState(false);
@@ -37,7 +44,7 @@ const DBFReaderComponent = () => {
 
     // Page View: 
     const [webpageSelection, setWebpageSelection] = useState(webpageSelectionEnums.home);
-    2
+
     // Search: 
     const [searchBarValue, setSearchBarValue] = useState(null);
     const [searchResult, setSearchResult] = useState([]);
@@ -202,7 +209,7 @@ const DBFReaderComponent = () => {
                     } else {
                         console.log("No alreadyOrderedList data in file");
                     }
-                    
+
                     if (listData.recountInventoryList) {
                         setRecountInventoryList(listData.recountInventoryList);
                     } else {
@@ -328,21 +335,6 @@ const DBFReaderComponent = () => {
     // Now you can use these maps for lookups within the component
     const getProductIndicesByCode = (code) => productsByCodeNum.get(code);
     const getProductIndicesByBrand = (brand) => productsByBrand.get(brand) || [];
-
-
-    //------------Main Display Selection Handlers ------------------
-
-    const selectMainDisplayHandler = () => {
-        setWebpageSelection(webpageSelectionEnums.home);
-    }
-
-    const selectAssortmentDisplayHandler = () => {
-        setWebpageSelection(webpageSelectionEnums.assortmentTool);
-    }
-
-    const selectOrderingToolDisplayHandler = () => {
-        setWebpageSelection(webpageSelectionEnums.orderingTool);
-    }
 
 
     // -----------------Search Stuff -----------------------
@@ -508,7 +500,7 @@ const DBFReaderComponent = () => {
 
     };
 
- 
+
 
     const handleAddToOutOfStockListClick = (e, productIndex) => {
 
@@ -559,22 +551,6 @@ const DBFReaderComponent = () => {
     };
 
 
-
-
-
-    // Production Stuff
-
-    // useEffect(() => {
-    //     const dataFileLocationFromLocalStorage = localStorage.getItem('torchwoodDataLocation');
-
-    //     if (dataFileLocationFromLocalStorage === null) {
-    //         console.log("No Data File Location Found in Local Storage");
-    //         setShowSelectDataDialog(true);
-
-    //     }
-    // }, []); 
-
-
     // On Page Load
 
     useEffect(() => {
@@ -609,9 +585,9 @@ const DBFReaderComponent = () => {
 
         }
 
-    }, [orderList, 
-        outOfStockList, 
-        discontinuedList, 
+    }, [orderList,
+        outOfStockList,
+        discontinuedList,
         alreadyOrderedList,
         recountInventoryList,
         labelList,
@@ -624,22 +600,22 @@ const DBFReaderComponent = () => {
         orderList: orderList,
         selectionList: selectedProductsList,
         alreadyOrderedList: alreadyOrderedList,
-        outOfStockList:outOfStockList,
-        discontinuedList:discontinuedList,
-        recountInventoryList:recountInventoryList,
-        labelList:labelList,
-        watchList:watchList
+        outOfStockList: outOfStockList,
+        discontinuedList: discontinuedList,
+        recountInventoryList: recountInventoryList,
+        labelList: labelList,
+        watchList: watchList
     }
 
 
     const allAddToListCallbacks = {
         orderList: handleAddToOrderListClick,
         alreadyOrderedList: handleAddToAlreadyOrderedListClick,
-        outOfStockList:handleAddToOutOfStockListClick,
-        discontinuedList:handleAddToDiscontinuedListClick,
-        recountInventoryList:handleAddToRecountInventoryListClick,
-        labelList:handleAddToLabelListClick,
-        watchList:handleAddToWatchListClick
+        outOfStockList: handleAddToOutOfStockListClick,
+        discontinuedList: handleAddToDiscontinuedListClick,
+        recountInventoryList: handleAddToRecountInventoryListClick,
+        labelList: handleAddToLabelListClick,
+        watchList: handleAddToWatchListClick
 
     }
 
@@ -648,13 +624,87 @@ const DBFReaderComponent = () => {
         alreadyOrderedList: setAlreadyOrderedList,
         outOfStockList: setOutOfStockList,
         discontinuedList: setDiscontinuedList,
-        recountInventoryList:setRecountInventoryList,
-        labelList:setLabelList,
-        watchList:setWatchList
+        recountInventoryList: setRecountInventoryList,
+        labelList: setLabelList,
+        watchList: setWatchList
 
     }
 
-    
+    // -----------------Props ------------------------//
+
+    const searchWindowProps = {
+        data: data,
+        changeSearchHandler: changeSearchHandler,
+        searchDisplayItemsArray: searchResult,
+        selectedItemsIndicesArray: selectedProductsList,
+        handleCheckBoxClick: handleCheckBoxClick,
+        showDetailsHandler: showProductDetailsHandler,
+
+        searchPageNumber: searchPageNumber,
+        setSearchPageNumber: setSearchPageNumber,
+        handleUncheckAllClick: handleUncheckAllClick,
+        allAddToListHandlers: allAddToListCallbacks,
+    }
+
+
+    const productDetailsWindowProps = {
+        data: data,
+        productDetailsIndexList: viewDetailsProductList,
+        removeProductDetailsHandler: removeProductDetailsHandler,
+        clearProductDetailsPanelHandler: clearProductDetailsPanelHandler,
+        flexDirection: 'column'
+    }
+
+    const assortmentToolProps = {
+        data: data,
+        productIndicesToAnalyze: assortmentAnalyzerProductList,
+        importSelectionToAssortmentAnalyzerHandler: importSelectionToAssortmentAnalyzer,
+        handleRemoveAssortmentItem: handleRemoveAssortmentItem,
+        showDetailsHandler: showProductDetailsHandler,
+        removeAllAssortedItemsHandler: removeAllAssortedItemsHandler,
+    }
+
+    const smallSearchWindowProps = {
+        data: data,
+        changeSearchHandler: changeSmallSearchHandler,
+        searchDisplayItemsArray: smallSearchResult,
+
+        showDetailsHandler: showProductDetailsHandler,
+
+        searchPageNumber: smallSearchPageNumber,
+        setSearchPageNumber: setSmallSearchPageNumber,
+        addToAssorterHandler: addItemToAssortmentListHandler,
+    }
+
+    const orderToolProps = {
+        data: data,
+        reorderItemsList: reorderItemsList,
+        setReorderItemsList: setReorderItemsList,
+        removeFromReorderItemsListHandler: removeFromReorderItemsListHandler,
+        reorderToolPageNumber: reorderToolPageNumber,
+        setReorderToolPageNumber: setReorderToolPageNumber,
+        addToListHandlers: allAddToListCallbacks,
+        listStates: allLists,
+        showProductDetailsHandler: showProductDetailsHandler,
+    }
+
+    const orderListDisplayProps = {
+        data: data,
+        clickItemHandler: showProductDetailsHandler,
+        orderList: orderList,
+        setOrderList: setOrderList,
+        orderListScrollRef: orderListScrollRef,
+        addToAlreadyOrderedListHandler: handleAddToAlreadyOrderedListClick,
+    }
+
+    const listDisplaysProps = {
+        data: data,
+        clickItemHandler: showProductDetailsHandler,
+        allLists: allLists,
+        allListSetterCallbacks: allListSetterCallbacks,
+    }
+
+
     // if (!suppressOutput) {
     //     console.log(`data is a length ${data.length} array`);
 
@@ -672,20 +722,18 @@ const DBFReaderComponent = () => {
 
 
     return (
-        <>
+        <div className='liquor-app'>
 
+            {/* <h2>Varuni 1000</h2> */}
+            <Tabs
+            
+                id="controlled-tab-example"
+                activeKey={tabKey}
+                onSelect={(k) => setTabKey(k)}
+                className="mb-3"
+            >
 
-
-            <div className="main-nav">
-                <h2>Varuni 1000</h2>
-
-
-                <div className="page-selection-bar">
-                    <button className="nav-bar-button" onClick={selectMainDisplayHandler}>Search</button>
-                    <button className="nav-bar-button" onClick={selectAssortmentDisplayHandler}>Assortment Tool</button>
-                    <button className="nav-bar-button" onClick={selectOrderingToolDisplayHandler}>Reorder Tool</button>
-
-                    {/* <button className="nav-bar-button" onClick={readListDataFromLocalStorageFileHandler}>Read List Data</button> */}
+                <Tab eventKey="data" title="Load Data">
 
                     <button onClick={clickDataFileInputHandler} className="nav-bar-button">
                         Select Data
@@ -713,103 +761,43 @@ const DBFReaderComponent = () => {
                         style={{ display: "none" }}
                     />
                     <button className="nav-bar-button" onClick={saveListDataToFileHandler}>Save List Data</button>
+                    {listDataMessage && <p>{listDataMessage}</p>}
+                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {data.length > 0 && (
+                        <p>Data Loaded!</p>
+                    )}
 
-                </div>
-                {listDataMessage && <p>{listDataMessage}</p>}
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {data.length > 0 && (
-                    <p>Data Loaded!</p>
-                )}
-            </div>
+                </Tab>
+                <Tab eventKey="search" title="Search">
+                    <div className='main-display'>
+                        <SearchWindow {...searchWindowProps} />
+                        <ProductDetailsPanel {...productDetailsWindowProps} />
+                        <OrderListDisplay {...orderListDisplayProps} />
+                        <ListDisplays {...listDisplaysProps} />
+                    </div>
+                </Tab>
+                <Tab eventKey="assorter" title="Assortment Tool">
+                    <div className='main-display'>
+                        <AssortmentAnalyzerWindow {...assortmentToolProps} />
+                        <SmallSearchWindow {...smallSearchWindowProps} />
+                        <ProductDetailsPanel {...productDetailsWindowProps} />
+                        <OrderListDisplay {...orderListDisplayProps} />
+                        <ListDisplays {...listDisplaysProps} />
+                    </div>
+                </Tab>
+                <Tab eventKey="ordering" title="Order Tool" >
+                    <div className='main-display'>
+                        <NeedToReorderTool {...orderToolProps} />
+                        <ProductDetailsPanel {...productDetailsWindowProps} />
+                        <OrderListDisplay {...orderListDisplayProps} />
+                        
+                    </div>
+                </Tab>
 
-            <div className='main-display'>
-
-                {(webpageSelection === webpageSelectionEnums.home) &&
-                    <SearchWindow
-                        data={data}
-                        changeSearchHandler={changeSearchHandler}
-                        searchDisplayItemsArray={searchResult}
-                        selectedItemsIndicesArray={selectedProductsList}
-                        handleCheckBoxClick={handleCheckBoxClick}
-                        showDetailsHandler={showProductDetailsHandler}
-
-                        searchPageNumber={searchPageNumber}
-                        setSearchPageNumber={setSearchPageNumber}
-                        handleUncheckAllClick={handleUncheckAllClick}                        
-                        allAddToListHandlers={allAddToListCallbacks} />
-                }
-
-                {webpageSelection === webpageSelectionEnums.assortmentTool &&
-                    <>
-                        <AssortmentAnalyzerWindow
-                            data={data}
-                            productIndicesToAnalyze={assortmentAnalyzerProductList}
-                            importSelectionToAssortmentAnalyzerHandler={importSelectionToAssortmentAnalyzer}
-                            handleRemoveAssortmentItem={handleRemoveAssortmentItem}
-                            showDetailsHandler={showProductDetailsHandler}
-                            removeAllAssortedItemsHandler={removeAllAssortedItemsHandler}
-                        />
-                        <SmallSearchWindow
-                            data={data}
-                            changeSearchHandler={changeSmallSearchHandler}
-                            searchDisplayItemsArray={smallSearchResult}
-
-                            showDetailsHandler={showProductDetailsHandler}
-
-                            searchPageNumber={smallSearchPageNumber}
-                            setSearchPageNumber={setSmallSearchPageNumber}
-                            addToAssorterHandler={addItemToAssortmentListHandler}
-                        />
-                    </>
-                }
-
-                {webpageSelection === webpageSelectionEnums.orderingTool &&
-                    <NeedToReorderTool
-                        data={data}
-                        reorderItemsList={reorderItemsList}
-                        setReorderItemsList={setReorderItemsList}
-                        removeFromReorderItemsListHandler={removeFromReorderItemsListHandler}
-                        reorderToolPageNumber={reorderToolPageNumber}
-                        setReorderToolPageNumber={setReorderToolPageNumber}
-                        addToListHandlers= {allAddToListCallbacks}
-                        listStates ={allLists}
-                        showProductDetailsHandler={showProductDetailsHandler} />
-                }
-
-                <ProductDetailsPanel
-                    data={data}
-                    productDetailsIndexList={viewDetailsProductList}
-                    removeProductDetailsHandler={removeProductDetailsHandler}
-                    clearProductDetailsPanelHandler={clearProductDetailsPanelHandler}
-                    flexDirection={'column'}
-                />
-
-                <OrderListDisplay
-                    data={data}
-                    clickItemHandler={showProductDetailsHandler}
-                    orderList={orderList}
-                    setOrderList={setOrderList}
-                    orderListScrollRef={orderListScrollRef}
-                    addToAlreadyOrderedListHandler={handleAddToAlreadyOrderedListClick}
-                />
-
-                <ListDisplays
-                    data={data}
-                    clickItemHandler={showProductDetailsHandler}
-                    allLists={allLists}
-                    allListSetterCallbacks = {allListSetterCallbacks}                   
-                />
-
-
-
-
-
-
-            </div >
-
-        </>
+            </Tabs>
+        </div>
 
     );
 };
 
-export default DBFReaderComponent;
+export default LiquorApp;

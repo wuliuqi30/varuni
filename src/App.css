@@ -186,8 +186,6 @@ h2 {
 }
 
 
-
-
 /* -------------- Search Window-----------------------------------------*/
 
 
@@ -203,9 +201,9 @@ h2 {
   padding: 15px;
 
 }
-.search-result-window  th{
+/* .search-result-window  th{
   height: 55px;
-}
+} */
 
 .search-results-header {
   display: flex;
@@ -292,8 +290,6 @@ h2 {
   justify-self: flex-end;
   margin-top:auto;
 }
-
-
 
 .page-turn-div {
 
@@ -529,32 +525,6 @@ h2 {
 }
 
 
-/* -------------- Current Selection-----------------------------------------*/
-
-.current-selection-window {
-  width: 100%;
-
-  flex: 0 0 auto;
-  border: 2px solid blue;
-  overflow-y: auto;
-}
-
-.current-selection-window-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 15px;
-}
-
-
-
-.current-selection-item {
-  display: flex;
-  flex-direction: row;
-  gap: 5px;
-  align-items: flex-start;
-}
-
 .product-display-list {
   display: flex;
   flex-direction: column;
@@ -577,11 +547,11 @@ h4 {
   font-size: 1.1rem;
 }
 
-th{
+/* th{
   background-color: rgb(197, 197, 197);
   border: 2px solid black;
   padding: 4px;
-}
+} */
 
 .need-to-reorder-window {
 
@@ -613,12 +583,16 @@ th{
   width: 100px;
 }
 
+/* Table Styles: */
+
 .large-table-style {
   border-collapse: collapse;
   border-spacing: 2px;
   width: 97%;
   flex: 0 0 auto;
 }
+
+
 
 td {
   text-align: left;
@@ -632,17 +606,11 @@ td.large-list-numerical-item {
   
 }
 
-tbody tr:nth-child(odd) {
-  background-color: #f2f2f2;
-}
 
-tbody tr:nth-child(even) {
-  background-color: #ffffff;
-}
-
-tbody tr:focus {
+.hersh-generic-table-row:focus {
   background-color: rgb(160, 179, 233);
   font-weight: 700;
+  outline: 2px solid green;
 
 }
 
@@ -655,7 +623,7 @@ td.action-button-cell {
 
 .need-to-reorder-window th{
   height: 100px;
-}
+} 
 
 /* .reorder-list-grid {
   
@@ -688,7 +656,6 @@ td.action-button-cell {
 
 .reorder-list-product-info {
   font-weight: 600;
-
   color: blue;
 }
 

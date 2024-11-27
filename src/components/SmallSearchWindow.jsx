@@ -117,6 +117,7 @@ export function SmallSearchWindow({
                                 onClick={(event) => showDetailsHandler(event, thisProduct.INDEX)}
                                 onFocus={(event) => handleFocus(event, thisProduct.INDEX, index)}
                                 ref={(el) => (listOfRefs.current[index] = el)}
+                                className="hersh-generic-table-row"
                             >
 
                                 <td>{thisProduct.BRAND}</td>

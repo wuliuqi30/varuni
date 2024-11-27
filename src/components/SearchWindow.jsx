@@ -61,6 +61,7 @@ export function SearchWindow({
         // Focus the element at the focused index
         if (listOfRefs.current[focusedIndex]) {
             listOfRefs.current[focusedIndex].focus();
+            
         }
     }, [focusedIndex]);
 
@@ -119,7 +120,7 @@ export function SearchWindow({
                 />
                 <button className="search-results-clear-all-button" onClick={handleUncheckAllClick}> Uncheck All</button>
             </div>
-            <table className="large-table-style">
+            <table >
                 <thead>
                     <tr tabIndex="0">
                         <th>Select</th>
@@ -134,7 +135,7 @@ export function SearchWindow({
 
                     </tr>
                 </thead>
-                <tbody>
+                <tbody >
                     {thisPageResult.map((searchItemDataIndex, index) => {
                         const thisProduct = data[searchItemDataIndex];
                         const thisIsChecked = selectedItemsIndicesArray !== null && selectedItemsIndicesArray.findIndex(item => item === thisProduct.INDEX) > -1;
@@ -145,6 +146,7 @@ export function SearchWindow({
                                 onClick={(event) => showDetailsHandler(event, thisProduct.INDEX)}
                                 onFocus={(event) => handleFocus(event, thisProduct.INDEX, index)}
                                 ref={(el) => (listOfRefs.current[index] = el)}
+                                className="hersh-generic-table-row"
                             >
                                 <td>
                                     <Checkbox

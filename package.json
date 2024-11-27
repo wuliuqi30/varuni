@@ -17,11 +17,13 @@
     "@mui/material": "^6.1.6",
     "@mui/system": "^6.1.6",
     "@mui/x-date-pickers": "^7.22.2",
+    "bootstrap": "^5.3.3",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dbf": "^0.2.0",
     "dbf-reader": "^1.0.3",
     "react": "^17.0.0 || ^18.0.0",
+    "react-bootstrap": "^2.10.6",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-google-charts": "^5.2.1",
     "trie-prefix-tree": "^1.5.1"
