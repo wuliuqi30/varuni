@@ -3,11 +3,11 @@ import {
     weeksFromNowToDBFFileMonthName,
     dateFromNowFromWeeks
 } from '../data/constants';
-import { differenceInWeeks, getWeeksInMonth, addWeeks } from 'date-fns';
+import { differenceInWeeks, getWeeksInMonth, addWeeks,format } from 'date-fns';
 
-function removeTrailingSlash(str){
+function removeTrailingSlash(str) {
     return str.replace(/[\\/]+$/, "");
-  };
+};
 
 
 function printArrayToString(titleString, array, unit) {
@@ -29,18 +29,36 @@ function printArrayToString(titleString, array, unit) {
     console.log(outstring);
 }
 
-function printOrderAndTime(titleString, productArray, oldProductOrders, oldTimeArray, newProductOrders, newTimeArray) {
+function printOrderAndTime(titleString, productArray, oldProductOrders, oldTimeArray, newProductOrders, newTimeArray, dateOrTime) {
 
     const outArray = [];
-    for (let i = 0; i < productArray.length; i++) {
-        outArray[i] = {
-            name: productArray[i].SIZE,
-            order: `${oldProductOrders[i]} cases`,
-            time: `${oldTimeArray[i]} wks.`,
-            newOrder: `${newProductOrders[i]} cases`,
-            newTime: `${newTimeArray[i]} wks.`
-        };
+    switch (dateOrTime) {
+        case 'time': {
+            for (let i = 0; i < productArray.length; i++) {
+                outArray[i] = {
+                    name: productArray[i].SIZE,
+                    order: `${oldProductOrders[i]} cases`,
+                    time: `${oldTimeArray[i]} wks.`,
+                    newOrder: `${newProductOrders[i]} cases`,
+                    newTime: `${newTimeArray[i]} wks.`
+                };
+            }
+        }
+            break;
+        case 'date': {
+            for (let i = 0; i < productArray.length; i++) {
+                outArray[i] = {
+                    name: productArray[i].SIZE,
+                    order: `${oldProductOrders[i]} cases`,
+                    time: `${format(oldTimeArray[i],'MMM eo yyyy')}.`,
+                    newOrder: `${newProductOrders[i]} cases`,
+                    newTime: `${format(newTimeArray[i],'MMM eo yyyy')}.`
+                };
+            }
+        }
+
     }
+
     console.log(titleString);
     console.table(outArray);
 
@@ -101,7 +119,7 @@ const calculateReorderPointFromQuantity = (product, startingQuantity, analysisMe
     // Given a certain quantity, calculate how many weeks until you run out based on monthly sales
 
     // If its over a certain number of weeekks, just return that number to avoid an infinite loop
-    const maxNumWeeks = 52;
+    const maxNumWeeks = 208;
     let thingsUnsold = startingQuantity;
 
     let reorderWeek = 0;
@@ -111,14 +129,14 @@ const calculateReorderPointFromQuantity = (product, startingQuantity, analysisMe
     } else if ((thingsUnsold > 0) && (startingQuantity !== undefined && startingQuantity !== null)) {
 
         let thisWeeksSales = extrapolateWeeklySales(product, reorderWeek, analysisMethod);
-        while ( thingsUnsold - thisWeeksSales > 0) {
+        while (thingsUnsold - thisWeeksSales > 0) {
 
             thingsUnsold -= thisWeeksSales;
 
             reorderWeek++;
             thisWeeksSales = extrapolateWeeklySales(product, reorderWeek, analysisMethod);
 
-            if (reorderWeek >= maxNumWeeks){
+            if (reorderWeek >= maxNumWeeks) {
                 reorderWeek = maxNumWeeks;
                 break;
             }
