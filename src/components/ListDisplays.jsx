@@ -11,8 +11,9 @@ export function ListDisplays({
 }) {
 
     const suppressOutput = true;
-
+    console.log(listSelectionsEnums);
     const [selectedOption, setSelectedOption] = useState(Object.keys(listSelectionsEnums)[0]);
+   
 
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -26,7 +27,7 @@ export function ListDisplays({
 
     currentlyDisplayedList = allLists[selectedOption];
     currentListSetterCallback = allListSetterCallbacks[selectedOption];
-    
+    const colorClass = listSelectionsEnums[selectedOption].colorTheme;
 
     const deleteFunction = (event, productIndex) => {
 
@@ -52,7 +53,7 @@ export function ListDisplays({
 
 
     return (
-        <div className='list-display-window'>
+        <div className={`list-display-window ${colorClass}`}>
             <div className="list-display-header">
 
                 <select

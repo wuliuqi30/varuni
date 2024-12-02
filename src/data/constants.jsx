@@ -103,13 +103,13 @@ const webpageSelectionEnums = {
 
 const listSelectionsEnums = {
 
-    alreadyOrderedList: { name: "already-ordered-list", displayName: "Already Ordered" },
-    selectionList: { name: "selection-list", displayName: "Selected Items" },
-    outOfStockList: { name: "out-of-stock-list", displayName: "Out Of Stock" },
-    discontinuedList: { name: "discontinued-list", displayName: "Discontinued" },
-    recountInventoryList: { name: "recount-list", displayName: "Recount List" },
-    labelList: { name: "label-list", displayName: "Label List" },
-    watchList: { name: "watch-list", displayName: "Watch List" }
+    alreadyOrderedList: { name: "already-ordered-list", displayName: "Already Ordered", colorTheme:'alreadyordered-theme' },
+    selectionList: { name: "selection-list", displayName: "Selected Items", colorTheme: '' },
+    outOfStockList: { name: "out-of-stock-list", displayName: "Out Of Stock", colorTheme: 'outofstock-theme'},
+    discontinuedList: { name: "discontinued-list", displayName: "Discontinued", colorTheme: 'discontinued-theme'},
+    recountInventoryList: { name: "recount-list", displayName: "Recount List", colorTheme: 'needrecount-theme'},
+    labelList: { name: "label-list", displayName: "Label List" , colorTheme:'labellist-theme'},
+    watchList: { name: "watch-list", displayName: "Watch List", colorTheme: 'watchlist-theme'}
 
 }
 

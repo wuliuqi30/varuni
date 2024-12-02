@@ -103,6 +103,68 @@ p {
 }
 
 
+/* Color Themes*/
+
+/* Search */
+.search-theme{
+  color:#0f172a;
+  background-color: #e2e8f0;
+ 
+}
+
+/* Assort */
+.assort-theme{
+  color: #0c0a09;
+  background-color: #fdba74;
+}
+
+/* Order List*/
+.orderlist-theme{
+  color: #083344;
+  background-color: #cffafe;
+  
+}
+
+/* Out of Stock*/
+.outofstock-theme{
+  color: #fce7f3;
+  background-color: #500724;
+ 
+}
+
+/* Discontinued*/
+.discontinued-theme{
+  color: #4a044e;
+  background-color: #fdf4ff;
+  
+}
+
+/* Already Ordered*/
+.alreadyordered-theme{
+  color: #451a03;
+  background-color: #fef3c7;
+  
+}
+
+/* Label List*/
+.labellist-theme{
+  color: #111827;
+  background-color: #4ade80;
+  
+}
+
+/* Need Recount*/
+.needrecount-theme{
+  color: #fef2f2;
+  background-color: #dc2626;
+}
+
+/* Watch List*/
+.watchlist-theme{
+  color: #1a2e05;
+  background-color: #d9f99d;
+}
+
 /* -------------------------------------------------------*/
 
 h2 {
@@ -173,17 +235,14 @@ h2 {
 
 .do-something-button{
   padding: 5px;
-  background-color:beige;
-  color: black;
   border: 2px solid black;
 }
 
 .previous-next-button-style{
   padding: 5px;
-  background-color:darkseagreen;
-  color: black;
-  border: 2px solid black;
+
 }
+
 
 
 /* -------------- Search Window-----------------------------------------*/
@@ -387,12 +446,12 @@ h2 {
 
   justify-self: center;
   padding: 5px;
-  width: 200px;
+  width: 250px;
   text-align: left;
   white-space: nowrap;
-
+  text-overflow: ellipsis;
   overflow-x: hidden;
-
+  flex: 0 0 auto;
   height: 50px;
 }
 
@@ -601,9 +660,15 @@ td {
   font-size: 1rem;
 }
 
+td.large-list-text-item {
+  
+  white-space: nowrap;
+}
+
+
 td.large-list-numerical-item {
   text-align: center;
-  
+  white-space: nowrap;
 }
 
 
@@ -614,12 +679,7 @@ td.large-list-numerical-item {
 
 }
 
-td.action-button-cell {
-  display: block;
-  width: 280px;
-  height: 160px;
-  text-align: center;
-}
+
 
 .need-to-reorder-window th{
   height: 100px;
@@ -665,15 +725,32 @@ td.action-button-cell {
 
 }
 
+.action-button-cell {
+  display: flex;
+  flex-direction: column;
+    grid-row: 2 / 3;
+  grid-column: 3 / 4;
+  align-items: center;
+}
+
+.action-buttons-cell-header{
+height: 55px;
+}
+
 .large-list-click-button {
 
   padding: 6px;
-  width: 130px;
-  border: 1px solid green;
+  width: 200px;
   white-space: nowrap;
   font-size: 0.9rem;
   margin:2px;
+  flex: 1 1 auto;
+  padding: 5px;
  
+
+  border: 2px solid black;
+  border-radius: 5px;
+  font-weight: 700;
 }
 
 
@@ -686,7 +763,7 @@ td.action-button-cell {
 
 .order-list-window {
   grid-row: 2 / 3;
-  grid-column: 3 / 4;
+  grid-column: 4 / 5;
 
   border: 2px solid blue;
 
@@ -720,7 +797,7 @@ td.action-button-cell {
 
 .list-display-window {
   grid-row: 2 / 3;
-  grid-column: 4 / 5;
+  grid-column: 3 / 4;
 
   padding: 5px;
   border: 2px solid blue;

@@ -117,6 +117,7 @@ export function SearchWindow({
                     nextPageHandler={nextPageHandler}
                     lastPage={lastPage}
                     searchPageNumber={searchPageNumber}
+                     buttonClassName="search-theme"
                 />
                 <button className="search-results-clear-all-button" onClick={handleUncheckAllClick}> Uncheck All</button>
             </div>
@@ -195,6 +196,7 @@ export function SearchWindow({
                 nextPageHandler={nextPageHandler}
                 lastPage={lastPage}
                 searchPageNumber={searchPageNumber}
+                buttonClassName="search-theme"
             />
 
         </div>

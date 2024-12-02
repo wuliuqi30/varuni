@@ -34,26 +34,38 @@ export function SmallSearchWindow({
 
     }
 
-    // Function to handle keydown event
+   
     const handleKeyDown = (e) => {
+        
+        console.log("Pressed a key down.");
+
         if (e.key === "ArrowDown") {
             // Move focus to the next element
             setFocusedIndex((prevIndex) => Math.min(prevIndex + 1, listOfRefs.current.length - 1));
         } else if (e.key === "ArrowUp") {
             // Move focus to the previous element
             setFocusedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            // Move focus to the previous element
+            const prefixLen = 'smallSearchProduct'.length;
+            const rowIDString = e.target.id;
+            const productIndex = Number(rowIDString.substring(prefixLen));
+            //assortmentListSetter(e,productId);
+            addToAssorterHandler(e, productIndex);
+            setFocusedIndex((prevIndex) => Math.min(prevIndex + 1, listOfRefs.current.length - 1));
         }
     };
 
-    useEffect(() => {
-        // Add event listener for keydown
-        window.addEventListener("keydown", handleKeyDown);
+    // useEffect(() => {
+    //     // Add event listener for keydown
+    //     window.addEventListener("keydown", handleKeyDown);
 
-        return () => {
-            // Cleanup event listener on unmount
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-    }, []);
+    //     return () => {
+    //         // Cleanup event listener on unmount
+    //         window.removeEventListener("keydown", handleKeyDown);
+    //     };
+    // }, []);
 
     useEffect(() => {
         // Focus the element at the focused index
@@ -73,7 +85,14 @@ export function SmallSearchWindow({
 
     const handleAddToAssortmentClick = (event, productIndex) => {
         addToAssorterHandler(event, productIndex);
+
+        // if (!assortmentAnalyzerProductList.includes(productIndex)) {
+        //     assortmentListSetter((prevArray) => [...prevArray, productIndex]);
+        // } else {
+        //     console.log(`Product ${productIndex} already in the list!`);
+        // }
     }
+
 
     let thisPageResult = searchDisplayItemsArray.slice((searchPageNumber - 1) * itemsPerPage, (searchPageNumber) * itemsPerPage);
     return (
@@ -118,6 +137,8 @@ export function SmallSearchWindow({
                                 onFocus={(event) => handleFocus(event, thisProduct.INDEX, index)}
                                 ref={(el) => (listOfRefs.current[index] = el)}
                                 className="hersh-generic-table-row"
+                                id = {`smallSearchProduct${thisProduct.INDEX}`}
+                                onKeyDown={handleKeyDown}
                             >
 
                                 <td>{thisProduct.BRAND}</td>
@@ -126,7 +147,7 @@ export function SmallSearchWindow({
 
                                 <td className="single-button-table-item">
                                     <button
-                                        className="add-to-assorter-button"
+                                        className="add-to-assorter-button assort-theme"
                                         onClick={(event) => handleAddToAssortmentClick(event, thisProduct.INDEX)}>
                                         Add!
 

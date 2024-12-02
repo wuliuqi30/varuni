@@ -13,6 +13,7 @@ import { NeedToReorderTool } from './NeedToReorderTool';
 import { printArrayToString, removeTrailingSlash } from '../helper-fns/helperFunctions'
 import { TextInputModal } from './TextInputModal'
 import { readDbfFile } from './readDbfFile'
+import {ActionButtonsPanel} from './ActionButtonsPanel'
 
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
@@ -20,6 +21,7 @@ import Tabs from 'react-bootstrap/Tabs';
 const LiquorApp = () => {
 
     const suppressOutput = true;
+
     if (!suppressOutput) {
         console.log("Entered LiquorApp Component");
         console.log(process.env.NODE_ENV);
@@ -70,6 +72,8 @@ const LiquorApp = () => {
     // Reorder Tool States: 
     const [reorderItemsList, setReorderItemsList] = useState([]);  // Array of: { index: type int, reorderDate: type Date, reorderTimeWeeks: type int }
     const [reorderToolPageNumber, setReorderToolPageNumber] = useState(1); // 1 indexed
+    const [reorderItemsFocusedProduct,setReorderItemsFocusedProduct] = useState(null);
+
 
     const [orderList, setOrderList] = useState([]);
     const orderListScrollRef = useRef(null);
@@ -456,6 +460,8 @@ const LiquorApp = () => {
     const addItemToAssortmentListHandler = (e, productIndex) => {
         if (!assortmentAnalyzerProductList.includes(productIndex)) {
             setAssortmentAnalyzerProductList((prevArray) => [...prevArray, productIndex]);
+        } else {
+            console.log(`Product ${productIndex} already in the list!`);
         }
     }
 
@@ -668,17 +674,17 @@ const LiquorApp = () => {
         data: data,
         changeSearchHandler: changeSmallSearchHandler,
         searchDisplayItemsArray: smallSearchResult,
-
         showDetailsHandler: showProductDetailsHandler,
-
         searchPageNumber: smallSearchPageNumber,
         setSearchPageNumber: setSmallSearchPageNumber,
-        addToAssorterHandler: addItemToAssortmentListHandler,
+        addToAssorterHandler: addItemToAssortmentListHandler
     }
 
     const orderToolProps = {
         data: data,
         reorderItemsList: reorderItemsList,
+        reorderItemsFocusedProduct: reorderItemsFocusedProduct,
+        setReorderItemsFocusedProduct: setReorderItemsFocusedProduct,
         setReorderItemsList: setReorderItemsList,
         removeFromReorderItemsListHandler: removeFromReorderItemsListHandler,
         reorderToolPageNumber: reorderToolPageNumber,
@@ -687,6 +693,14 @@ const LiquorApp = () => {
         listStates: allLists,
         showProductDetailsHandler: showProductDetailsHandler,
     }
+
+    const actionButtonsPanelProps = {
+        data: data,
+        focusedProductIndex: reorderItemsFocusedProduct,
+        removeFromReorderItemsListHandler: removeFromReorderItemsListHandler,
+        addToListHandlers:allAddToListCallbacks
+    }
+
 
     const orderListDisplayProps = {
         data: data,
@@ -705,20 +719,20 @@ const LiquorApp = () => {
     }
 
 
-    // if (!suppressOutput) {
-    //     console.log(`data is a length ${data.length} array`);
+    if (!suppressOutput) {
+        console.log(`data is a length ${data.length} array`);
 
-    //     printArrayToString("SelectedProductsList ", selectedProductsList);
-    //     printArrayToString("Details Panel List", viewDetailsProductList);
-    //     printArrayToString("Assortment Items in Assortment Display", assortmentAnalyzerProductList);
+        printArrayToString("SelectedProductsList ", selectedProductsList);
+        printArrayToString("Details Panel List", viewDetailsProductList);
+        printArrayToString("Assortment Items in Assortment Display", assortmentAnalyzerProductList);
 
-    //     printArrayToString('reorderItemsList', reorderItemsList)
-    //     printArrayToString('Order List', orderList);
-    //     printArrayToString('outOfStockList List', outOfStockList);
-    //     printArrayToString('discontinuedList', discontinuedList);
-    //     printArrayToString('alreadyOrderedList List', alreadyOrderedList);
-    //     printArrayToString('assortmentAnalyzerProductList ', assortmentAnalyzerProductList);
-    // }
+        printArrayToString('reorderItemsList', reorderItemsList)
+        printArrayToString('Order List', orderList);
+        printArrayToString('outOfStockList List', outOfStockList);
+        printArrayToString('discontinuedList', discontinuedList);
+        printArrayToString('alreadyOrderedList List', alreadyOrderedList);
+        printArrayToString('assortmentAnalyzerProductList ', assortmentAnalyzerProductList);
+    }
 
 
     return (
@@ -789,6 +803,7 @@ const LiquorApp = () => {
                     <div className='main-display'>
                         <NeedToReorderTool {...orderToolProps} />
                         <ProductDetailsPanel {...productDetailsWindowProps} />
+                        <ActionButtonsPanel {...actionButtonsPanelProps}/>
                         <OrderListDisplay {...orderListDisplayProps} />
                         
                     </div>

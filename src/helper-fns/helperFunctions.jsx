@@ -3,7 +3,7 @@ import {
     weeksFromNowToDBFFileMonthName,
     dateFromNowFromWeeks
 } from '../data/constants';
-import { differenceInWeeks, getWeeksInMonth, addWeeks,format } from 'date-fns';
+import { differenceInWeeks, getWeeksInMonth, addWeeks, format, startOfMonth, getISOWeek } from 'date-fns';
 
 function removeTrailingSlash(str) {
     return str.replace(/[\\/]+$/, "");
@@ -50,9 +50,9 @@ function printOrderAndTime(titleString, productArray, oldProductOrders, oldTimeA
                 outArray[i] = {
                     name: productArray[i].SIZE,
                     order: `${oldProductOrders[i]} cases`,
-                    time: `${format(oldTimeArray[i],'MMM eo yyyy')}.`,
+                    time: `${format(oldTimeArray[i], 'MMM eo yyyy')}.`,
                     newOrder: `${newProductOrders[i]} cases`,
-                    newTime: `${format(newTimeArray[i],'MMM eo yyyy')}.`
+                    newTime: `${format(newTimeArray[i], 'MMM eo yyyy')}.`
                 };
             }
         }
@@ -83,8 +83,13 @@ const extrapolateMonthlySales = (product, m, analysisMethod) => {
 
 }
 
-const calculateAverageMonthlySales = (product) => {
-    return product.PRIORY / 12;
+const calculateAverageMonthlySales = (product, analysisMethod = 'prior-year') => {
+    if (analysisMethod === 'prior-year') {
+        return product.PRIORY / 12;
+    } else {
+        return 0;
+    }
+
 }
 
 
@@ -149,9 +154,47 @@ const calculateReorderPointFromQuantity = (product, startingQuantity, analysisMe
     // we sell out DURING week= reorderWeek. 
     const reorderDate = addWeeks(todayDate, reorderWeek);
     const reorderTimeWeeks = Math.max(differenceInWeeks(reorderDate, todayDate), 0);
+
     return [reorderDate, reorderTimeWeeks];
 }
 
+const getWeekOfMonthString = (reorderDate) => {
+    const weekOfMonth = getWeekOfMonth(reorderDate);
+    // 2nd week of July '23
+    let weekOfMonthString = '';
+    switch (weekOfMonth) {
+        case 1: weekOfMonthString = '1st';
+            break;
+        case 2: weekOfMonthString = '2nd';
+            break;
+        case 3: weekOfMonthString = '3rd';
+            break;
+        case 4: weekOfMonthString = '4th';
+            break;
+        case 5: weekOfMonthString = '5th';
+            break;
+        default: weekOfMonthString = '1st';
+    }
+    return `${weekOfMonthString} week of ${format(reorderDate, 'MMM')} '${format(reorderDate, 'yy')}`
+}
+
+const calculateReorderPointWithOrderingSheet = (product, numCasesOrdered, analysisMethod = 'previous-year') => {
+    // analysis method is 'previous-year' for now
+    if (numCasesOrdered === undefined) {
+        return "Undefined"
+    }
+
+    const startingAmount = product.QTY_ON_HND + product.QTY_CASE * numCasesOrdered;
+
+    return calculateReorderPointFromQuantity(product, startingAmount, analysisMethod);
+
+}
+
+const getWeekOfMonth = (date) => {
+    const startOfMonthDate = startOfMonth(date);
+    const weekNumber = differenceInWeeks(date, startOfMonthDate, { weekStartsOn: 1 });
+    return weekNumber;
+};
 
 export {
     printArrayToString,
@@ -161,5 +204,7 @@ export {
     extrapolateMonthlySales,
     extrapolateWeeklySales,
     calculateAverageMonthlySales,
-    removeTrailingSlash
+    removeTrailingSlash,
+    calculateReorderPointWithOrderingSheet,
+    getWeekOfMonthString
 }

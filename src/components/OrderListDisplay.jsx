@@ -35,7 +35,7 @@ export function OrderListDisplay({
     }
 
     return (
-        <div className='order-list-window'>
+        <div className='order-list-window orderlist-theme'>
             <div className="order-list-header">
 
                 <h3>Order List</h3>

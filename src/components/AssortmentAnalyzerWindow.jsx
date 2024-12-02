@@ -6,6 +6,7 @@ import {
     printArrayToString,
     printOrderAndTime,
     calculateReorderPointFromQuantity,
+    calculateReorderPointWithOrderingSheet,
     getLastTwelveMonthSales
 } from '../helper-fns/helperFunctions';
 import { format, min, compareAsc } from 'date-fns';
@@ -23,7 +24,8 @@ export function AssortmentAnalyzerWindow({
     handleRemoveAssortmentItem,
     showDetailsHandler,
     removeAllAssortedItemsHandler }) {
-    const suppressOutput = false;
+
+    const suppressOutput = true;
     const exampleCalcs = false;
 
     if (!suppressOutput) {
@@ -52,18 +54,7 @@ export function AssortmentAnalyzerWindow({
     }
 
 
-    const calculateReorderPointWithOrderingSheet = (product, numCasesOrdered) => {
-
-        if (numCasesOrdered === undefined) {
-            return "Undefined"
-        }
-
-        const startingAmount = product.QTY_ON_HND + product.QTY_CASE * numCasesOrdered;
-
-        return calculateReorderPointFromQuantity(product, startingAmount, analysisMethod);
-
-    }
-
+  
 
     const changeNumberOfItemsHandler = (e) => {
 
@@ -75,7 +66,7 @@ export function AssortmentAnalyzerWindow({
             console.log(`changing the date, e.target  is: `);
             console.log(typeof date);
         }
-        setTargetLastTillDate(date.add(1, 'month'));
+        setTargetLastTillDate(date);
     }
 
     const changeOrderAmountHandler = (e) => {
@@ -304,11 +295,13 @@ export function AssortmentAnalyzerWindow({
         const maxIterations = 4000;
         const printInfoFrequency = 1;
 
+        const lastTillEndOfDate = targetLastTillDate.add(1, 'month');
+
         let oldTimeArray;
         let oldOrderArray;
 
         console.log(`BEGINNING SLOWLY ADD MORE ALGORITHM. TARGET: ${targetNumberOfItems} ${targetType}`)
-        while ((iterationCounter <= maxIterations) && (compareAsc(dateArrayInWeeks[currentMinIndex], targetLastTillDate.toDate()) < 0)) {
+        while ((iterationCounter <= maxIterations) && (compareAsc(dateArrayInWeeks[currentMinIndex], lastTillEndOfDate.toDate()) < 0)) {
 
             if (!suppressOutput && (iterationCounter % printInfoFrequency == 0)) {
                 console.log("                                                    ");
@@ -405,7 +398,7 @@ export function AssortmentAnalyzerWindow({
         const timeDateArrayWeeks = Array(productDataList.length);
 
         for (let p = 0; p < productDataList.length; p++) {
-            const reorderPtResult = calculateReorderPointWithOrderingSheet(productDataList[p], orderProductsArray[p]);
+            const reorderPtResult = calculateReorderPointWithOrderingSheet(productDataList[p], orderProductsArray[p], analysisMethod);
             if (typeof reorderPtResult === 'string') {
                 timeDateArrayWeeks[p] = reorderPtResult;
             } else if (timeOrDate === 'time') {
@@ -498,11 +491,11 @@ export function AssortmentAnalyzerWindow({
             </div>
 
             <div className="assortment-analyzer-button-bar">
-                <button className="do-something-button" onClick={removeAllAssortedItemsClickHandler}>
+                <button className="do-something-button assort-theme" onClick={removeAllAssortedItemsClickHandler}>
                     Remove All Items
                 </button>
                 <button
-                    className="do-something-button"
+                    className="do-something-button assort-theme"
                     onClick={calculateOrderQuantitiesHandler}
                 > Calculate!</button>
                 <div className="calculation-info-message">{calculationInfoMessage}</div>
@@ -522,7 +515,7 @@ export function AssortmentAnalyzerWindow({
                                     id={`assortment-item-${product.INDEX}`}
                                 >
                                     <button
-                                        className="assortment-list-info"
+                                        className="assortment-list-info assort-theme"
                                         onClick={(event) => showDetailsHandler(event, product.INDEX)}>
                                         {product["SIZE"]} {product["DESCRIP"]}, {product["QTY_CASE"]}/Case
 

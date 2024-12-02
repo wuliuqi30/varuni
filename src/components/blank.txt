@@ -1,0 +1,40 @@
+/* Assort */
+.assort-theme{
+  color: ;
+  background-color: ;
+}
+/* Order List*/
+.orderlist-theme{
+  color: ;
+  background-color: ;
+}
+/* Out of Stock*/
+.outofstock-theme{
+  color: ;
+  background-color: ;
+}
+/* Discontinued*/
+.discontinued-theme{
+  color: ;
+  background-color: ;
+}
+/* Already Ordered*/
+.alreadyordered-theme{
+  color: ;
+  background-color: ;
+}
+/* Label List*/
+.labellist-theme{
+  color: ;
+  background-color: ;
+}
+/* Watch List*/
+.watchlist-theme{
+  color: ;
+  background-color: ;
+}
+/* Need Recount*/
+.needrecount-theme{
+  color: ;
+  background-color: ;
+}

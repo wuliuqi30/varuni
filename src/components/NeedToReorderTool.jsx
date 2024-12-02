@@ -11,6 +11,8 @@ import { barChartOptions } from '../data/constants';
 export function NeedToReorderTool({
     data,
     reorderItemsList,
+    reorderItemsFocusedProduct,
+    setReorderItemsFocusedProduct,
     setReorderItemsList,
     removeFromReorderItemsListHandler,
     reorderToolPageNumber,
@@ -25,81 +27,77 @@ export function NeedToReorderTool({
 
     const listOfRefs = useRef([]);
     const [focusedIndex, setFocusedIndex] = useState(0);
+    const itemsPerPage = 21;
+    const lastPage = reorderItemsList.length > 0 ? Math.ceil(reorderItemsList.length / itemsPerPage) : 1;
 
     // Function to handle keydown event
     const handleKeyDown = (e) => {
         if (e.key === "ArrowDown") {
-            // Move focus to the next element
-            setFocusedIndex((prevIndex) => Math.min(prevIndex + 1, listOfRefs.current.length - 1));
+            // If this is the last element, 
+            if (focusedIndex + 1 > listOfRefs.current.length - 1) {
+                //move to the next page.
+                nextPageHandler();
+               
+            } else {
+                // Move focus to the next element
+                setFocusedIndex((prevIndex) => Math.min(prevIndex + 1, listOfRefs.current.length - 1));
+            }
         } else if (e.key === "ArrowUp") {
-            // Move focus to the previous element
+            // Move focus to the previous element unless its the first element, then try previous page
+            if (focusedIndex - 1 < 0 && reorderToolPageNumber !== 1 ){               
+                //move to the next page.
+                prevPageHandler(itemsPerPage-1);                
+
+            } else {
             setFocusedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+        }
+        } else if (e.key === "ArrowRight") {
+            // Move focus to the previous element unless its the first element, then try previous page
+            if (reorderToolPageNumber !== lastPage ){               
+                //move to the next page.
+                nextPageHandler(focusedIndex);               
+
+            } 
+        } else if (e.key === "ArrowLeft") {
+            // Move focus to the previous element unless its the first element, then try previous page
+            if (reorderToolPageNumber !== 1 ){               
+                //move to the next page.
+                prevPageHandler(focusedIndex);             
+
+            } 
         }
     };
 
-    useEffect(() => {
-        // Add event listener for keydown
-        window.addEventListener("keydown", handleKeyDown);
+    // useEffect(() => {
+    //     // Add event listener for keydown
+    //     window.addEventListener("keydown", handleKeyDown);
 
-        return () => {
-            // Cleanup event listener on unmount
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-    }, []);
+    //     return () => {
+    //         // Cleanup event listener on unmount
+    //         window.removeEventListener("keydown", handleKeyDown);
+    //     };
+    // }, []);
 
     useEffect(() => {
         // Focus the element at the focused index
         if (listOfRefs.current[focusedIndex]) {
             listOfRefs.current[focusedIndex].focus();
         }
-    }, [focusedIndex]);
+    }, [focusedIndex,reorderToolPageNumber]);
 
 
-    const itemsPerPage = 4;
 
 
-    const lastPage = reorderItemsList.length > 0 ? Math.ceil(reorderItemsList.length / itemsPerPage) : 1;
+   
 
-    const nextPageHandler = () => {
+    const nextPageHandler = (itemIndex = 0) => {
         setReorderToolPageNumber(Math.min(reorderToolPageNumber + 1, lastPage));
+        setFocusedIndex(itemIndex);
     }
-    const prevPageHandler = () => {
+    const prevPageHandler = (itemIndex = 0) => {
         setReorderToolPageNumber(Math.max(reorderToolPageNumber - 1, 1));
+        setFocusedIndex(itemIndex);
     }
-
-
-    // Add to Lists
-    const addToOrderListHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
-        removeFromReorderItemsListHandler(event, productIndex);
-        addToListHandlers.orderList(event, productIndex);
-
-    }
-    const addToOutOfStockHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
-        removeFromReorderItemsListHandler(event, productIndex);
-        addToListHandlers.outOfStockList(event, productIndex);
-    }
-    const addToDiscontinuedHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
-        removeFromReorderItemsListHandler(event, productIndex);
-        addToListHandlers.discontinuedList(event, productIndex);
-    }
-    const markAlreadyOrderedHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
-        removeFromReorderItemsListHandler(event, productIndex);
-        addToListHandlers.alreadyOrderedList(event, productIndex);
-    }
-
-    const addToLabelListHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
-        removeFromReorderItemsListHandler(event, productIndex);
-        addToListHandlers.labelList(event, productIndex);
-    }
-    const addToWatchListHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
-        removeFromReorderItemsListHandler(event, productIndex);
-        addToListHandlers.watchList(event, productIndex);
-    }
-    const addToRecountListHandlerAndRemoveFromReorderListHandler = (event, productIndex) => {
-        removeFromReorderItemsListHandler(event, productIndex);
-        addToListHandlers.recountInventoryList(event, productIndex);
-    }
-
 
 
     const getReorderListHandler = () => {
@@ -111,15 +109,15 @@ export function NeedToReorderTool({
         }
 
         // Filter Out What is Already On Certain Lists: c
-        const allExcludedLists = [...new Set([...listStates.orderList, 
-            ...listStates.alreadyOrderedList, 
-            ...listStates.discontinuedList, 
-            ...listStates.outOfStockList, 
-            ...listStates.watchList])];
+        const allExcludedLists = [...new Set([...listStates.orderList,
+        ...listStates.alreadyOrderedList,
+        ...listStates.discontinuedList,
+        ...listStates.outOfStockList,
+        ...listStates.watchList])];
 
         const filteredOutListsData = data.filter(element => !allExcludedLists.includes(element.INDEX));
-            // filter(element => !listStates.discontinuedList.includes(element.INDEX)).
-            // filter(element => !listStates.alreadyOrderedList.includes(element.INDEX));
+        // filter(element => !listStates.discontinuedList.includes(element.INDEX)).
+        // filter(element => !listStates.alreadyOrderedList.includes(element.INDEX));
 
         const filteredData = filteredOutListsData.filter(element => (element.YTD > 0) && (element.MTD > 0));
 
@@ -197,8 +195,9 @@ export function NeedToReorderTool({
 
 
     const handleFocus = (event, productIndex, listIndex) => {
-        //console.log(`Product of Index ${productIndex} is focused!`);
+        console.log(`Product of Index ${productIndex} is focused!`);
         setFocusedIndex(listIndex);
+        setReorderItemsFocusedProduct(productIndex);
         showProductDetailsHandler(event, productIndex);
     }
 
@@ -241,7 +240,7 @@ export function NeedToReorderTool({
             </div>
             <table className="large-table-style">
                 <thead>
-                    <tr tabIndex="0">
+                    <tr tabIndex="0" >
 
                         <th>Brand</th>
                         <th>Description</th>
@@ -252,7 +251,7 @@ export function NeedToReorderTool({
                         <th>MTD</th>
                         <th>{barChartOptions[13].xlabel.toUpperCase()}</th>
                         <th>{barChartOptions[12].xlabel.toUpperCase()}</th>
-                        <th>Actions</th>
+
 
                     </tr>
                 </thead>
@@ -272,15 +271,7 @@ export function NeedToReorderTool({
                                         product={product}
                                         reorderDate={item.reorderDate}
                                         reorderTime={item.reorderTimeWeeks}
-                                        addToOrderListHandler={addToOrderListHandlerAndRemoveFromReorderListHandler}
-                                        addToOutOfStockHandler={addToOutOfStockHandlerAndRemoveFromReorderListHandler}
-                                        addToDiscontinuedHandler={addToDiscontinuedHandlerAndRemoveFromReorderListHandler}
-                                        markAlreadyOrderedHandler={markAlreadyOrderedHandlerAndRemoveFromReorderListHandler}
-                                        addToLabelListHandler={addToLabelListHandlerAndRemoveFromReorderListHandler}
-                                        addToWatchListHandler={addToWatchListHandlerAndRemoveFromReorderListHandler}
-                                        addToRecountListHandler={addToRecountListHandlerAndRemoveFromReorderListHandler}
-
-
+                                        handleKeyDown={handleKeyDown}
                                     />
                                 )
                             })}
