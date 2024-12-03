@@ -10,32 +10,40 @@ import {
     calculateAverageMonthlySales,
     getWeekOfMonthString
 } from '../helper-fns/helperFunctions';
+import { useState, useEffect } from "react"; // Import useRef
 
 export function ProductDetailsPanel({
     data,
-    productDetailsIndexList,
-    removeProductDetailsHandler,
-    clearProductDetailsPanelHandler,
-    flexDirection
- }) {
+    productDataIndex
+}) {
 
     const suppressOutput = true;
-    let windowClassName;
-    if (flexDirection === 'column') {
-        windowClassName = 'product-details-window-column';
-    } else {
-        windowClassName = 'product-details-window-row';
-    }
+    const [numberOfCasesOrdered, setNumberOfCasesOrdered] = useState(1);
+
+    const productData = data[productDataIndex];
+
     if (!suppressOutput) {
-        console.log(productDetailsIndexList);
+        console.log(productData);
     }
 
-    // Run out Times.
-    const runoutTimeLabelArray = [];
+    const orderCasesHandler = (event, product) => {
+        const { value } = event.target;
 
-    for (let i = 0; i < productDetailsIndexList.length; i++) {
+        setNumberOfCasesOrdered(value);
+
+    }
+
+
+    useEffect(() => {
+        // Focus the element at the focused index
+        setNumberOfCasesOrdered(1);
+    }, [productDataIndex]);
+
+
+    if (productData) {
+
         // calculate reorder point but assuming ordering 0 cases of the item, hence the 0.
-        const reorderPoint = calculateReorderPointWithOrderingSheet(data[productDetailsIndexList[i]], 0);
+        const reorderPoint = calculateReorderPointWithOrderingSheet(productData, 0);
         let runoutLabel;
         if (typeof reorderPoint === 'string') {
             runoutLabel = reorderPoint;
@@ -43,96 +51,98 @@ export function ProductDetailsPanel({
             runoutLabel = getWeekOfMonthString(reorderPoint[0]);
         }
 
-        runoutTimeLabelArray[i] = runoutLabel;
-    }
-    if (productDetailsIndexList.length > 0) {
 
-        const productDataArray = [];
-        for (let i = 0; i < productDetailsIndexList.length; i++) {
-            productDataArray[i] = data[productDetailsIndexList[i]];
+        // Calculate How Long setNumberOfCasesOrdered will get us to last:
+        const reorderPointWithCaseOrder = calculateReorderPointWithOrderingSheet(productData, numberOfCasesOrdered);
+        let runoutLabelWithCaseOrder;
+        if (typeof reorderPoint === 'string') {
+            runoutLabelWithCaseOrder = reorderPointWithCaseOrder;
+        } else {
+            runoutLabelWithCaseOrder = getWeekOfMonthString(reorderPointWithCaseOrder[0]);
         }
+
+        const productTitle = `${productData.BRAND} ${productData.DESCRIP} ${productData.SIZE}`;
+        const productExtraInfoFirstLine =
+            `On Hand: ${productData.QTY_ON_HND}, Last Edit Date: 
+    ${format(productData.LAST_EDIT, 'M/d/yy')}`;
+        const productExtraInfoSecondLine =
+            `Avg/Month ~${Math.round(calculateAverageMonthlySales(productData))}, Runs Out in ${runoutLabel}`;
+
+
+        const data = [
+            ["Element", "Number of Sales", { role: "style" }, { type: 'number', role: 'annotation' }]
+        ]
+
+        for (let m = 0; m < barChartOptions.length; m++) {
+            //console.log(`m is ${m}`);
+            //console.log(barChartOptions[m]);
+            //console.log(monthData[m].date.getMonth());
+
+            data[m + 1] = [
+                barChartOptions[m].xlabel,
+                productData[barChartOptions[m].dbfName],
+                `stroke-color: black; stroke-width: 1; fill-color: ${barChartOptions[m].color}`,
+                productData[barChartOptions[m].dbfName]
+            ]
+        }
+
+        const options = {
+            legend: { position: 'none' },
+            annotations: {
+                alwaysOutside: true
+            },
+            chartArea: {
+                left: 20,
+                right: 20
+            }
+        }
+
         if (!suppressOutput) {
-            console.log(productDataArray);
+            console.log("productData is: ");
+            console.log(productData);
         }
+
         return (
-            <div className={windowClassName}>
-                {/* {(flexDirection === 'column') &&
-                    <div className="product-details-header">
+            <div
+                className="product-details-window"
+                id={`product-details-item-${productData.INDEX}`}>
 
-                        <button className="remove-items-button" onClick={clearProductDetailsPanelHandler}>Clear Details Panel</button>
+                <div className="product-details-item-header">
+                    <div className="product-details-chart-title">
+                        <p className="product-details-title-info" style={{ textAlign: 'left', color: 'red' }}>{productTitle}</p>
+                        <p className="product-details-title-info" style={{ textAlign: 'left', color: 'black' }}>{productExtraInfoFirstLine}</p>
+                        <p className="product-details-title-info" style={{ textAlign: 'left', color: 'green' }}>{productExtraInfoSecondLine}</p>
                     </div>
-                } */}
-                {productDataArray.map((productData, index) => {
-                    const productTitle = `${productData.BRAND} ${productData.DESCRIP} ${productData.SIZE}`;
-                    const productExtraInfoFirstLine = 
-                    `On Hand: ${productData.QTY_ON_HND}, Last Edit Date: 
-                    ${format(productData.LAST_EDIT,'M/d/yy')}`;
-                    const productExtraInfoSecondLine = 
-                    `Avg/Month ~${Math.round(calculateAverageMonthlySales(productData))}, Runs Out in ${runoutTimeLabelArray[index]}`;
-                    
-                    
-                    const data = [
-                        ["Element", "Number of Sales", { role: "style" }, { type: 'number', role: 'annotation' }]
-                    ]
 
-                    for (let m = 0; m < barChartOptions.length; m++) {
-                        //console.log(`m is ${m}`);
-                        //console.log(barChartOptions[m]);
-                        //console.log(monthData[m].date.getMonth());
+                    <div className="product-details-header-right">
 
-                        data[m + 1] = [
-                            barChartOptions[m].xlabel,
-                            productData[barChartOptions[m].dbfName],
-                            `stroke-color: black; stroke-width: 1; fill-color: ${barChartOptions[m].color}`,
-                            productData[barChartOptions[m].dbfName]
-                        ]
-                    }
+                        <p style={{ margin:'0px'}}>
+                            {`If ordering `}
+                            <input
+                                type="number"
+                                className="product-details-panel-cases-input"
+                                label={'order-calculator'}
+                                min={0}
+                                onChange={(event) => orderCasesHandler(event, productData)}
+                                value={numberOfCasesOrdered}
+                            />
+                            {`case(s), supply will last until: `}
+                        </p>
 
-                    const options = {
-                        legend: { position: 'none' },
-                        annotations: {
-                            alwaysOutside: true
-                        },
-                        chartArea: {
-                            left: 20,
-                            right: 20
-                        }
-                    }
-
-                    if (!suppressOutput) {
-                        console.log("productData is: ");
-                        console.log(productData);
-                    }
-                    return (
-
-                        <li
-                            key={productData.INDEX}
-                            className="product-details-item"
-                            id={`product-details-item-${productData.INDEX}`}>
-                            <div className="product-details-item-header">
-                                <div className="product-details-chart-title">
-                                    <p style={{textAlign:'left', color: 'red', margin:'0'}}>{productTitle}</p>
-                                    <p style={{textAlign:'left', color:'black', margin:'0'}}>{productExtraInfoFirstLine}</p>
-                                    <p style={{textAlign:'left', color:'green', margin:'0'}}>{productExtraInfoSecondLine}</p>
-                                </div>
-                                {/* <button className="remove-product-details-button" onClick={removeProductDetailsHandler}>Remove</button> */}
-                            </div>
-                            <Chart chartType="ColumnChart" data={data} options={options} />
-                            <div className="extra-details-block"></div>
-
-                        </li>
-
-                    )
-                })}
+                        <strong>{runoutLabelWithCaseOrder}</strong>
+                    </div>
+                    {/* <button className="remove-product-details-button" onClick={removeProductDetailsHandler}>Remove</button> */}
+                </div>
+                <Chart chartType="ColumnChart" data={data} options={options} />
+                <div className="extra-details-block"></div>
 
             </div>
+
         )
     } else {
         return (
-            <div className="product-details-window">
-                No Product Selected!
-            </div>
-
+            <div>No Data</div>
         )
     }
+
 }

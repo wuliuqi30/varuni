@@ -67,7 +67,7 @@ const LiquorApp = () => {
     const [assortmentAnalyzerProductList, setAssortmentAnalyzerProductList] = useState([]);
 
     // Details Panel
-    const [viewDetailsProductList, setViewDetailsProductList] = useState([]);
+    const [viewDetailsProductIndex, setViewDetailsProductIndex] = useState([]);
 
     // Reorder Tool States: 
     const [reorderItemsList, setReorderItemsList] = useState([]);  // Array of: { index: type int, reorderDate: type Date, reorderTimeWeeks: type int }
@@ -416,22 +416,14 @@ const LiquorApp = () => {
 
     const showProductDetailsHandler = (e, productIndex) => {
 
-        setViewDetailsProductList([productIndex]);
+        setViewDetailsProductIndex(productIndex);
     };
 
     const clearProductDetailsPanelHandler = () => {
-        setViewDetailsProductList([]);
+        setViewDetailsProductIndex(null);
     }
 
-    const removeProductDetailsHandler = (e) => {
 
-        const parent = e.target.closest('li');
-        const idstring = "product-details-item-";
-        const productIndex = Number(parent.getAttribute('id').substring(idstring.length));
-
-        setViewDetailsProductList((prevList) => { return prevList.filter(element => element !== productIndex) });
-
-    }
 
 
 
@@ -490,7 +482,7 @@ const LiquorApp = () => {
         console.log(`removing product: ${productIndex}`);
 
         const newList = reorderItemsList.filter(item => item.index !== productIndex);
-        setViewDetailsProductList([newList[0].index]);
+        setViewDetailsProductIndex(newList[0].index);
         setReorderItemsList(newList);
 
     }
@@ -655,8 +647,7 @@ const LiquorApp = () => {
 
     const productDetailsWindowProps = {
         data: data,
-        productDetailsIndexList: viewDetailsProductList,
-        removeProductDetailsHandler: removeProductDetailsHandler,
+        productDataIndex: viewDetailsProductIndex,
         clearProductDetailsPanelHandler: clearProductDetailsPanelHandler,
         flexDirection: 'column'
     }
@@ -722,7 +713,7 @@ const LiquorApp = () => {
         console.log(`data is a length ${data.length} array`);
 
         printArrayToString("SelectedProductsList ", selectedProductsList);
-        printArrayToString("Details Panel List", viewDetailsProductList);
+        printArrayToString("Details Panel List", viewDetailsProductIndex);
         printArrayToString("Assortment Items in Assortment Display", assortmentAnalyzerProductList);
 
         printArrayToString('reorderItemsList', reorderItemsList)
