@@ -11,84 +11,87 @@ import { barChartOptions } from '../data/constants';
 export function NeedToReorderTool({
     data,
     reorderItemsList,
-    reorderItemsFocusedProduct,
     setReorderItemsFocusedProduct,
     setReorderItemsList,
     removeFromReorderItemsListHandler,
     reorderToolPageNumber,
     setReorderToolPageNumber,
-    addToListHandlers,
     listStates,
-    showProductDetailsHandler
+    showProductDetailsHandler,
+    handleAddToOrderListClick
 
 }) {
 
     const suppressOutput = true;
 
+    // Refs
     const listOfRefs = useRef([]);
+
+
+    // States
     const [focusedIndex, setFocusedIndex] = useState(0);
+    const [numberOfWeeksToCalculate, setNumberOfWeeksToCalculate] = useState(2);
+
     const itemsPerPage = 21;
     const lastPage = reorderItemsList.length > 0 ? Math.ceil(reorderItemsList.length / itemsPerPage) : 1;
 
     // Function to handle keydown event
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e,productIndex) => {
         if (e.key === "ArrowDown") {
             // If this is the last element, 
             if (focusedIndex + 1 > listOfRefs.current.length - 1) {
                 //move to the next page.
                 nextPageHandler();
-               
+
             } else {
                 // Move focus to the next element
                 setFocusedIndex((prevIndex) => Math.min(prevIndex + 1, listOfRefs.current.length - 1));
             }
         } else if (e.key === "ArrowUp") {
             // Move focus to the previous element unless its the first element, then try previous page
-            if (focusedIndex - 1 < 0 && reorderToolPageNumber !== 1 ){               
+            if (focusedIndex - 1 < 0 && reorderToolPageNumber !== 1) {
                 //move to the next page.
-                prevPageHandler(itemsPerPage-1);                
+                prevPageHandler(itemsPerPage - 1);
 
             } else {
-            setFocusedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-        }
+                setFocusedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+            }
         } else if (e.key === "ArrowRight") {
             // Move focus to the previous element unless its the first element, then try previous page
-            if (reorderToolPageNumber !== lastPage ){               
+            if (reorderToolPageNumber !== lastPage) {
                 //move to the next page.
-                nextPageHandler(focusedIndex);               
+                nextPageHandler(focusedIndex);
+              
 
-            } 
+            }
         } else if (e.key === "ArrowLeft") {
             // Move focus to the previous element unless its the first element, then try previous page
-            if (reorderToolPageNumber !== 1 ){               
+            if (reorderToolPageNumber !== 1) {
                 //move to the next page.
-                prevPageHandler(focusedIndex);             
+                prevPageHandler(focusedIndex);
+               
 
-            } 
+            }
+        } else if (e.key === "o") {
+            // pressing "o" is a hotkey to put in the order list
+            removeFromReorderItemsListHandler(event, productIndex);
+            handleAddToOrderListClick(event, productIndex);
+            //setFocusedIndex(focusedIndex);
         }
     };
 
-    // useEffect(() => {
-    //     // Add event listener for keydown
-    //     window.addEventListener("keydown", handleKeyDown);
 
-    //     return () => {
-    //         // Cleanup event listener on unmount
-    //         window.removeEventListener("keydown", handleKeyDown);
-    //     };
-    // }, []);
-
-    useEffect(() => {
-        // Focus the element at the focused index
-        if (listOfRefs.current[focusedIndex]) {
-            listOfRefs.current[focusedIndex].focus();
-        }
-    }, [focusedIndex,reorderToolPageNumber]);
+    const numberOfWeeksToCalculateHandler = (event) => {
+        const { value, name } = event.target;
+        setNumberOfWeeksToCalculate(value);
+    }
 
 
 
 
-   
+
+
+
 
     const nextPageHandler = (itemIndex = 0) => {
         setReorderToolPageNumber(Math.min(reorderToolPageNumber + 1, lastPage));
@@ -172,7 +175,7 @@ export function NeedToReorderTool({
         // return: an array of integers ordered by how soon
         //         the product will sell out. 
 
-        const numWeeksReorderFilter = 6;
+        const numWeeksReorderFilter = numberOfWeeksToCalculate;
         const finalFilteredData = itemArray.filter(element => element.reorderTimeWeeks < numWeeksReorderFilter);
         if (!suppressOutput) {
             console.log("finalFilteredData:");
@@ -202,9 +205,18 @@ export function NeedToReorderTool({
     }
 
     useEffect(() => {
+        // Focus the element at the focused index
+        if (listOfRefs.current[focusedIndex]) {
+            listOfRefs.current[focusedIndex].focus();
+            
+        }
+    }, [focusedIndex, reorderToolPageNumber]);
+
+    
+    useEffect(() => {
         // Automatically focus the component when it mounts
         if (listOfRefs.current.length > 0) {
-            listOfRefs.current[0].focus();
+            listOfRefs.current[focusedIndex].focus();
         }
     }, [reorderItemsList]);
 
@@ -228,12 +240,20 @@ export function NeedToReorderTool({
                 <h2>Ordering Tool</h2>
                 <button
                     onClick={getReorderListHandler}
-                    className="calculate-reorder-items-button">Get Top Reorder Items</button>
+                    className="calculate-reorder-items-button orderlist-theme">Get Top Reorder Items
+                </button>
+                <input
+                    type="number"
+                    label={`calculationWeekNumbers`}
+                    min={0}
+                    onChange={(event) => numberOfWeeksToCalculateHandler(event)}
+                    value={numberOfWeeksToCalculate}
+                />
                 {(reorderItemsList !== null) &&
                     <div className="page-turn-div">
 
-                        <button onClick={prevPageHandler} className="left-right-arrow">Previous</button>
-                        <button onClick={nextPageHandler} className="left-right-arrow">Next</button>
+                        <button onClick={(event)=> prevPageHandler(0)} className="left-right-arrow">Previous</button>
+                        <button onClick={(event)=> nextPageHandler(0)} className="left-right-arrow">Next</button>
                         <p>{`Page ${reorderToolPageNumber}/${lastPage}`}</p>
 
                     </div>}
@@ -271,7 +291,7 @@ export function NeedToReorderTool({
                                         product={product}
                                         reorderDate={item.reorderDate}
                                         reorderTime={item.reorderTimeWeeks}
-                                        handleKeyDown={handleKeyDown}
+                                        handleKeyDown={(event)=> handleKeyDown(event,product.INDEX)}
                                     />
                                 )
                             })}

@@ -11,7 +11,10 @@ export function ListDisplays({
 }) {
 
     const suppressOutput = true;
-    console.log(listSelectionsEnums);
+    if (!suppressOutput){
+        console.log(listSelectionsEnums);
+    }
+    
     const [selectedOption, setSelectedOption] = useState(Object.keys(listSelectionsEnums)[0]);
    
 
@@ -53,7 +56,7 @@ export function ListDisplays({
 
 
     return (
-        <div className={`list-display-window ${colorClass}`}>
+        <div className={`list-display-window`}>
             <div className="list-display-header">
 
                 <select
@@ -70,7 +73,7 @@ export function ListDisplays({
                 <button className="order-list-clear-btn" onClick={clickClearListHandler}>Clear List?</button>
             </div>
             {((currentlyDisplayedList.length > 0) && (data.length > 0)) &&
-                <ul className="current-selection-window-list">
+                <ul className="general-list">
                     {currentlyDisplayedList.map((index) => {
                         const thisProduct = data[index];
                         return (
@@ -81,7 +84,7 @@ export function ListDisplays({
 
 
                                 <button
-                                    className="list-display-info"
+                                    className={`list-display-info ${colorClass}`}
                                     onClick={(event) => clickItemHandler(event, thisProduct.INDEX)}>
                                     <p>{thisProduct["BRAND"]} {thisProduct["DESCRIP"]} {thisProduct["SIZE"]}</p>
 

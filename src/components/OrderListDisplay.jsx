@@ -35,7 +35,7 @@ export function OrderListDisplay({
     }
 
     return (
-        <div className='order-list-window orderlist-theme'>
+        <div className='order-list-window orderlist-window-theme'>
             <div className="order-list-header">
 
                 <h3>Order List</h3>
@@ -53,7 +53,7 @@ export function OrderListDisplay({
 
 
                                 <button
-                                    className="list-display-info"
+                                    className={`list-display-info orderlist-theme`}
                                     onClick={(event) => clickItemHandler(event, thisProduct.INDEX)}>
                                     <p>{thisProduct["BRAND"]} {thisProduct["DESCRIP"]} {thisProduct["SIZE"]}</p>
 

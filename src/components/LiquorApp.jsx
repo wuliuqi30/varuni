@@ -683,15 +683,14 @@ const LiquorApp = () => {
     const orderToolProps = {
         data: data,
         reorderItemsList: reorderItemsList,
-        reorderItemsFocusedProduct: reorderItemsFocusedProduct,
         setReorderItemsFocusedProduct: setReorderItemsFocusedProduct,
         setReorderItemsList: setReorderItemsList,
         removeFromReorderItemsListHandler: removeFromReorderItemsListHandler,
         reorderToolPageNumber: reorderToolPageNumber,
         setReorderToolPageNumber: setReorderToolPageNumber,
-        addToListHandlers: allAddToListCallbacks,
         listStates: allLists,
         showProductDetailsHandler: showProductDetailsHandler,
+        handleAddToOrderListClick: handleAddToOrderListClick
     }
 
     const actionButtonsPanelProps = {
