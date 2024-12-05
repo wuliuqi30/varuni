@@ -381,6 +381,7 @@ const LiquorApp = () => {
 
             newSearchResultArray.push(...allProductsForThisBrand);
         }
+        newSearchResultArray.sort()
         return newSearchResultArray;
 
 

@@ -122,7 +122,7 @@ export function NeedToReorderTool({
         // filter(element => !listStates.discontinuedList.includes(element.INDEX)).
         // filter(element => !listStates.alreadyOrderedList.includes(element.INDEX));
 
-        const filteredData = filteredOutListsData.filter(element => (element.YTD > 0) && (element.MTD > 0));
+        const filteredData = filteredOutListsData.filter(element => (element.YTD > 0) || (element.PRIORY > 0));
 
 
         if (!suppressOutput) {

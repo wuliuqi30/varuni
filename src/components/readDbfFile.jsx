@@ -1,4 +1,4 @@
-export function readDbfFile( buffer ) {
+export function readDbfFile(buffer) {
     console.log("entered readdbfile componenet");
     console.log(buffer);
     const view = new DataView(buffer);
@@ -49,12 +49,16 @@ export function readDbfFile( buffer ) {
             record[field.name] = fieldValue;
         }
 
-        records.push(record);
-        record["INDEX"] = count;
-        // if (count > 400) {
-        //     break;
-        // }
-        count++;
+        // Filter Out Items we don't sell anymore.
+       
+            records.push(record);
+            record["INDEX"] = count;
+            // if (count > 400) {
+            //     break;
+            // }
+            count++;
+        
+
 
     }
     records.pop();
