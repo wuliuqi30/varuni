@@ -13,7 +13,7 @@ import { NeedToReorderTool } from './NeedToReorderTool';
 import { printArrayToString, removeTrailingSlash } from '../helper-fns/helperFunctions'
 import { TextInputModal } from './TextInputModal'
 import { readDbfFile } from './readDbfFile'
-import {ActionButtonsPanel} from './ActionButtonsPanel'
+import { ActionButtonsPanel } from './ActionButtonsPanel'
 
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
@@ -72,7 +72,7 @@ const LiquorApp = () => {
     // Reorder Tool States: 
     const [reorderItemsList, setReorderItemsList] = useState([]);  // Array of: { index: type int, reorderDate: type Date, reorderTimeWeeks: type int }
     const [reorderToolPageNumber, setReorderToolPageNumber] = useState(1); // 1 indexed
-    const [reorderItemsFocusedProduct,setReorderItemsFocusedProduct] = useState(null);
+    const [reorderItemsFocusedProduct, setReorderItemsFocusedProduct] = useState(null);
 
 
     const [orderList, setOrderList] = useState([]);
@@ -171,7 +171,7 @@ const LiquorApp = () => {
             setLabelList(jsonObject.labelList);
             setWatchList(jsonObject.watchList);
             console.log("-------Finished Reading List Data File------------");
-            setListDataMessage("Read List Data from Local Storage");
+            setListDataMessage("Finished Reading List Data from Local Storage!");
 
         } else {
             setListDataMessage("No List Data File Found, please click 'Choose List File' button");
@@ -688,7 +688,7 @@ const LiquorApp = () => {
         data: data,
         focusedProductIndex: reorderItemsFocusedProduct,
         removeFromReorderItemsListHandler: removeFromReorderItemsListHandler,
-        addToListHandlers:allAddToListCallbacks
+        addToListHandlers: allAddToListCallbacks
     }
 
 
@@ -730,7 +730,7 @@ const LiquorApp = () => {
 
             {/* <h2>Varuni 1000</h2> */}
             <Tabs
-            
+
                 id="controlled-tab-example"
                 activeKey={tabKey}
                 onSelect={(k) => setTabKey(k)}
@@ -738,39 +738,40 @@ const LiquorApp = () => {
             >
 
                 <Tab eventKey="data" title="Load Data">
+                    <div className="data-load-window">
+                        <button onClick={clickDataFileInputHandler} className="nav-bar-button">
+                            Select Data
+                        </button>
+                        <input
+                            className="choose-file-input"
 
-                    <button onClick={clickDataFileInputHandler} className="nav-bar-button">
-                        Select Data
-                    </button>
-                    <input
-                        className="choose-file-input"
+                            id="data-file-upload"
+                            type="file"
+                            accept=".dbf"
+                            onChange={readFileFromSelectedFileLocation}
 
-                        id="data-file-upload"
-                        type="file"
-                        accept=".dbf"
-                        onChange={readFileFromSelectedFileLocation}
+                        />
 
-                    />
+                        <button onClick={clickListFileInputHandler} className="nav-bar-button">
+                            Load List File
+                        </button>
+                        <input
+                            className="choose-file-input"
 
-                    <button onClick={clickListFileInputHandler} className="nav-bar-button">
-                        Load List File
-                    </button>
-                    <input
-                        className="choose-file-input"
-
-                        id="list-file-upload"
-                        type="file"
-                        accept=".json"
-                        onChange={handleListFileChange}
-                        style={{ display: "none" }}
-                    />
-                    <button className="nav-bar-button" onClick={saveListDataToFileHandler}>Save List Data</button>
+                            id="list-file-upload"
+                            type="file"
+                            accept=".json"
+                            onChange={handleListFileChange}
+                            style={{ display: "none" }}
+                        />
+                        <button className="nav-bar-button" onClick={saveListDataToFileHandler}>Save List Data</button>
+                        
+                    </div>
                     {listDataMessage && <p>{listDataMessage}</p>}
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
-                    {data.length > 0 && (
-                        <p>Data Loaded!</p>
-                    )}
-
+                        {error && <p style={{ color: 'red' }}>{error}</p>}
+                        {data.length > 0 && (
+                            <p>Data Loaded!</p>
+                        )}
                 </Tab>
                 <Tab eventKey="search" title="Search">
                     <div className='main-display'>
@@ -793,9 +794,9 @@ const LiquorApp = () => {
                     <div className='main-display'>
                         <NeedToReorderTool {...orderToolProps} />
                         <ProductDetailsPanel {...productDetailsWindowProps} />
-                        <ActionButtonsPanel {...actionButtonsPanelProps}/>
+                        <ActionButtonsPanel {...actionButtonsPanelProps} />
                         <OrderListDisplay {...orderListDisplayProps} />
-                        
+
                     </div>
                 </Tab>
 

@@ -1,27 +1,3 @@
-body,
-html,
-button,
-table,
-td {
-  margin: 0;
-  padding: 0;
-  border-width: 0px;
-
-
-}
-
-body,
-html,
-button {
-
-  background-color: white;
-
-}
-
-* {
-  box-sizing: border-box;
-}
-
 #root {
 
   margin: 0px;
@@ -36,10 +12,10 @@ button {
   display: flex;
   justify-content: flex-start;
 
-  --main-top-width: 40%;
-  --main-bottom-width: 60%;
+  --main-top-width: 45%;
+  --main-bottom-width: 55%;
 
-  --main-left-width: 1fr;
+  --main-left-width: 1.3fr;
   --main-center-width: 1fr;
   --main-right-width: 0.6fr;
   --main-right-right-width: 0.6fr;
@@ -81,6 +57,32 @@ button {
   
 
 }
+
+body,
+html,
+button,
+table,
+td {
+  margin: 0;
+  padding: 0;
+  border-width: 0px;
+
+
+}
+
+body,
+html,
+button {
+
+  background-color: white;
+  border-radius: var(--common-border-radius);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+
 
 h1,
 h2,
@@ -227,7 +229,7 @@ h2 {
 
 .nav-bar-button {
   padding: 8px;
-  border: 2px solid green;
+  border: 2px solid black;
 }
 
 .main-display {
@@ -258,6 +260,12 @@ h2 {
 }
 
 
+.data-load-window{
+  display:flex;
+  justify-content: center;
+  gap: 30px;
+  
+}
 
 /* -------------- Search Window-----------------------------------------*/
 
@@ -269,7 +277,7 @@ h2 {
   display: flex;
   flex-direction: column;
   justify-content: space-betwen;
-  border: 2px solid green;
+  border: 2px solid black;
   gap: 20px;
   padding: 15px;
 
@@ -307,6 +315,7 @@ h2 {
   padding: 0px;
 
   border: 2px solid red;
+  border-radius: var(--common-border-radius);
 }
 
 
@@ -385,7 +394,7 @@ h2 {
   grid-row: 1 / 3;
   grid-column: 1 / 2;
 
-  border: 2px solid orange;
+  border: 2px solid black;
 
   display: flex;
   flex-direction: column;
@@ -459,14 +468,15 @@ h2 {
   border-radius: var(--common-border-radius);
 
   justify-self: center;
-  padding: 5px;
-  width: 250px;
+
+  width: 280px;
+  padding: 1px 5px 1px 5px;
   text-align: left;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow-x: hidden;
   flex: 0 0 auto;
-  height: 50px;
+  
 }
 
 
@@ -482,15 +492,15 @@ h2 {
 
   overflow-x: hidden;
 
-  height: 50px;
+  
 }
 
 .case-order-amounts-input {
   font-size: inherit;
-
+ 
   text-align: center;
   width: 60px;
-  height: 50px;
+  
 
 }
 
@@ -504,7 +514,7 @@ h2 {
 
   display: flex;
   flex-direction: column;
-  border: 2px solid green;
+  border: 2px solid black;
   gap: 20px;
   padding: 10px;
 }
@@ -522,20 +532,21 @@ h2 {
 /* -------------- Product Details----------------------------------------*/
 
 
-.product-details-window-column {
+.product-details-window{
   grid-row: 1 / 2;
   grid-column: 3 / 5;
 
 
-  border: 2px solid blue;
+  border: 2px solid black;
 
   display: flex;
   flex-direction: column;
   gap: 10px;
 
-
+  width: 100%;
 
   overflow-y: auto;
+  padding: 20px;
 
 
 }
@@ -568,18 +579,41 @@ h2 {
 .product-details-item-header {
   display: flex;
   gap: 5px;
-
-
+  height: 100px;
+  align-items: center;
 }
 
 .product-details-chart-title {
  
   font-weight: 700;
-  font-size: 1.1rem;
-  justify-self: center;
+  font-size: 1rem;
   margin-left: 5%;
+  
 }
 
+.product-details-title-info{
+  margin: 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.product-details-header-right{
+  width: 140px;
+margin-left: auto;
+font-size: 0.9rem;
+flex: 0 0 auto;
+text-align:left;
+display:flex;
+flex-direction: column;
+gap: 0px;
+}
+
+.product-details-panel-cases-input{
+  width: 45px;
+  text-align:center;
+  margin: 0;
+
+}
 .remove-product-details-button {
   margin-left: auto;
   height: 30px;
@@ -602,7 +636,7 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  border: 2px solid green;
+  border: 2px solid black;
 }
 
 
@@ -652,7 +686,7 @@ h4 {
 .left-right-arrow {
   font-size: 1rem;
   padding: 5px;
-  border: 2px solid blue;
+  border: 2px solid black;
   width: 100px;
 }
 
@@ -689,7 +723,7 @@ td.large-list-numerical-item {
 .hersh-generic-table-row:focus {
   background-color: rgb(160, 179, 233);
   font-weight: 700;
-  outline: 2px solid green;
+  outline: 2px solid black;
 
 }
 
@@ -779,7 +813,7 @@ height: 55px;
   grid-row: 2 / 3;
   grid-column: 4 / 5;
 
-  border: 2px solid blue;
+  border: 2px solid black;
 
 }
 
@@ -795,6 +829,7 @@ height: 55px;
   font-size: .9rem;
   border: 1px solid red;
   padding: 4px;
+  border-radius: var(--common-border-radius);
 }
 
 .order-list,.general-list {
@@ -814,7 +849,7 @@ height: 55px;
   grid-column: 3 / 4;
 
   padding: 5px;
-  border: 2px solid blue;
+  border: 2px solid black;
   overflow-y: auto;
 
 }

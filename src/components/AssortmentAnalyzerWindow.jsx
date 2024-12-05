@@ -41,7 +41,7 @@ export function AssortmentAnalyzerWindow({
     const [targetLastTillDate, setTargetLastTillDate] = useState(todayDayjs); // How long you wish the supply to last
     const [analysisMethod, setAnalysisMethod] = useState('previous-year'); // previous-year, year-to-date, last-three-months
 
-    const [productThingReorderAmounts, setProductThingReorderAmounts] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    const [productThingReorderAmounts, setProductThingReorderAmounts] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0]);
     const [calculationInfoMessage, setCalculationInfoMessage] = useState("");
 
 
@@ -50,9 +50,9 @@ export function AssortmentAnalyzerWindow({
 
     for (let i = 0; i < productIndicesToAnalyze.length; i++) {
         productDataArray[i] = data[productIndicesToAnalyze[i]];
-
+        productDataArray[i].ORDER_QUANTITY = productThingReorderAmounts[i];
     }
-
+   
 
   
 
@@ -443,6 +443,9 @@ export function AssortmentAnalyzerWindow({
     //     console.log("productIndicesToAnalyze is");
     //     console.log(productIndicesToAnalyze);
     // }
+
+     // Sort Product Data by order quantity, most first
+
     return (
         <div className='assortment-analyzer-main-window'>
             <h2>Assorted Ordering Tool</h2>

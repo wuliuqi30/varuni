@@ -116,7 +116,7 @@ export function ProductDetailsPanel({
 
                     <div className="product-details-header-right">
 
-                        <p style={{ margin:'0px'}}>
+                        <p style={{ margin: '0px' }}>
                             {`If ordering `}
                             <input
                                 type="number"

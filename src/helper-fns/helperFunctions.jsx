@@ -3,7 +3,7 @@ import {
     weeksFromNowToDBFFileMonthName,
     dateFromNowFromWeeks
 } from '../data/constants';
-import { differenceInWeeks, getWeeksInMonth, addWeeks, format, startOfMonth, getISOWeek } from 'date-fns';
+import { differenceInWeeks, getWeeksInMonth, addWeeks, format, startOfMonth, getISOWeek,differenceInMonths } from 'date-fns';
 
 function removeTrailingSlash(str) {
     return str.replace(/[\\/]+$/, "");
@@ -83,9 +83,11 @@ const extrapolateMonthlySales = (product, m, analysisMethod) => {
 
 }
 
-const calculateAverageMonthlySales = (product, analysisMethod = 'prior-year') => {
-    if (analysisMethod === 'prior-year') {
+const calculateAverageMonthlySales = (product) => {
+    if (product.PRIORY > 0) {
         return product.PRIORY / 12;
+    } else if (product.YTD > 0){
+        return getNumberOfSalesPerMonthFromYTDBeforeCurrentMonth(product);
     } else {
         return 0;
     }
@@ -95,16 +97,31 @@ const calculateAverageMonthlySales = (product, analysisMethod = 'prior-year') =>
 
 const extrapolateWeeklySales = (product, week, analysisMethod) => {
 
-    // return the predicted sales per WEEK during the month that is MONTH months into the future
+    // return the predicted sales per WEEK during the month that is week weeks into the future
+    const today = new Date();
+    const thisMonth = today.getMonth();
+    // if PriorY ~= 0, use below method.
+    if (product.PRIORY !== 0) {
+        switch (analysisMethod) {
+            case 'previous-year': {
+                const salesPerThatWeeksMonth = product[weeksFromNowToDBFFileMonthName[week % 52]];
+                const weeksPerMonth = getWeeksInMonth(dateFromNowFromWeeks[week % 52]);
+                // for now just break up each month in
+                return Math.round(salesPerThatWeeksMonth / weeksPerMonth);
+            }
 
-    switch (analysisMethod) {
-        case 'previous-year': {
-            const salesPerThatWeeksMonth = product[weeksFromNowToDBFFileMonthName[week % 52]];
-            const weeksPerMonth = getWeeksInMonth(dateFromNowFromWeeks[week % 52]);
-            // for now just break up each month in
-            return Math.round(salesPerThatWeeksMonth / weeksPerMonth);
         }
-
+    } else if (product.YTD !== 0){
+        // YTD method
+        
+        // Get total number of months we sold anything this year
+            // Find first non-zero sales month
+        
+        const salesPerMonthEstimate = getNumberOfSalesPerMonthFromYTDBeforeCurrentMonth(product);
+        
+        // get weekly sales for that month by dividing by sales per month
+        const weeksPerMonth = getWeeksInMonth(dateFromNowFromWeeks[week % 52]);
+        return Math.round(salesPerMonthEstimate / weeksPerMonth);
     }
     return 0;
 
@@ -117,6 +134,26 @@ const getLastTwelveMonthSales = (product) => {
     }
     return sum;
 }
+
+const getNumberOfSalesPerMonthFromYTDBeforeCurrentMonth = (product) => {
+
+    let numNonZeroSalesMonths = 0;
+    let totalSales = 0;
+    for (let i = 0; i < 12; i++){
+        if(product[monthsFromNowToDBFFileMonthName[i]]){
+            numNonZeroSalesMonths++;
+            totalSales += product[monthsFromNowToDBFFileMonthName[i]];
+        }
+    }
+
+    if (numNonZeroSalesMonths > 0){
+        return totalSales / numNonZeroSalesMonths;
+    } else {
+        return 0;
+    }
+    
+}
+
 
 const calculateReorderPointFromQuantity = (product, startingQuantity, analysisMethod) => {
 
@@ -192,7 +229,7 @@ const calculateReorderPointWithOrderingSheet = (product, numCasesOrdered, analys
 
 const getWeekOfMonth = (date) => {
     const startOfMonthDate = startOfMonth(date);
-    const weekNumber = differenceInWeeks(date, startOfMonthDate, { weekStartsOn: 1 });
+    const weekNumber = differenceInWeeks(date, startOfMonthDate, { weekStartsOn: 1 }) + 1;
     return weekNumber;
 };
 
